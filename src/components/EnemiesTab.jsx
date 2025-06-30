@@ -1,5 +1,11 @@
 import { useState, useEffect } from 'react';
 
+// Helper function to render trackLength as empty bubbles
+const renderTrackLength = (length) => {
+  if (!length || length <= 0) return '';
+  return Array(length).fill('⦾').join('-');
+};
+
 const EnemiesTab = () => {
   const [enemies, setEnemies] = useState([]);
   const [selectedEnemy, setSelectedEnemy] = useState(null);
@@ -67,32 +73,42 @@ const EnemiesTab = () => {
       </div>
 
       {selectedEnemy && (
-        <div className="enemy-display">
+        <div className="enemy-sheet">
           <div className="enemy-header">
-            <h1>{selectedEnemy.name}</h1>
-            <div className="enemy-basic-info">
-              <span className="enemy-size">Size: {selectedEnemy.size}</span>
-              <span className="enemy-track">Track Length: {selectedEnemy.trackLength}</span>
+            <div className="enemy-title-section">
+              <h1>{selectedEnemy.name}</h1>
+              <div className="enemy-basic-stats">
+                <div className="enemy-stat">
+                  <span className="stat-label">Size:</span>
+                  <span className="stat-value">{selectedEnemy.size}</span>
+                </div>
+                <div className="enemy-stat">
+                  <span className="stat-label">Track:</span>
+                  <span className="stat-value">{renderTrackLength(selectedEnemy.trackLength)}</span>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="enemy-blurb">
-            <h3>Blurb</h3>
+            <h2>Blurb</h2>
             <p>{selectedEnemy.blurb}</p>
           </div>
 
           <div className="enemy-description">
-            <h3>Description</h3>
+            <h2>Description</h2>
             <p>{selectedEnemy.description}</p>
           </div>
 
           {selectedEnemy.aspects && selectedEnemy.aspects.length > 0 && (
             <div className="enemy-aspects">
-              <h3>Aspects</h3>
+              <h2>Aspects</h2>
               {selectedEnemy.aspects.map((aspect, index) => (
                 <div key={index} className="enemy-aspect">
-                  <h4>{aspect.name}</h4>
-                  <p>{aspect.description}</p>
+                  <div className="aspect-header">
+                    <span className="aspect-name">{aspect.name}</span>
+                  </div>
+                  <p className="aspect-details">{aspect.description}</p>
                 </div>
               ))}
             </div>
@@ -100,11 +116,13 @@ const EnemiesTab = () => {
 
           {selectedEnemy.drives && selectedEnemy.drives.length > 0 && (
             <div className="enemy-drives">
-              <h3>Drives</h3>
+              <h2>Drives</h2>
               {selectedEnemy.drives.map((drive, index) => (
                 <div key={index} className="enemy-drive">
-                  <h4>{drive.name}</h4>
-                  <p>{drive.description}</p>
+                  <div className="drive-header">
+                    <span className="drive-name">{drive.name}</span>
+                  </div>
+                  <p className="drive-details">{drive.description}</p>
                 </div>
               ))}
             </div>
@@ -112,11 +130,13 @@ const EnemiesTab = () => {
 
           {selectedEnemy.quirks && selectedEnemy.quirks.length > 0 && (
             <div className="enemy-quirks">
-              <h3>Quirks</h3>
+              <h2>Quirks</h2>
               {selectedEnemy.quirks.map((quirk, index) => (
                 <div key={index} className="enemy-quirk">
-                  <h4>{quirk.name}</h4>
-                  <p>{quirk.description}</p>
+                  <div className="quirk-header">
+                    <span className="quirk-name">{quirk.name}</span>
+                  </div>
+                  <p className="quirk-details">{quirk.description}</p>
                 </div>
               ))}
             </div>
@@ -124,13 +144,15 @@ const EnemiesTab = () => {
 
           {selectedEnemy.presence && Object.keys(selectedEnemy.presence).length > 0 && (
             <div className="enemy-presence">
-              <h3>Presence</h3>
-              {Object.entries(selectedEnemy.presence).map(([sense, description]) => (
-                <div key={sense} className="presence-sense">
-                  <h4>{sense}</h4>
-                  <p>{description}</p>
-                </div>
-              ))}
+              <h2>Presence</h2>
+              <div className="presence-grid">
+                {Object.entries(selectedEnemy.presence).map(([sense, description]) => (
+                  <div key={sense} className="presence-sense">
+                    <h3>{sense}</h3>
+                    <p>{description}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
