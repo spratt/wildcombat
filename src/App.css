@@ -9,6 +9,149 @@ h1 {
   margin-bottom: 2rem;
 }
 
+/* Tabs */
+.tabs {
+  margin-bottom: 2rem;
+}
+
+.tab-list {
+  display: flex;
+  justify-content: center;
+  border-bottom: 2px solid #2a2a2a;
+  margin-bottom: 2rem;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #888;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  color: #61dafb;
+  background: #1a1a1a;
+}
+
+.tab.active {
+  color: #61dafb;
+  border-bottom-color: #61dafb;
+  background: #1a1a1a;
+}
+
+/* Tab Content */
+.tab-content {
+  min-height: 400px;
+}
+
+/* TODO Placeholder */
+.todo-placeholder {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.todo-placeholder h2 {
+  color: #61dafb;
+  margin-bottom: 1rem;
+}
+
+.todo-placeholder p {
+  font-size: 1.5rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* Party Tab */
+.party-section {
+  margin-bottom: 3rem;
+  padding: 1.5rem;
+  background: #1a1a1a;
+  border-radius: 8px;
+}
+
+.party-section h3 {
+  color: #98c379;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+/* Party Stats */
+.party-stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #2a2a2a;
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+}
+
+.stat-label {
+  font-weight: bold;
+  color: #ccc;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #61dafb;
+}
+
+/* Empty Party */
+.empty-party {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* Party Characters */
+.party-characters {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.party-character {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2a2a2a;
+  padding: 1rem 1.5rem;
+  border-radius: 6px;
+}
+
+.character-name {
+  font-weight: bold;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.remove-character-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.remove-character-button:hover {
+  background: #ff6b6b;
+}
+
 /* Character Input Section */
 .character-input-section {
   display: flex;

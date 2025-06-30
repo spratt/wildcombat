@@ -1,53 +1,41 @@
 import { useState } from 'react'
 import './App.css'
-import CombinedCharacterSelector from './components/CombinedCharacterSelector'
-import CharacterUpload from './components/CharacterUpload'
-import SaveCharacterButton from './components/SaveCharacterButton'
-import ExportCharacterButton from './components/ExportCharacterButton'
-import Character from './components/Character'
+import CharacterViewerTab from './components/CharacterViewerTab'
+import PartyTab from './components/PartyTab'
+import EnemiesTab from './components/EnemiesTab'
+import SimulateTab from './components/SimulateTab'
 
 function App() {
-  const [selectedCharacter, setSelectedCharacter] = useState(null)
-  const [uploadedCharacter, setUploadedCharacter] = useState(null)
-  const [savedCharactersRefresh, setSavedCharactersRefresh] = useState(0)
+  const [activeTab, setActiveTab] = useState('character-viewer')
 
-  const handleCharacterSelect = (character) => {
-    setSelectedCharacter(character);
-    setUploadedCharacter(null);
-  };
+  const tabs = [
+    { id: 'character-viewer', label: 'Character Viewer', component: CharacterViewerTab },
+    { id: 'party', label: 'Party', component: PartyTab },
+    { id: 'enemies', label: 'Enemies', component: EnemiesTab },
+    { id: 'simulate', label: 'Simulate!', component: SimulateTab }
+  ]
 
-  const handleCharacterUpload = (character) => {
-    setUploadedCharacter(character);
-    setSelectedCharacter(null);
-  };
-
-  const handleCharacterSaved = () => {
-    setSavedCharactersRefresh(prev => prev + 1);
-  };
-
-  const displayCharacter = uploadedCharacter || selectedCharacter;
+  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || CharacterViewerTab
 
   return (
     <>
-      <h1>Wildsea Character Viewer</h1>
-      <div className="character-input-section">
-        <CombinedCharacterSelector 
-          onCharacterSelect={handleCharacterSelect}
-          refreshTrigger={savedCharactersRefresh}
-        />
-        <div className="input-divider">or</div>
-        <CharacterUpload onCharacterUpload={handleCharacterUpload} />
-      </div>
-      {displayCharacter && (
-        <div className="character-actions">
-          <SaveCharacterButton 
-            characterData={displayCharacter} 
-            onSave={handleCharacterSaved}
-          />
-          <ExportCharacterButton characterData={displayCharacter} />
+      <h1>Wildcombat - A Wildsea Combat Simulator</h1>
+      
+      <div className="tabs">
+        <div className="tab-list">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-      )}
-      <Character characterData={displayCharacter} />
+      </div>
+
+      <ActiveComponent />
     </>
   )
 }
