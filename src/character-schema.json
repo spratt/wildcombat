@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "title": "Wildsea Character",
+  "type": "object",
+  "required": [
+    "name",
+    "background",
+    "edges",
+    "skills",
+    "languages",
+    "drives",
+    "mires",
+    "resources",
+    "aspects",
+    "version",
+    "_sheetType"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Character name"
+    },
+    "portrait": {
+      "type": "string",
+      "description": "URL to character portrait image"
+    },
+    "background": {
+      "type": "object",
+      "required": ["bloodline", "origin", "post"],
+      "properties": {
+        "bloodline": {
+          "type": "string",
+          "description": "Character's bloodline"
+        },
+        "origin": {
+          "type": "string",
+          "description": "Character's origin"
+        },
+        "post": {
+          "type": "string",
+          "description": "Character's post/profession"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional background notes"
+        }
+      }
+    },
+    "edges": {
+      "type": "object",
+      "properties": {
+        "GRACE": { "type": "boolean" },
+        "INSTINCT": { "type": "boolean" },
+        "IRON": { "type": "boolean" },
+        "SHARPS": { "type": "boolean" },
+        "TIDES": { "type": "boolean" },
+        "VEILS": { "type": "boolean" }
+      }
+    },
+    "skills": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z_]+$": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      }
+    },
+    "languages": {
+      "type": "object",
+      "patternProperties": {
+        "^[A-Z_]+$": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 0 },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      }
+    },
+    "drives": {
+      "type": "string",
+      "description": "Character motivations and goals"
+    },
+    "mires": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "value"],
+        "properties": {
+          "label": { "type": "string" },
+          "value": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0 },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "required": ["charts", "salvage", "specimens", "whispers"],
+      "properties": {
+        "charts": { "type": "string" },
+        "salvage": { "type": "string" },
+        "specimens": { "type": "string" },
+        "whispers": { "type": "string" }
+      }
+    },
+    "aspects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "value": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0 }
+          },
+          "details": { "type": "string" },
+          "detailsHeight": { "type": "integer" },
+          "chosen": { "type": "boolean" },
+          "selected": { "type": "boolean" },
+          "id": { "type": "string" }
+        }
+      }
+    },
+    "temporaryTracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "value": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0 }
+          },
+          "details": { "type": "string" },
+          "detailsHeight": { "type": "integer" },
+          "chosen": { "type": "boolean" },
+          "selected": { "type": "boolean" },
+          "id": { "type": "string" }
+        }
+      }
+    },
+    "minorMilestones": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label"],
+        "properties": {
+          "label": { "type": "string" }
+        }
+      }
+    },
+    "notesV2": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["BASIC", "LABELED"]
+          },
+          "value": {},
+          "expanded": { "type": "boolean" },
+          "height": { "type": "integer" },
+          "name": { "type": "string" }
+        }
+      }
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "createdBy": {
+      "type": "string"
+    },
+    "accessControl": {
+      "type": "string"
+    },
+    "descriptionHeight": {
+      "type": "integer"
+    },
+    "aspectsExpanded": {
+      "type": "boolean"
+    },
+    "layout": {
+      "type": "object"
+    },
+    "_sheetType": {
+      "type": "string",
+      "const": "characters"
+    },
+    "_CHARSMITH": {
+      "type": "boolean"
+    }
+  }
+}
