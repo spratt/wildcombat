@@ -24,7 +24,7 @@ Characters are validated against a JSON Schema (draft-2019-09) located at `publi
 - Progress tracking (milestones, temporary tracks)
 
 ## Commands
-- `npm run dev` - Start development server
+- `npm run dev` - Start development server (Note: Assume this is always running in another terminal)
 - `npm run build` - Build for production
 - `npm run lint` - Run ESLint
 - `npm run validate:characters` - Validate all character JSON files

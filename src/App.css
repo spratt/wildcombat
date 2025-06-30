@@ -2,41 +2,201 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+h1 {
   text-align: center;
+  margin-bottom: 2rem;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Character Selector */
+.character-selector {
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.character-selector label {
+  margin-right: 1rem;
+  font-weight: bold;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.character-selector select {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
 }
 
-.card {
-  padding: 2em;
+/* Character Sheet */
+.character-sheet {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-top: 2rem;
+  text-align: left;
 }
 
-.read-the-docs {
-  color: #888;
+.character-sheet.error {
+  border: 2px solid #ff6b6b;
+}
+
+.character-sheet.error h2 {
+  color: #ff6b6b;
+}
+
+.character-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.character-portrait {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.character-sheet h2 {
+  color: #61dafb;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #61dafb;
+  padding-bottom: 0.5rem;
+}
+
+.character-sheet h3 {
+  color: #98c379;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Edges */
+.edges-list {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.edge {
+  background: #61dafb;
+  color: #1a1a1a;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: bold;
+}
+
+/* Skills and Languages */
+.skills-grid,
+.languages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.skill,
+.language {
+  display: flex;
+  justify-content: space-between;
+  background: #2a2a2a;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.skill-name,
+.language-name {
+  font-weight: bold;
+}
+
+.skill-values,
+.language-values {
+  color: #61dafb;
+}
+
+/* Drives and Mires */
+.drives-text {
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.character-mires ul {
+  list-style: none;
+  padding: 0;
+}
+
+.character-mires li {
+  background: #2a2a2a;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+}
+
+/* Resources */
+.resources-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.resource {
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.resource h3 {
+  margin-top: 0;
+}
+
+.resource p {
+  white-space: pre-line;
+  margin: 0;
+}
+
+/* Aspects */
+.aspect {
+  background: #2a2a2a;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+
+.aspect h3 {
+  margin-top: 0;
+}
+
+.aspect-value {
+  color: #61dafb;
+  font-weight: bold;
+}
+
+.aspect-details {
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+/* Milestones */
+.character-milestones ul {
+  list-style: disc;
+  padding-left: 2rem;
+}
+
+.character-milestones li {
+  margin-bottom: 0.5rem;
+}
+
+/* Background Notes */
+.background-notes {
+  margin-top: 1rem;
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.background-notes p {
+  white-space: pre-line;
+  margin-top: 0.5rem;
 }

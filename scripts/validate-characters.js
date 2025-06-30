@@ -23,7 +23,7 @@ files.forEach(file => {
   const filePath = path.join(charactersDir, file);
   
   try {
-    execSync(`npx ajv validate --spec=draft2019 -s "${schemaPath}" -d "${filePath}"`, {
+    execSync(`npx ajv validate -s "${schemaPath}" -d "${filePath}"`, {
       stdio: 'pipe'
     });
     console.log(`✓ ${file} - valid`);
