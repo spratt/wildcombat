@@ -168,10 +168,17 @@ h1 {
   background: #ff5252;
 }
 
+/* Character Actions */
+.character-actions {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 1rem 0 2rem 0;
+  flex-wrap: wrap;
+}
+
 /* Save Character Button */
 .save-character-section {
-  text-align: center;
-  margin: 1rem 0 2rem 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -212,6 +219,52 @@ h1 {
 }
 
 .save-status.error {
+  background: #ff6b6b;
+  color: white;
+}
+
+/* Export Character Button */
+.export-character-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.export-button {
+  background: #61dafb;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.export-button:hover:not(:disabled) {
+  background: #4fa8c4;
+}
+
+.export-button:disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.export-status {
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.export-status.success {
+  background: #61dafb;
+  color: #1a1a1a;
+}
+
+.export-status.error {
   background: #ff6b6b;
   color: white;
 }

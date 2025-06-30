@@ -3,6 +3,7 @@ import './App.css'
 import CombinedCharacterSelector from './components/CombinedCharacterSelector'
 import CharacterUpload from './components/CharacterUpload'
 import SaveCharacterButton from './components/SaveCharacterButton'
+import ExportCharacterButton from './components/ExportCharacterButton'
 import Character from './components/Character'
 
 function App() {
@@ -38,10 +39,13 @@ function App() {
         <CharacterUpload onCharacterUpload={handleCharacterUpload} />
       </div>
       {displayCharacter && (
-        <SaveCharacterButton 
-          characterData={displayCharacter} 
-          onSave={handleCharacterSaved}
-        />
+        <div className="character-actions">
+          <SaveCharacterButton 
+            characterData={displayCharacter} 
+            onSave={handleCharacterSaved}
+          />
+          <ExportCharacterButton characterData={displayCharacter} />
+        </div>
       )}
       <Character characterData={displayCharacter} />
     </>
