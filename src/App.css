@@ -1289,6 +1289,21 @@ h1 {
   font-style: italic;
 }
 
+/* Party Characters Grid in Simulate */
+.simulate-layout .party-characters {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.simulate-layout .party-character {
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Enemy Info in Simulate */
 .enemy-info {
   display: flex;
@@ -1341,5 +1356,9 @@ h1 {
   
   .party-column {
     min-width: 0;
+  }
+  
+  .simulate-layout .party-characters {
+    grid-template-columns: 1fr;
   }
 }
