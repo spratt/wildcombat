@@ -1228,6 +1228,65 @@ h1 {
   background: #ff5252;
 }
 
+/* Simulate Tab Layout */
+.simulate-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.party-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.party-column .party-section {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.party-column .party-section h3 {
+  color: #98c379;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+/* Empty States */
+.empty-encounter {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* Enemy Info in Simulate */
+.enemy-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.enemy-name {
+  font-weight: bold;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.enemy-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.enemy-track {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #ff6b6b;
+  letter-spacing: 0.1rem;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .enemies-layout {
@@ -1240,5 +1299,13 @@ h1 {
   
   .encounter-section {
     position: static;
+  }
+  
+  .simulate-layout {
+    flex-direction: column;
+  }
+  
+  .party-column {
+    min-width: 0;
   }
 }
