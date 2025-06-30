@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Wildsea Enemy",
+  "type": "object",
+  "required": [
+    "name",
+    "blurb",
+    "description",
+    "trackLength",
+    "size",
+    "aspects",
+    "drives",
+    "quirks",
+    "presence"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Enemy name"
+    },
+    "blurb": {
+      "type": "string",
+      "description": "Short summary of the enemy"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the enemy"
+    },
+    "trackLength": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Length of the enemy's track (hit points)"
+    },
+    "size": {
+      "type": "string",
+      "enum": ["small", "medium", "large", "variable"],
+      "description": "Enemy size category"
+    },
+    "aspects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Aspect name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Aspect description"
+          }
+        }
+      },
+      "description": "Enemy aspects and abilities"
+    },
+    "drives": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Drive name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Drive description"
+          }
+        }
+      },
+      "description": "Enemy motivations and goals"
+    },
+    "quirks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Quirk name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Quirk description"
+          }
+        }
+      },
+      "description": "Enemy behavioral quirks and traits"
+    },
+    "presence": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "string"
+        }
+      },
+      "description": "Sensory descriptions of the enemy"
+    }
+  }
+}

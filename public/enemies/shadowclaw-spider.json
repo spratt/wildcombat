@@ -1,0 +1,47 @@
+{
+  "name": "Shadowclaw Spider",
+  "blurb": "A massive arachnid that hunts from the canopy depths, using stealth and venom to disable its prey.",
+  "description": "The Shadowclaw Spider is a formidable predator that has adapted to life in the dense Wildsea canopy. Its jet-black carapace is covered in fine hairs that absorb light, making it nearly invisible in shadow. Eight razor-sharp legs end in hooked claws that can anchor into bark or pierce flesh with equal ease. Most terrifying are its mandibles, which drip with a paralytic venom that can immobilize even the largest prey. These creatures are known to construct elaborate web traps between the great branches, waiting patiently for unwary travelers to stumble into their domain.",
+  "trackLength": 6,
+  "size": "large",
+  "aspects": [
+    {
+      "name": "Venomous Bite",
+      "description": "The spider's bite injects a potent paralytic toxin. Mark to inflict the Paralyzed condition on a target."
+    },
+    {
+      "name": "Web Trap",
+      "description": "Can quickly weave restraining webs. Mark to entangle a target, preventing movement until they break free."
+    },
+    {
+      "name": "Shadowmeld",
+      "description": "Becomes nearly invisible in darkness or shadow. Mark to gain advantage on stealth and ambush attacks."
+    }
+  ],
+  "drives": [
+    {
+      "name": "Territorial Hunter",
+      "description": "Defends its web-territory aggressively, attacking any intruders that threaten its domain."
+    },
+    {
+      "name": "Patient Predator",
+      "description": "Prefers to wait and ambush rather than engage in direct confrontation."
+    }
+  ],
+  "quirks": [
+    {
+      "name": "Light Sensitivity",
+      "description": "Becomes agitated and less effective in bright light, preferring shadows and darkness."
+    },
+    {
+      "name": "Web Maintenance",
+      "description": "Constantly repairs and improves its web traps, sometimes ignoring immediate threats to tend to damaged strands."
+    }
+  ],
+  "presence": {
+    "Sight": "A massive black shape that seems to absorb light, with eight gleaming eyes reflecting any available illumination like dark jewels.",
+    "Sound": "The soft whisper of silk being woven, punctuated by the sharp click-clack of chitin legs against bark.",
+    "Smell": "A musty, acrid scent of old webs and decay, mixed with the sharp chemical tang of venom.",
+    "Taste": "The air carries a bitter, metallic flavor that makes the tongue tingle with warning."
+  }
+}

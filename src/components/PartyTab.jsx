@@ -22,6 +22,7 @@ const PartyTab = () => {
   const [partyCharacters, setPartyCharacters] = useState([]);
   const [savedCharactersRefresh, setSavedCharactersRefresh] = useState(0);
   const [saveStatus, setSaveStatus] = useState('');
+  const [healStatus, setHealStatus] = useState('');
 
   // Load party from localStorage on component mount
   useEffect(() => {
@@ -78,6 +79,57 @@ const PartyTab = () => {
     }
   };
 
+  // Heal all characters in the party
+  const healParty = () => {
+    if (partyCharacters.length === 0) {
+      setHealStatus('No characters to heal');
+      setTimeout(() => setHealStatus(''), 3000);
+      return;
+    }
+
+    try {
+      const healedParty = partyCharacters.map(character => {
+        // Heal all aspects for this character
+        const healedAspects = character.aspects ? character.aspects.map(aspect => {
+          if (!aspect.value || !Array.isArray(aspect.value)) {
+            return aspect;
+          }
+          
+          // Heal marked bubbles (1 -> 0) but leave burned bubbles (2) unchanged
+          const healedValue = aspect.value.map(bubble => {
+            if (bubble === 1) return 0; // Heal marked bubbles
+            return bubble; // Keep unchecked (0) and burned (2) bubbles unchanged
+          });
+          
+          return {
+            ...aspect,
+            value: healedValue
+          };
+        }) : character.aspects;
+
+        // Recalculate hit points for healed character
+        const healedCharacter = {
+          ...character,
+          aspects: healedAspects
+        };
+        const newHitPoints = calculateHitPoints(healedCharacter);
+
+        return {
+          ...healedCharacter,
+          hitPoints: newHitPoints
+        };
+      });
+
+      setPartyCharacters(healedParty);
+      setHealStatus('Party healed!');
+      setTimeout(() => setHealStatus(''), 3000);
+    } catch (error) {
+      console.error('Error healing party:', error);
+      setHealStatus('Error healing party');
+      setTimeout(() => setHealStatus(''), 3000);
+    }
+  };
+
   return (
     <div className="tab-content">
       <h2>Party Management</h2>
@@ -121,6 +173,26 @@ const PartyTab = () => {
           </div>
         </div>
       </div>
+
+      {/* Party Operations */}
+      {partyCharacters.length > 0 && (
+        <div className="party-section">
+          <h3>Party Operations</h3>
+          <div className="party-operations">
+            <button 
+              className="heal-party-button"
+              onClick={healParty}
+            >
+              Heal Party
+            </button>
+            {healStatus && (
+              <span className={`party-heal-status ${healStatus.includes('Error') ? 'error' : 'success'}`}>
+                {healStatus}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Party Characters */}
       <div className="party-section">
