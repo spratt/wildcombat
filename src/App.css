@@ -221,6 +221,7 @@ h1 {
 .aspect-value {
   font-size: 1.5rem;
   letter-spacing: 0.2rem;
+  color: #61dafb;
 }
 
 .track-details {
@@ -233,4 +234,5 @@ h1 {
 .language-values {
   font-size: 1.2rem;
   letter-spacing: 0.1rem;
+  color: #61dafb;
 }

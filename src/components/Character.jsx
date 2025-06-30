@@ -5,7 +5,11 @@ import characterSchema from '../character-schema.json';
 // Helper function to render a track as bubbles
 const renderTrack = (track) => {
   if (!Array.isArray(track)) return '';
-  return track.map(bubble => bubble === 1 ? '⦿' : '⦾').join('');
+  return track.map(bubble => {
+    if (bubble === 1) return '⦿';
+    if (bubble === 2) return '⦻';
+    return '⦾';
+  }).join('-');
 };
 
 const Character = ({ characterData }) => {
