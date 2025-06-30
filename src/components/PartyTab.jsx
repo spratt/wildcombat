@@ -1,6 +1,23 @@
 import { useState } from 'react';
 import CombinedCharacterSelector from './CombinedCharacterSelector';
 
+// Helper function to calculate unchecked aspect tracks (hit points)
+const calculateHitPoints = (character) => {
+  if (!character.aspects || !Array.isArray(character.aspects)) {
+    return 0;
+  }
+  
+  return character.aspects.reduce((total, aspect) => {
+    if (!aspect.value || !Array.isArray(aspect.value)) {
+      return total;
+    }
+    
+    // Count unchecked bubbles (0 values)
+    const uncheckedBubbles = aspect.value.filter(bubble => bubble === 0).length;
+    return total + uncheckedBubbles;
+  }, 0);
+};
+
 const PartyTab = () => {
   const [partyCharacters, setPartyCharacters] = useState([]);
   const [savedCharactersRefresh, setSavedCharactersRefresh] = useState(0);
@@ -15,10 +32,12 @@ const PartyTab = () => {
       return;
     }
     
-    // Add character to party with unique ID
+    // Add character to party with unique ID and hit points
+    const hitPoints = calculateHitPoints(character);
     const partyCharacter = {
       ...character,
-      partyId: `${character.name}-${Date.now()}`
+      partyId: `${character.name}-${Date.now()}`,
+      hitPoints: hitPoints
     };
     setPartyCharacters(prev => [...prev, partyCharacter]);
   };
@@ -26,6 +45,11 @@ const PartyTab = () => {
   const removeCharacterFromParty = (partyId) => {
     setPartyCharacters(prev => prev.filter(char => char.partyId !== partyId));
   };
+
+  // Calculate total party hit points
+  const totalPartyHitPoints = partyCharacters.reduce((total, character) => {
+    return total + character.hitPoints;
+  }, 0);
 
   return (
     <div className="tab-content">
@@ -48,6 +72,10 @@ const PartyTab = () => {
             <span className="stat-label">Characters in Party:</span>
             <span className="stat-value">{partyCharacters.length}</span>
           </div>
+          <div className="stat">
+            <span className="stat-label">Total Hit Points:</span>
+            <span className="stat-value">{totalPartyHitPoints}</span>
+          </div>
         </div>
       </div>
 
@@ -62,7 +90,10 @@ const PartyTab = () => {
           <div className="party-characters">
             {partyCharacters.map(character => (
               <div key={character.partyId} className="party-character">
-                <span className="character-name">{character.name}</span>
+                <div className="character-info">
+                  <span className="character-name">{character.name}</span>
+                  <span className="character-hp">HP: {character.hitPoints}</span>
+                </div>
                 <button 
                   className="remove-character-button"
                   onClick={() => removeCharacterFromParty(character.partyId)}
