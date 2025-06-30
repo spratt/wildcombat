@@ -10,6 +10,7 @@ function App() {
   const [selectedCharacter, setSelectedCharacter] = useState(null)
   const [uploadedCharacter, setUploadedCharacter] = useState(null)
   const [savedCharacter, setSavedCharacter] = useState(null)
+  const [savedCharactersRefresh, setSavedCharactersRefresh] = useState(0)
 
   const handleCharacterSelect = (character) => {
     setSelectedCharacter(character);
@@ -29,6 +30,10 @@ function App() {
     setUploadedCharacter(null);
   };
 
+  const handleCharacterSaved = () => {
+    setSavedCharactersRefresh(prev => prev + 1);
+  };
+
   const displayCharacter = savedCharacter || uploadedCharacter || selectedCharacter;
 
   return (
@@ -39,10 +44,16 @@ function App() {
         <div className="input-divider">or</div>
         <CharacterUpload onCharacterUpload={handleCharacterUpload} />
         <div className="input-divider">or</div>
-        <SavedCharacters onCharacterSelect={handleSavedCharacterSelect} />
+        <SavedCharacters 
+          onCharacterSelect={handleSavedCharacterSelect} 
+          refreshTrigger={savedCharactersRefresh}
+        />
       </div>
       {displayCharacter && (
-        <SaveCharacterButton characterData={displayCharacter} />
+        <SaveCharacterButton 
+          characterData={displayCharacter} 
+          onSave={handleCharacterSaved}
+        />
       )}
       <Character characterData={displayCharacter} />
     </>

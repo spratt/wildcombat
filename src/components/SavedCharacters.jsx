@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 
-const SavedCharacters = ({ onCharacterSelect }) => {
+const SavedCharacters = ({ onCharacterSelect, refreshTrigger }) => {
   const [savedCharacters, setSavedCharacters] = useState([]);
   const [selectedSaved, setSelectedSaved] = useState('');
 
   useEffect(() => {
     loadSavedCharacters();
-  }, []);
+  }, [refreshTrigger]);
 
   const loadSavedCharacters = () => {
     try {

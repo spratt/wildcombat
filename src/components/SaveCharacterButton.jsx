@@ -30,9 +30,9 @@ const SaveCharacterButton = ({ characterData, onSave }) => {
       setSaveStatus('Character saved!');
       setTimeout(() => setSaveStatus(''), 3000);
 
-      // Notify parent component if callback provided
+      // Notify parent component to refresh saved characters list
       if (onSave) {
-        onSave(saveEntry);
+        onSave();
       }
     } catch (error) {
       console.error('Error saving character:', error);
