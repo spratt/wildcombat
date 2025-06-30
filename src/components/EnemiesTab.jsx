@@ -272,6 +272,25 @@ const EnemiesTab = () => {
                   </span>
                 )}
               </div>
+
+              {/* Encounter Stats */}
+              <div className="encounter-stats">
+                <div className="stat">
+                  <span className="stat-label">Total Enemies:</span>
+                  <span className="stat-value">
+                    {encounter.reduce((total, enemy) => total + enemy.count, 0)}
+                  </span>
+                </div>
+                <div className="stat">
+                  <span className="stat-label">Total HP:</span>
+                  <span className="stat-value">
+                    {encounter.reduce((total, encounterEnemy) => {
+                      const enemy = enemies.find(e => e.id === encounterEnemy.enemyId);
+                      return total + (enemy ? enemy.trackLength * encounterEnemy.count : 0);
+                    }, 0)}
+                  </span>
+                </div>
+              </div>
               
               <div className="encounter-enemies">
                 {encounter.map(enemy => (

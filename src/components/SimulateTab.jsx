@@ -121,6 +121,11 @@ const SimulateTab = () => {
     return total + (character.defenseScore || 1);
   }, 0);
 
+  // Calculate encounter stats
+  const totalEncounterHP = uniqueEnemies.reduce((total, enemy) => {
+    return total + (enemy.trackLength || 0);
+  }, 0);
+
   return (
     <div className="tab-content">
       <h2>Combat Simulation</h2>
@@ -187,18 +192,34 @@ const SimulateTab = () => {
                 <p>No encounter loaded. Go to the Enemies tab to build an encounter.</p>
               </div>
             ) : (
-              <div className="encounter-enemies">
-                {uniqueEnemies.map(enemy => (
-                  <div key={enemy.instanceId} className="encounter-enemy">
-                    <div className="enemy-info">
-                      <span className="enemy-name">{enemy.uniqueName}</span>
-                      <div className="enemy-stats">
-                        <span className="enemy-track">Track: {renderTrackLength(enemy.trackLength)}</span>
+              <>
+                {/* Encounter Stats */}
+                <div className="encounter-stats">
+                  <div className="stat">
+                    <span className="stat-label">Enemies:</span>
+                    <span className="stat-value">{uniqueEnemies.length}</span>
+                  </div>
+                  <div className="stat">
+                    <span className="stat-label">Total HP:</span>
+                    <span className="stat-value">{totalEncounterHP}</span>
+                  </div>
+                </div>
+
+                {/* Encounter Enemies */}
+                <div className="encounter-enemies">
+                  {uniqueEnemies.map(enemy => (
+                    <div key={enemy.instanceId} className="encounter-enemy">
+                      <div className="enemy-info">
+                        <span className="enemy-name">{enemy.uniqueName}</span>
+                        <div className="enemy-stats">
+                          <span className="enemy-hp">HP: {enemy.trackLength}</span>
+                          <span className="enemy-track">Track: {renderTrackLength(enemy.trackLength)}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
