@@ -15,6 +15,9 @@ const SaveCharacterButton = ({ characterData, onSave }) => {
       const existingSaved = localStorage.getItem('wildcombat-saved-characters');
       const savedCharacters = existingSaved ? JSON.parse(existingSaved) : [];
 
+      // Remove any existing character with the same name
+      const filteredCharacters = savedCharacters.filter(char => char.name !== characterData.name);
+
       // Create new save entry
       const saveEntry = {
         id: `${characterData.name}-${Date.now()}`,
@@ -23,8 +26,8 @@ const SaveCharacterButton = ({ characterData, onSave }) => {
         savedAt: new Date().toISOString()
       };
 
-      // Add to saved characters
-      const updatedCharacters = [...savedCharacters, saveEntry];
+      // Add to saved characters (replacing any existing one with same name)
+      const updatedCharacters = [...filteredCharacters, saveEntry];
       localStorage.setItem('wildcombat-saved-characters', JSON.stringify(updatedCharacters));
 
       setSaveStatus('Character saved!');
