@@ -12,6 +12,38 @@ const renderTrack = (track) => {
   }).join('-');
 };
 
+// Standard lists for Wildsea
+const EDGES = ['GRACE', 'INSTINCT', 'IRON', 'SHARPS', 'TEETH', 'TIDES', 'VEILS'];
+
+const SKILLS = [
+  'BRACE', 'BREAK', 'CONCOCT', 'COOK', 'DELVE', 'FLOURISH', 'HACK', 'HARVEST',
+  'HUNT', 'OUTWIT', 'RATTLE', 'SCAVENGE', 'SENSE', 'STUDY', 'SWAY', 'TEND',
+  'VAULT', 'WAVEWALK'
+];
+
+const LANGUAGES = [
+  'LOW_SOUR', 'CHTHONIC', 'SAPREKK', 'GAUDIMM', 'KNOCK', 'BRASSTONGUE',
+  'RAKA_SPIT', 'LYRE_BITE', 'OLD_HAND', 'SIGNALLING', 'HIGHVIN'
+];
+
+// Helper function to get all skills with defaults
+const getAllSkills = (characterSkills) => {
+  const skills = {};
+  SKILLS.forEach(skill => {
+    skills[skill] = characterSkills[skill] || [0, 0, 0];
+  });
+  return skills;
+};
+
+// Helper function to get all languages with defaults
+const getAllLanguages = (characterLanguages) => {
+  const languages = {};
+  LANGUAGES.forEach(language => {
+    languages[language] = characterLanguages[language] || [0, 0, 0];
+  });
+  return languages;
+};
+
 const Character = ({ characterData }) => {
   const [validationError, setValidationError] = useState(null);
   const [character, setCharacter] = useState(null);
@@ -92,8 +124,10 @@ const Character = ({ characterData }) => {
       <div className="character-edges">
         <h2>Edges</h2>
         <div className="edges-list">
-          {Object.entries(character.edges).map(([edge, value]) => (
-            value && <span key={edge} className="edge">{edge}</span>
+          {EDGES.map(edge => (
+            <span key={edge} className={`edge ${character.edges[edge] ? 'selected' : 'unselected'}`}>
+              {edge}
+            </span>
           ))}
         </div>
       </div>
@@ -101,7 +135,7 @@ const Character = ({ characterData }) => {
       <div className="character-skills">
         <h2>Skills</h2>
         <div className="skills-grid">
-          {Object.entries(character.skills).map(([skill, values]) => (
+          {Object.entries(getAllSkills(character.skills)).map(([skill, values]) => (
             <div key={skill} className="skill">
               <span className="skill-name">{skill}</span>
               <span className="skill-values">{renderTrack(values)}</span>
@@ -113,7 +147,7 @@ const Character = ({ characterData }) => {
       <div className="character-languages">
         <h2>Languages</h2>
         <div className="languages-grid">
-          {Object.entries(character.languages).map(([language, values]) => (
+          {Object.entries(getAllLanguages(character.languages)).map(([language, values]) => (
             <div key={language} className="language">
               <span className="language-name">{language}</span>
               <span className="language-values">{renderTrack(values)}</span>

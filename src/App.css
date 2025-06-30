@@ -82,11 +82,20 @@ h1 {
 }
 
 .edge {
-  background: #61dafb;
-  color: #1a1a1a;
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-weight: bold;
+  border: 2px solid #61dafb;
+}
+
+.edge.selected {
+  background: #61dafb;
+  color: #1a1a1a;
+}
+
+.edge.unselected {
+  background: transparent;
+  color: #61dafb;
 }
 
 /* Skills and Languages */
