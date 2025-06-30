@@ -98,6 +98,101 @@ h1 {
   font-weight: bold;
 }
 
+/* Saved Characters */
+.saved-characters {
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.saved-characters label {
+  margin-right: 1rem;
+  font-weight: bold;
+}
+
+.saved-character-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.saved-character-controls select {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+  flex: 1;
+  max-width: 300px;
+}
+
+.delete-button {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  min-width: 30px;
+  height: 38px;
+}
+
+.delete-button:hover {
+  background: #ff5252;
+}
+
+/* Save Character Button */
+.save-character-section {
+  text-align: center;
+  margin: 1rem 0 2rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.save-button {
+  background: #98c379;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.save-button:hover:not(:disabled) {
+  background: #7fb069;
+}
+
+.save-button:disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.save-status {
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.save-status.success {
+  background: #98c379;
+  color: #1a1a1a;
+}
+
+.save-status.error {
+  background: #ff6b6b;
+  color: white;
+}
+
 /* Character Sheet */
 .character-sheet {
   background: #1a1a1a;
