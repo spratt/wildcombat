@@ -164,8 +164,17 @@ h1 {
   border-radius: 4px;
 }
 
-.aspect h3 {
-  margin-top: 0;
+.aspect-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.aspect-name {
+  color: #98c379;
+  font-weight: bold;
+  font-size: 1.1rem;
 }
 
 .aspect-value {
@@ -213,12 +222,20 @@ h1 {
   border-radius: 4px;
 }
 
-.temporary-track h3 {
-  margin-top: 0;
+.track-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
-.track-value,
-.aspect-value {
+.track-name {
+  color: #98c379;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.track-value {
   font-size: 1.5rem;
   letter-spacing: 0.2rem;
   color: #61dafb;

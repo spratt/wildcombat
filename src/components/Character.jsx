@@ -156,8 +156,10 @@ const Character = ({ characterData }) => {
         <h2>Aspects</h2>
         {character.aspects.map((aspect, index) => (
           <div key={index} className="aspect">
-            <h3>{aspect.name}</h3>
-            {aspect.value && <p className="aspect-value">{renderTrack(aspect.value)}</p>}
+            <div className="aspect-header">
+              <span className="aspect-name">{aspect.name}</span>
+              {aspect.value && <span className="aspect-value">{renderTrack(aspect.value)}</span>}
+            </div>
             {aspect.details && <p className="aspect-details">{aspect.details}</p>}
           </div>
         ))}
@@ -168,8 +170,10 @@ const Character = ({ characterData }) => {
           <h2>Temporary Tracks</h2>
           {character.temporaryTracks.map((track, index) => (
             <div key={index} className="temporary-track">
-              <h3>{track.name}</h3>
-              {track.value && <p className="track-value">{renderTrack(track.value)}</p>}
+              <div className="track-header">
+                <span className="track-name">{track.name}</span>
+                {track.value && <span className="track-value">{renderTrack(track.value)}</span>}
+              </div>
               {track.details && <p className="track-details">{track.details}</p>}
             </div>
           ))}
