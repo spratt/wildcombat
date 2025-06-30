@@ -84,26 +84,11 @@ const PartyTab = () => {
       
       {/* Character Selection */}
       <div className="party-section">
-        <h3>Add Character to Party</h3>
+        <h3>Build & Save Party</h3>
         <CombinedCharacterSelector 
           onCharacterSelect={handleCharacterSelect}
           refreshTrigger={savedCharactersRefresh}
         />
-      </div>
-
-      {/* Party Stats */}
-      <div className="party-section">
-        <h3>Party Stats</h3>
-        <div className="party-stats">
-          <div className="stat">
-            <span className="stat-label">Characters in Party:</span>
-            <span className="stat-value">{partyCharacters.length}</span>
-          </div>
-          <div className="stat">
-            <span className="stat-label">Total Hit Points:</span>
-            <span className="stat-value">{totalPartyHitPoints}</span>
-          </div>
-        </div>
         
         {partyCharacters.length > 0 && (
           <div className="party-save-section">
@@ -120,6 +105,21 @@ const PartyTab = () => {
             )}
           </div>
         )}
+      </div>
+
+      {/* Party Stats */}
+      <div className="party-section">
+        <h3>Party Stats</h3>
+        <div className="party-stats">
+          <div className="stat">
+            <span className="stat-label">Characters in Party:</span>
+            <span className="stat-value">{partyCharacters.length}</span>
+          </div>
+          <div className="stat">
+            <span className="stat-label">Total Hit Points:</span>
+            <span className="stat-value">{totalPartyHitPoints}</span>
+          </div>
+        </div>
       </div>
 
       {/* Party Characters */}
