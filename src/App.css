@@ -424,6 +424,52 @@ h1 {
   color: white;
 }
 
+/* Heal Character Button */
+.heal-character-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.heal-button {
+  background: #98c379;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.heal-button:hover:not(:disabled) {
+  background: #7fb069;
+}
+
+.heal-button:disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.heal-status {
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.heal-status.success {
+  background: #98c379;
+  color: #1a1a1a;
+}
+
+.heal-status.error {
+  background: #ff6b6b;
+  color: white;
+}
+
 /* Character Sheet */
 .character-sheet {
   background: #1a1a1a;
@@ -446,6 +492,35 @@ h1 {
   align-items: center;
   gap: 2rem;
   margin-bottom: 2rem;
+}
+
+.character-title-section {
+  flex: 1;
+}
+
+.character-title-section h1 {
+  margin-bottom: 1rem;
+}
+
+.character-hp-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hp-label {
+  font-weight: bold;
+  color: #ccc;
+  font-size: 1.1rem;
+}
+
+.hp-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #61dafb;
+  background: #2a2a2a;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
 }
 
 .character-portrait {

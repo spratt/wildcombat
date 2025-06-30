@@ -12,6 +12,23 @@ const renderTrack = (track) => {
   }).join('-');
 };
 
+// Helper function to calculate unchecked aspect tracks (hit points)
+const calculateHitPoints = (character) => {
+  if (!character || !character.aspects || !Array.isArray(character.aspects)) {
+    return 0;
+  }
+  
+  return character.aspects.reduce((total, aspect) => {
+    if (!aspect.value || !Array.isArray(aspect.value)) {
+      return total;
+    }
+    
+    // Count unchecked bubbles (0 values)
+    const uncheckedBubbles = aspect.value.filter(bubble => bubble === 0).length;
+    return total + uncheckedBubbles;
+  }, 0);
+};
+
 // Standard lists for Wildsea
 const EDGES = ['GRACE', 'INSTINCT', 'IRON', 'SHARPS', 'TEETH', 'TIDES', 'VEILS'];
 
@@ -99,10 +116,18 @@ const Character = ({ characterData }) => {
     return <div className="character-sheet">Loading...</div>;
   }
 
+  const hitPoints = calculateHitPoints(character);
+
   return (
     <div className="character-sheet">
       <div className="character-header">
-        <h1>{character.name}</h1>
+        <div className="character-title-section">
+          <h1>{character.name}</h1>
+          <div className="character-hp-display">
+            <span className="hp-label">Hit Points:</span>
+            <span className="hp-value">{hitPoints}</span>
+          </div>
+        </div>
         {character.portrait && (
           <img src={character.portrait} alt={character.name} className="character-portrait" />
         )}
