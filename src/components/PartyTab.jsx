@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CombinedCharacterSelector from './CombinedCharacterSelector';
 
 // Helper function to calculate unchecked aspect tracks (hit points)
@@ -21,6 +21,20 @@ const calculateHitPoints = (character) => {
 const PartyTab = () => {
   const [partyCharacters, setPartyCharacters] = useState([]);
   const [savedCharactersRefresh, setSavedCharactersRefresh] = useState(0);
+  const [saveStatus, setSaveStatus] = useState('');
+
+  // Load party from localStorage on component mount
+  useEffect(() => {
+    try {
+      const savedParty = localStorage.getItem('wildcombat-party');
+      if (savedParty) {
+        const partyData = JSON.parse(savedParty);
+        setPartyCharacters(partyData);
+      }
+    } catch (error) {
+      console.error('Error loading saved party:', error);
+    }
+  }, []);
 
   const handleCharacterSelect = (character) => {
     if (!character) return;
@@ -51,6 +65,19 @@ const PartyTab = () => {
     return total + character.hitPoints;
   }, 0);
 
+  // Save party to localStorage
+  const saveParty = () => {
+    try {
+      localStorage.setItem('wildcombat-party', JSON.stringify(partyCharacters));
+      setSaveStatus('Party saved!');
+      setTimeout(() => setSaveStatus(''), 3000);
+    } catch (error) {
+      console.error('Error saving party:', error);
+      setSaveStatus('Error saving party');
+      setTimeout(() => setSaveStatus(''), 3000);
+    }
+  };
+
   return (
     <div className="tab-content">
       <h2>Party Management</h2>
@@ -77,6 +104,22 @@ const PartyTab = () => {
             <span className="stat-value">{totalPartyHitPoints}</span>
           </div>
         </div>
+        
+        {partyCharacters.length > 0 && (
+          <div className="party-save-section">
+            <button 
+              className="save-party-button"
+              onClick={saveParty}
+            >
+              Save Party
+            </button>
+            {saveStatus && (
+              <span className={`party-save-status ${saveStatus.includes('Error') ? 'error' : 'success'}`}>
+                {saveStatus}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Party Characters */}

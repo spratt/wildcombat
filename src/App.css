@@ -108,6 +108,46 @@ h1 {
   color: #61dafb;
 }
 
+/* Party Save */
+.party-save-section {
+  margin-top: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.save-party-button {
+  background: #98c379;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.save-party-button:hover {
+  background: #7fb069;
+}
+
+.party-save-status {
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.party-save-status.success {
+  background: #98c379;
+  color: #1a1a1a;
+}
+
+.party-save-status.error {
+  background: #ff6b6b;
+  color: white;
+}
+
 /* Empty Party */
 .empty-party {
   text-align: center;
