@@ -223,10 +223,29 @@ h1 {
   font-size: 1.1rem;
 }
 
-.character-hp {
-  font-size: 0.9rem;
-  color: #61dafb;
+.character-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.character-hp,
+.character-attack,
+.character-defense {
+  font-size: 0.85rem;
   font-weight: bold;
+}
+
+.character-hp {
+  color: #61dafb;
+}
+
+.character-attack {
+  color: #ff6b6b;
+}
+
+.character-defense {
+  color: #98c379;
 }
 
 .remove-character-button {

@@ -18,6 +18,60 @@ const calculateHitPoints = (character) => {
   }, 0);
 };
 
+// Helper function to calculate attack skill and score
+const calculateAttackStats = (character) => {
+  if (!character.skills) {
+    return { skill: 'BREAK', score: 1 };
+  }
+  
+  const attackSkills = ['BREAK', 'HACK', 'HUNT'];
+  let bestSkill = 'BREAK';
+  let maxFilledBubbles = 0;
+  
+  attackSkills.forEach(skillName => {
+    const skill = character.skills[skillName];
+    if (skill && Array.isArray(skill)) {
+      const filledBubbles = skill.filter(bubble => bubble === 1).length;
+      if (filledBubbles > maxFilledBubbles) {
+        maxFilledBubbles = filledBubbles;
+        bestSkill = skillName;
+      }
+    }
+  });
+  
+  return {
+    skill: bestSkill,
+    score: 1 + maxFilledBubbles
+  };
+};
+
+// Helper function to calculate defense skill and score
+const calculateDefenseStats = (character) => {
+  if (!character.skills) {
+    return { skill: 'BRACE', score: 1 };
+  }
+  
+  const defenseSkills = ['BRACE', 'FLOURISH', 'VAULT'];
+  let bestSkill = 'BRACE';
+  let maxFilledBubbles = 0;
+  
+  defenseSkills.forEach(skillName => {
+    const skill = character.skills[skillName];
+    if (skill && Array.isArray(skill)) {
+      const filledBubbles = skill.filter(bubble => bubble === 1).length;
+      if (filledBubbles > maxFilledBubbles) {
+        maxFilledBubbles = filledBubbles;
+        bestSkill = skillName;
+      }
+    }
+  });
+  
+  return {
+    skill: bestSkill,
+    score: 1 + maxFilledBubbles
+  };
+};
+
 const PartyTab = () => {
   const [partyCharacters, setPartyCharacters] = useState([]);
   const [savedCharactersRefresh, setSavedCharactersRefresh] = useState(0);
@@ -47,12 +101,19 @@ const PartyTab = () => {
       return;
     }
     
-    // Add character to party with unique ID and hit points
+    // Add character to party with unique ID and combat stats
     const hitPoints = calculateHitPoints(character);
+    const attackStats = calculateAttackStats(character);
+    const defenseStats = calculateDefenseStats(character);
+    
     const partyCharacter = {
       ...character,
       partyId: `${character.name}-${Date.now()}`,
-      hitPoints: hitPoints
+      hitPoints: hitPoints,
+      attackSkill: attackStats.skill,
+      attackScore: attackStats.score,
+      defenseSkill: defenseStats.skill,
+      defenseScore: defenseStats.score
     };
     setPartyCharacters(prev => [...prev, partyCharacter]);
   };
@@ -61,9 +122,17 @@ const PartyTab = () => {
     setPartyCharacters(prev => prev.filter(char => char.partyId !== partyId));
   };
 
-  // Calculate total party hit points
+  // Calculate total party stats
   const totalPartyHitPoints = partyCharacters.reduce((total, character) => {
     return total + character.hitPoints;
+  }, 0);
+  
+  const totalPartyAttackScore = partyCharacters.reduce((total, character) => {
+    return total + (character.attackScore || 1);
+  }, 0);
+  
+  const totalPartyDefenseScore = partyCharacters.reduce((total, character) => {
+    return total + (character.defenseScore || 1);
   }, 0);
 
   // Save party to localStorage
@@ -107,16 +176,22 @@ const PartyTab = () => {
           };
         }) : character.aspects;
 
-        // Recalculate hit points for healed character
+        // Recalculate all stats for healed character
         const healedCharacter = {
           ...character,
           aspects: healedAspects
         };
         const newHitPoints = calculateHitPoints(healedCharacter);
+        const attackStats = calculateAttackStats(healedCharacter);
+        const defenseStats = calculateDefenseStats(healedCharacter);
 
         return {
           ...healedCharacter,
-          hitPoints: newHitPoints
+          hitPoints: newHitPoints,
+          attackSkill: attackStats.skill,
+          attackScore: attackStats.score,
+          defenseSkill: defenseStats.skill,
+          defenseScore: defenseStats.score
         };
       });
 
@@ -171,6 +246,14 @@ const PartyTab = () => {
             <span className="stat-label">Total Hit Points:</span>
             <span className="stat-value">{totalPartyHitPoints}</span>
           </div>
+          <div className="stat">
+            <span className="stat-label">Total Attack Score:</span>
+            <span className="stat-value">{totalPartyAttackScore}</span>
+          </div>
+          <div className="stat">
+            <span className="stat-label">Total Defense Score:</span>
+            <span className="stat-value">{totalPartyDefenseScore}</span>
+          </div>
         </div>
       </div>
 
@@ -207,7 +290,11 @@ const PartyTab = () => {
               <div key={character.partyId} className="party-character">
                 <div className="character-info">
                   <span className="character-name">{character.name}</span>
-                  <span className="character-hp">HP: {character.hitPoints}</span>
+                  <div className="character-stats">
+                    <span className="character-hp">HP: {character.hitPoints}</span>
+                    <span className="character-attack">ATK: {character.attackScore} ({character.attackSkill})</span>
+                    <span className="character-defense">DEF: {character.defenseScore} ({character.defenseSkill})</span>
+                  </div>
                 </div>
                 <button 
                   className="remove-character-button"
