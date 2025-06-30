@@ -129,13 +129,14 @@ const Character = ({ characterData }) => {
 
       <div className="character-mires">
         <h2>Mires</h2>
-        <ul>
+        <div className="mires-list">
           {character.mires.map((mire, index) => (
-            <li key={index}>
-              {mire.label} {renderTrack(mire.value)}
-            </li>
+            <div key={index} className="mire">
+              <span className="mire-label">{mire.label}</span>
+              <span className="mire-value">{renderTrack(mire.value)}</span>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
 
       <div className="character-resources">
