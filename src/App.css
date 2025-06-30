@@ -9,10 +9,24 @@ h1 {
   margin-bottom: 2rem;
 }
 
+/* Character Input Section */
+.character-input-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.input-divider {
+  font-weight: bold;
+  color: #888;
+  margin: 0.5rem 0;
+}
+
 /* Character Selector */
 .character-selector {
   text-align: center;
-  margin-bottom: 2rem;
 }
 
 .character-selector label {
@@ -27,6 +41,61 @@ h1 {
   border: 1px solid #ccc;
   background-color: white;
   cursor: pointer;
+}
+
+/* Character Upload */
+.character-upload {
+  width: 100%;
+  max-width: 400px;
+}
+
+.upload-area {
+  border: 2px dashed #61dafb;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  background: #1a1a1a;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.upload-area:hover,
+.upload-area.dragging {
+  border-color: #98c379;
+  background: #242424;
+}
+
+.upload-content p {
+  margin-bottom: 1rem;
+  color: #ccc;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-label {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #61dafb;
+  color: #1a1a1a;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.file-label:hover {
+  background: #4fa8c4;
+}
+
+.upload-error {
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background: #ff6b6b;
+  color: white;
+  border-radius: 4px;
+  font-weight: bold;
 }
 
 /* Character Sheet */
