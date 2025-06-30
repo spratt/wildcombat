@@ -16,8 +16,14 @@ const EnemiesTab = () => {
 
   useEffect(() => {
     loadEnemies();
-    loadEncounter();
   }, []);
+
+  // Separate effect to load encounter after enemies are loaded
+  useEffect(() => {
+    if (enemies.length > 0) {
+      loadEncounter();
+    }
+  }, [enemies]);
 
   const loadEnemies = async () => {
     try {
@@ -57,11 +63,8 @@ const EnemiesTab = () => {
         
         // Auto-select first enemy in encounter if available
         if (encounterData.length > 0) {
-          // Wait for enemies to load before selecting
-          setTimeout(() => {
-            const firstEnemyId = encounterData[0].enemyId;
-            handleEnemySelect(firstEnemyId);
-          }, 100);
+          const firstEnemyId = encounterData[0].enemyId;
+          handleEnemySelect(firstEnemyId);
         }
       }
     } catch (error) {
