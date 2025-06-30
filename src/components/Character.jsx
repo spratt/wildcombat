@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react';
 import Ajv from 'ajv';
 import characterSchema from '../character-schema.json';
 
+// Helper function to render a track as bubbles
+const renderTrack = (track) => {
+  if (!Array.isArray(track)) return '';
+  return track.map(bubble => bubble === 1 ? '⦿' : '⦾').join('');
+};
+
 const Character = ({ characterData }) => {
   const [validationError, setValidationError] = useState(null);
   const [character, setCharacter] = useState(null);
@@ -94,7 +100,7 @@ const Character = ({ characterData }) => {
           {Object.entries(character.skills).map(([skill, values]) => (
             <div key={skill} className="skill">
               <span className="skill-name">{skill}</span>
-              <span className="skill-values">{values.join('-')}</span>
+              <span className="skill-values">{renderTrack(values)}</span>
             </div>
           ))}
         </div>
@@ -106,7 +112,7 @@ const Character = ({ characterData }) => {
           {Object.entries(character.languages).map(([language, values]) => (
             <div key={language} className="language">
               <span className="language-name">{language}</span>
-              <span className="language-values">{values.join('-')}</span>
+              <span className="language-values">{renderTrack(values)}</span>
             </div>
           ))}
         </div>
@@ -122,7 +128,7 @@ const Character = ({ characterData }) => {
         <ul>
           {character.mires.map((mire, index) => (
             <li key={index}>
-              {mire.label} [{mire.value.join('-')}]
+              {mire.label} {renderTrack(mire.value)}
             </li>
           ))}
         </ul>
@@ -147,11 +153,24 @@ const Character = ({ characterData }) => {
         {character.aspects.map((aspect, index) => (
           <div key={index} className="aspect">
             <h3>{aspect.name}</h3>
-            {aspect.value && <p className="aspect-value">Value: [{aspect.value.join('-')}]</p>}
+            {aspect.value && <p className="aspect-value">{renderTrack(aspect.value)}</p>}
             {aspect.details && <p className="aspect-details">{aspect.details}</p>}
           </div>
         ))}
       </div>
+
+      {character.temporaryTracks && character.temporaryTracks.length > 0 && (
+        <div className="character-temporary-tracks">
+          <h2>Temporary Tracks</h2>
+          {character.temporaryTracks.map((track, index) => (
+            <div key={index} className="temporary-track">
+              <h3>{track.name}</h3>
+              {track.value && <p className="track-value">{renderTrack(track.value)}</p>}
+              {track.details && <p className="track-details">{track.details}</p>}
+            </div>
+          ))}
+        </div>
+      )}
 
       {character.minorMilestones && character.minorMilestones.length > 0 && (
         <div className="character-milestones">
