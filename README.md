@@ -51,7 +51,7 @@ npm run dev
 # Build for regular deployment
 npm run build
 
-# Build for GitHub Pages
+# Build for GitHub Pages (outputs to docs/)
 npm run build:pages
 ```
 
