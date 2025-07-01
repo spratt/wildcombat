@@ -51,7 +51,9 @@ const SimulateTab = () => {
     totalSessions: 0,
     wins: 0,
     losses: 0,
-    totalRounds: 0
+    totalRounds: 0,
+    totalPlayerHPOnWin: 0,
+    totalEnemyHPOnLoss: 0
   });
 
   useEffect(() => {
@@ -184,7 +186,9 @@ This model uses aspect track lengths as the basis for damage calculations, makin
       totalSessions: 0,
       wins: 0,
       losses: 0,
-      totalRounds: 0
+      totalRounds: 0,
+      totalPlayerHPOnWin: 0,
+      totalEnemyHPOnLoss: 0
     });
   };
 
@@ -210,6 +214,8 @@ This model uses aspect track lengths as the basis for damage calculations, makin
     let wins = 0;
     let losses = 0;
     let totalRounds = 0;
+    let totalPlayerHPOnWin = 0;
+    let totalEnemyHPOnLoss = 0;
     const allSessionLogs = [];
 
     for (let i = 0; i < sessionsToSimulate; i++) {
@@ -223,11 +229,23 @@ This model uses aspect track lengths as the basis for damage calculations, makin
       totalSessions++;
       totalRounds += sessionResult.finalRound - 1; // finalRound is 1 more than rounds completed
       
-      // Determine win/loss
+      // Determine win/loss and track remaining HP
       if (sessionResult.combatResult && sessionResult.combatResult.includes('WON')) {
         wins++;
+        // Calculate total remaining player HP on win
+        const remainingPlayerHP = sessionResult.finalParty.reduce((total, char) => {
+          const currentHP = char.currentHP !== undefined ? char.currentHP : char.hitPoints;
+          return total + currentHP;
+        }, 0);
+        totalPlayerHPOnWin += remainingPlayerHP;
       } else {
         losses++;
+        // Calculate total remaining enemy HP on loss
+        const remainingEnemyHP = sessionResult.finalEnemies.reduce((total, enemy) => {
+          const currentHP = enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy);
+          return total + currentHP;
+        }, 0);
+        totalEnemyHPOnLoss += remainingEnemyHP;
       }
       
       // Add session header to logs
@@ -251,7 +269,9 @@ This model uses aspect track lengths as the basis for damage calculations, makin
       totalSessions,
       wins,
       losses,
-      totalRounds
+      totalRounds,
+      totalPlayerHPOnWin,
+      totalEnemyHPOnLoss
     });
 
     // Update combat log with all session results
@@ -532,6 +552,18 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                 <span className="stat-label">Avg Rounds:</span>
                 <span className="stat-value">{sessionStats.totalSessions > 0 ? (sessionStats.totalRounds / sessionStats.totalSessions).toFixed(1) : 0}</span>
               </div>
+              {sessionStats.wins > 0 && (
+                <div className="stat">
+                  <span className="stat-label">Avg Player HP on Win:</span>
+                  <span className="stat-value">{(sessionStats.totalPlayerHPOnWin / sessionStats.wins).toFixed(1)}</span>
+                </div>
+              )}
+              {sessionStats.losses > 0 && (
+                <div className="stat">
+                  <span className="stat-label">Avg Enemy HP on Loss:</span>
+                  <span className="stat-value">{(sessionStats.totalEnemyHPOnLoss / sessionStats.losses).toFixed(1)}</span>
+                </div>
+              )}
             </>
           )}
         </div>
