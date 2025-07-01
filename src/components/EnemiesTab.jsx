@@ -12,7 +12,6 @@ const EnemiesTab = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [encounter, setEncounter] = useState([]);
-  const [saveStatus, setSaveStatus] = useState('');
 
   useEffect(() => {
     loadEnemies();
@@ -82,58 +81,81 @@ const EnemiesTab = () => {
     if (!enemy) return;
     
     const existingEnemy = encounter.find(e => e.enemyId === enemy.id);
+    let newEncounter;
+    
     if (existingEnemy) {
       // Increment count if enemy already in encounter
-      setEncounter(prev => prev.map(e => 
+      newEncounter = encounter.map(e => 
         e.enemyId === enemy.id 
           ? { ...e, count: e.count + 1 }
           : e
-      ));
+      );
     } else {
       // Add new enemy to encounter
-      setEncounter(prev => [...prev, {
+      newEncounter = [...encounter, {
         enemyId: enemy.id,
         name: enemy.name,
         count: 1
-      }]);
+      }];
+    }
+    
+    setEncounter(newEncounter);
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('wildcombat-encounter', JSON.stringify(newEncounter));
+    } catch (error) {
+      console.error('Error saving encounter:', error);
     }
   };
 
   // Remove enemy from encounter entirely
   const removeFromEncounter = (enemyId) => {
-    setEncounter(prev => prev.filter(e => e.enemyId !== enemyId));
+    const newEncounter = encounter.filter(e => e.enemyId !== enemyId);
+    setEncounter(newEncounter);
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('wildcombat-encounter', JSON.stringify(newEncounter));
+    } catch (error) {
+      console.error('Error saving encounter:', error);
+    }
   };
 
   // Increment enemy count in encounter
   const incrementEnemyCount = (enemyId) => {
-    setEncounter(prev => prev.map(e => 
+    const newEncounter = encounter.map(e => 
       e.enemyId === enemyId 
         ? { ...e, count: e.count + 1 }
         : e
-    ));
+    );
+    setEncounter(newEncounter);
+    
+    // Save to localStorage
+    try {
+      localStorage.setItem('wildcombat-encounter', JSON.stringify(newEncounter));
+    } catch (error) {
+      console.error('Error saving encounter:', error);
+    }
   };
 
   // Decrement enemy count in encounter
   const decrementEnemyCount = (enemyId) => {
-    setEncounter(prev => prev.map(e => 
+    const newEncounter = encounter.map(e => 
       e.enemyId === enemyId 
         ? { ...e, count: Math.max(1, e.count - 1) }
         : e
-    ));
-  };
-
-  // Save encounter to localStorage
-  const saveEncounter = () => {
+    );
+    setEncounter(newEncounter);
+    
+    // Save to localStorage
     try {
-      localStorage.setItem('wildcombat-encounter', JSON.stringify(encounter));
-      setSaveStatus('Encounter saved!');
-      setTimeout(() => setSaveStatus(''), 3000);
+      localStorage.setItem('wildcombat-encounter', JSON.stringify(newEncounter));
     } catch (error) {
       console.error('Error saving encounter:', error);
-      setSaveStatus('Error saving encounter');
-      setTimeout(() => setSaveStatus(''), 3000);
     }
   };
+
 
   if (loading) return <div className="tab-content">Loading enemies...</div>;
   if (error) return <div className="tab-content">Error loading enemies: {error}</div>;
@@ -259,19 +281,6 @@ const EnemiesTab = () => {
           <div className="encounter-column">
             <div className="encounter-section">
               <h3>Encounter</h3>
-              <div className="encounter-save-section">
-                <button 
-                  className="save-encounter-button"
-                  onClick={saveEncounter}
-                >
-                  Save Encounter
-                </button>
-                {saveStatus && (
-                  <span className={`encounter-save-status ${saveStatus.includes('Error') ? 'error' : 'success'}`}>
-                    {saveStatus}
-                  </span>
-                )}
-              </div>
 
               {/* Encounter Stats */}
               <div className="encounter-stats">
