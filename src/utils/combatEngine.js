@@ -95,6 +95,32 @@ const calculateLongestAspectTrack = (character) => {
   return longestTrack || 1; // Default to 1 if no tracks found
 };
 
+// Helper function to calculate incapacitate ability defense results
+export const calculateIncapacitateDefense = (rolls, targetCharacter) => {
+  const highest = Math.max(...rolls);
+  let damage = 0;
+  let incapacitated = false;
+  let fullyIncapacitated = false;
+  
+  if (highest === 6) {
+    damage = 1; // 1 damage on 6
+  } else if (highest >= 4) {
+    incapacitated = true; // Cannot attack for 1 turn on 4-5
+  } else {
+    fullyIncapacitated = true; // All HP removed on 1-3
+  }
+  
+  // Check for doubles (any two dice with same value)
+  const counts = {};
+  rolls.forEach(roll => {
+    counts[roll] = (counts[roll] || 0) + 1;
+  });
+  
+  const hasDoubles = Object.values(counts).some(count => count >= 2);
+  
+  return { damage, incapacitated, fullyIncapacitated, hasDoubles };
+};
+
 export const checkWinConditions = (enemies, party) => {
   const aliveEnemies = enemies.filter(enemy => 
     (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0

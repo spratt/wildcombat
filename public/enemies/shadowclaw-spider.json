@@ -7,11 +7,13 @@
   "aspects": [
     {
       "name": "Venomous Bite",
-      "description": "The spider's bite injects a potent paralytic toxin. Mark to inflict the Paralyzed condition on a target."
+      "description": "The spider's bite injects a potent paralytic toxin. Mark to inflict the Paralyzed condition on a target.",
+      "abilityCode": "incapacitate"
     },
     {
       "name": "Web Trap",
-      "description": "Can quickly weave restraining webs. Mark to entangle a target, preventing movement until they break free."
+      "description": "Can quickly weave restraining webs. Mark to entangle a target, preventing movement until they break free.",
+      "abilityCode": "incapacitate"
     },
     {
       "name": "Shadowmeld",
