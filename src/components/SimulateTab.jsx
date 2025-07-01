@@ -502,10 +502,12 @@ This model uses aspect track lengths as the basis for damage calculations, makin
       <div className="simulation-stats-section">
         <h3>Simulation Stats</h3>
         <div className="simulation-stats">
-          <div className="stat">
-            <span className="stat-label">Round:</span>
-            <span className="stat-value">{currentRound}</span>
-          </div>
+          {sessionStats.totalSessions === 0 && (
+            <div className="stat">
+              <span className="stat-label">Round:</span>
+              <span className="stat-value">{currentRound}</span>
+            </div>
+          )}
           {combatResult && (
             <div className="stat result-stat">
               <span className="stat-label">Result:</span>
