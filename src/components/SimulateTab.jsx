@@ -186,11 +186,12 @@ const SimulateTab = () => {
       
       // Roll dice
       const attackScore = character.attackScore || 1;
+      const attackSkill = character.attackSkill || 'BREAK';
       const rolls = rollDice(attackScore);
       const damage = calculateDamage(rolls);
       
       // Log dice roll
-      newLog.push(`${character.name} rolled ${rolls.join(', ')} (${attackScore} dice)`);
+      newLog.push(`${character.name} attacks ${target.uniqueName} with ${attackSkill} and rolled ${rolls.join(', ')} (${attackScore} dice)`);
       
       if (damage > 0) {
         // Find enemy in updatedEnemies array and apply damage
