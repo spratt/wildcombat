@@ -96,7 +96,12 @@ const EnemiesTab: React.FC = () => {
     let newEncounter: EncounterEnemy[];
     
     if (existingEnemy) {
-      // Increment count if enemy already in encounter
+      // For unique enemies, don't allow adding more than one
+      if (enemy.unique) {
+        console.log(`${enemy.name} is unique and already in encounter - cannot add more`);
+        return;
+      }
+      // Increment count if enemy already in encounter (non-unique only)
       newEncounter = encounter.map(e => 
         e.enemyId === enemy.id 
           ? { ...e, count: e.count + 1 }
@@ -136,6 +141,13 @@ const EnemiesTab: React.FC = () => {
 
   // Increment enemy count in encounter
   const incrementEnemyCount = (enemyId: string) => {
+    // Find the enemy data to check if it's unique
+    const enemyData = enemies.find(e => e.id === enemyId);
+    if (enemyData?.unique) {
+      console.log(`${enemyData.name} is unique - cannot increment count`);
+      return;
+    }
+    
     const newEncounter = encounter.map(e => 
       e.enemyId === enemyId 
         ? { ...e, count: e.count + 1 }
@@ -310,33 +322,45 @@ const EnemiesTab: React.FC = () => {
               </div>
               
               <div className="encounter-enemies">
-                {encounter.map(enemy => (
-                  <div key={enemy.enemyId} className="encounter-enemy">
-                    <div className="enemy-name">{enemy.name}</div>
-                    <div className="enemy-controls">
-                      <button 
-                        className="decrement-button"
-                        onClick={() => decrementEnemyCount(enemy.enemyId)}
-                      >
-                        -
-                      </button>
-                      <span className="enemy-count">{enemy.count}</span>
-                      <button 
-                        className="increment-button"
-                        onClick={() => incrementEnemyCount(enemy.enemyId)}
-                      >
-                        +
-                      </button>
-                      <button 
-                        className="remove-enemy-button"
-                        onClick={() => removeFromEncounter(enemy.enemyId)}
-                        title="Remove from encounter"
-                      >
-                        🗑️
-                      </button>
+                {encounter.map(enemy => {
+                  const enemyData = enemies.find(e => e.id === enemy.enemyId);
+                  const isUnique = enemyData?.unique;
+                  
+                  return (
+                    <div key={enemy.enemyId} className="encounter-enemy">
+                      <div className="enemy-name">
+                        {enemy.name}
+                        {isUnique && <span className="unique-label"> (Unique)</span>}
+                      </div>
+                      <div className="enemy-controls">
+                        {!isUnique && (
+                          <button 
+                            className="decrement-button"
+                            onClick={() => decrementEnemyCount(enemy.enemyId)}
+                          >
+                            -
+                          </button>
+                        )}
+                        <span className="enemy-count">{enemy.count}</span>
+                        {!isUnique && (
+                          <button 
+                            className="increment-button"
+                            onClick={() => incrementEnemyCount(enemy.enemyId)}
+                          >
+                            +
+                          </button>
+                        )}
+                        <button 
+                          className="remove-enemy-button"
+                          onClick={() => removeFromEncounter(enemy.enemyId)}
+                          title="Remove from encounter"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

@@ -59,6 +59,7 @@ export interface Milestone {
 export interface Enemy {
   name: string;
   description?: string;
+  unique?: boolean;
   aspects: EnemyAspect[];
   drives?: (string | { name: string; description?: string })[];
   quirks?: (string | { name: string; description?: string })[];

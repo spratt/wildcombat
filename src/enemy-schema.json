@@ -30,6 +30,11 @@
       "enum": ["small", "medium", "large", "variable"],
       "description": "Enemy size category"
     },
+    "unique": {
+      "type": "boolean",
+      "description": "Whether this enemy is unique (only one allowed per encounter)",
+      "default": false
+    },
     "aspects": {
       "type": "array",
       "minItems": 1,

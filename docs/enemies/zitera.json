@@ -3,7 +3,6 @@
   "blurb": "A legendary ektus gunslinger with twin revolvers and an unmatched quick draw.",
   "description": "Zitera cuts an unmistakable figure across the Wildsea - a towering cactus humanoid draped in weathered leather, twin gun belts crossing his barrel chest. His massive ten-gallon hat casts shadows over glowing amber eyes that miss nothing. Each of his four arms ends in lightning-fast hands that can draw and fire his custom revolvers before most enemies can blink. Spines bristle along his green hide, and his boots are worn from decades of wandering the endless canopy. As the last of the old gunslingers, Zitera follows an ancient code of honor, but his patience for those who break the peace grows thinner with each passing year.",
   "size": "large",
-  "unique": true,
   "aspects": [
     {
       "name": "Dual Wield Barrage",
