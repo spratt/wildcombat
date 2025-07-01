@@ -18,14 +18,15 @@ const CharacterSelector: React.FC<CharacterSelectorProps> = ({ onCharacterSelect
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // In a real app, you might have an API endpoint to list characters
-    // For now, we'll hardcode the known character files
-    const characterFiles = [
-      'cap.json', 'cosmia.json', 'kari.json', 'phil.json',
-      'felix.json', 'nova.json', 'thresh.json', 'zara.json'
-    ];
-    
-    Promise.all(
+    const loadCharacters = async () => {
+      try {
+        // Load character file list from config
+        const configResponse = await fetch('./config.json');
+        if (!configResponse.ok) throw new Error('Failed to load config.json');
+        const config = await configResponse.json();
+        const characterFiles = config.characterJsons || [];
+        
+        const results = await Promise.all(
       characterFiles.map(async (filename): Promise<CharacterFile | null> => {
         try {
           const response = await fetch(`./characters/${filename}`);
@@ -37,16 +38,18 @@ const CharacterSelector: React.FC<CharacterSelectorProps> = ({ onCharacterSelect
           return null;
         }
       })
-    )
-    .then(results => {
-      const validCharacters = results.filter((char): char is CharacterFile => char !== null);
-      setCharacters(validCharacters);
-      setLoading(false);
-    })
-    .catch(err => {
-      setError((err as Error).message);
-      setLoading(false);
-    });
+        );
+        
+        const validCharacters = results.filter((char): char is CharacterFile => char !== null);
+        setCharacters(validCharacters);
+        setLoading(false);
+      } catch (err) {
+        setError((err as Error).message);
+        setLoading(false);
+      }
+    };
+    
+    loadCharacters();
   }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {

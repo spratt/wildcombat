@@ -4,5 +4,15 @@
     "thornback-beetle.json",
     "dire-squirrel.json",
     "zitera.json"
+  ],
+  "characterJsons": [
+    "cap.json",
+    "cosmia.json",
+    "kari.json",
+    "phil.json",
+    "felix.json",
+    "nova.json",
+    "thresh.json",
+    "zara.json"
   ]
 }

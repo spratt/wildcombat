@@ -30,15 +30,15 @@ const CombinedCharacterSelector: React.FC<CombinedCharacterSelectorProps> = ({ o
     loadSavedCharacters();
   }, [refreshTrigger]);
 
-  const loadPreloadedCharacters = () => {
-    // In a real app, you might have an API endpoint to list characters
-    // For now, we'll hardcode the known character files
-    const characterFiles = [
-      'cap.json', 'cosmia.json', 'kari.json', 'phil.json',
-      'felix.json', 'nova.json', 'thresh.json', 'zara.json'
-    ];
-    
-    Promise.all(
+  const loadPreloadedCharacters = async () => {
+    try {
+      // Load character file list from config
+      const configResponse = await fetch('./config.json');
+      if (!configResponse.ok) throw new Error('Failed to load config.json');
+      const config = await configResponse.json();
+      const characterFiles = config.characterJsons || [];
+      
+      const results = await Promise.all(
       characterFiles.map(async (filename): Promise<CharacterOption | null> => {
         try {
           const response = await fetch(`./characters/${filename}`);
@@ -56,16 +56,15 @@ const CombinedCharacterSelector: React.FC<CombinedCharacterSelectorProps> = ({ o
           return null;
         }
       })
-    )
-    .then(results => {
+      );
+      
       const validCharacters = results.filter((char): char is CharacterOption => char !== null);
       setPreloadedCharacters(validCharacters);
       setLoading(false);
-    })
-    .catch(err => {
+    } catch (err) {
       setError((err as Error).message);
       setLoading(false);
-    });
+    }
   };
 
   const loadSavedCharacters = () => {
