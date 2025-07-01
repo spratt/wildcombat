@@ -211,6 +211,13 @@ export const simulateEnemyAttackPhase = (
         // Use random available ability
         const ability = availableAbilities[Math.floor(Math.random() * availableAbilities.length)];
         
+        if (debugMode) {
+          log.push({
+            message: `DEBUG: ${enemy.uniqueName} selected ability "${ability.name}" with abilityCode "${ability.abilityCode}"`,
+            type: 'neutral'
+          });
+        }
+        
         // Mark ability as used
         if (!enemy.usedAbilities) {
           enemy.usedAbilities = new Set<string>();
@@ -222,7 +229,7 @@ export const simulateEnemyAttackPhase = (
         const defenseSkill = target.defenseSkill || 'BRACE';
         const defenseRolls = rollDice(defenseScore);
         
-        if (ability.abilityCode === 'Incapacitate') {
+        if (ability.abilityCode === 'incapacitate' || ability.abilityCode === 'Incapacitate') {
           const abilityResult = calculateIncapacitateDefense(defenseRolls, target);
           
           // Log ability use and defense
@@ -287,6 +294,93 @@ export const simulateEnemyAttackPhase = (
           
           // Handle counter-attack on doubles
           if (abilityResult.counter) {
+            log.push({
+              message: `${target.name} rolled doubles and gets a free counter-attack!`,
+              type: 'player'
+            });
+            
+            const counterAttackScore = target.attackScore || 1;
+            const counterAttackSkill = target.attackSkill || 'BREAK';
+            const counterRolls = rollDice(counterAttackScore);
+            const counterDamage = calculateDamage(counterRolls);
+            
+            log.push({
+              message: `${target.name} counter-attacks ${enemy.uniqueName} with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
+              type: 'player'
+            });
+            
+            if (counterDamage > 0) {
+              const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
+              if (enemyIndex !== -1) {
+                const currentEnemyHP = updatedEnemies[enemyIndex].currentHP !== undefined 
+                  ? updatedEnemies[enemyIndex].currentHP 
+                  : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
+                updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
+                
+                log.push({
+                  message: `${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
+                  type: 'player'
+                });
+                
+                if (updatedEnemies[enemyIndex].currentHP <= 0) {
+                  log.push({
+                    message: `${enemy.uniqueName} was defeated by the counter-attack!`,
+                    type: 'neutral'
+                  });
+                }
+              }
+            }
+          }
+        } else {
+          if (debugMode) {
+            log.push({
+              message: `DEBUG: ${enemy.uniqueName} ability "${ability.name}" has unknown abilityCode "${ability.abilityCode}" - treating as regular attack`,
+              type: 'neutral'
+            });
+          }
+          
+          // For unknown ability codes, treat as regular attack for now
+          // This ensures enemies still do something rather than nothing
+          const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
+          log.push({
+            message: `${enemy.uniqueName} uses ${ability.name}${attackLabel}`,
+            type: 'enemy'
+          });
+          
+          // Use regular attack mechanics
+          const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
+          
+          log.push({
+            message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
+            type: 'player'
+          });
+        
+          if (defenseResult.damage > 0) {
+            // Find character in updatedParty array and apply damage
+            const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
+            if (charIndex !== -1) {
+              const currentHP = updatedParty[charIndex].currentHP !== undefined 
+                ? updatedParty[charIndex].currentHP 
+                : updatedParty[charIndex].hitPoints || 0;
+              updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
+              
+              log.push({
+                message: `${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name}`,
+                type: 'enemy'
+              });
+              
+              // Check if character is defeated
+              if (updatedParty[charIndex].currentHP <= 0) {
+                log.push({
+                  message: `${target.name} was defeated!`,
+                  type: 'neutral'
+                });
+              }
+            }
+          }
+          
+          // Handle counter-attack on doubles
+          if (defenseResult.counter) {
             log.push({
               message: `${target.name} rolled doubles and gets a free counter-attack!`,
               type: 'player'
