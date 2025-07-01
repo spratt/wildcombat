@@ -1447,6 +1447,28 @@ h1 {
   cursor: not-allowed;
 }
 
+.clear-simulation-button {
+  background: #666;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.clear-simulation-button:hover:not(:disabled) {
+  background: #555;
+}
+
+.clear-simulation-button:disabled {
+  background: #444;
+  color: #777;
+  cursor: not-allowed;
+}
+
 /* Combat Log */
 .combat-log-section {
   background: #1a1a1a;

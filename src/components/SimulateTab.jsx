@@ -214,6 +214,18 @@ const SimulateTab = () => {
     setCombatLog(prev => [...prev, ...newLog]);
   };
 
+  const clearSimulation = () => {
+    // Reset all enemies to full HP
+    const resetEnemies = uniqueEnemies.map(enemy => ({
+      ...enemy,
+      currentHP: enemy.trackLength
+    }));
+    setUniqueEnemies(resetEnemies);
+    
+    // Clear combat log
+    setCombatLog([]);
+  };
+
   return (
     <div className="tab-content">
       <h2>Combat Simulation</h2>
@@ -335,6 +347,13 @@ const SimulateTab = () => {
             disabled={partyCharacters.length === 0 || uniqueEnemies.length === 0}
           >
             Simulate One Round
+          </button>
+          <button 
+            className="clear-simulation-button"
+            onClick={clearSimulation}
+            disabled={partyCharacters.length === 0 && uniqueEnemies.length === 0 && combatLog.length === 0}
+          >
+            Clear
           </button>
         </div>
       </div>
