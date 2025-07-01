@@ -25,7 +25,10 @@ export const simulatePlayerAttackPhase = (party, enemies) => {
     const damage = calculateDamage(rolls);
     
     // Log dice roll
-    log.push(`${character.name} attacks ${target.uniqueName} with ${attackSkill} and rolled ${rolls.join(', ')} (${attackScore} dice)`);
+    log.push({
+      message: `${character.name} attacks ${target.uniqueName} with ${attackSkill} and rolled ${rolls.join(', ')} (${attackScore} dice)`,
+      type: 'player'
+    });
     
     if (damage > 0) {
       // Find enemy in updatedEnemies array and apply damage
@@ -36,11 +39,17 @@ export const simulatePlayerAttackPhase = (party, enemies) => {
           : updatedEnemies[enemyIndex].trackLength;
         updatedEnemies[enemyIndex].currentHP = Math.max(0, currentHP - damage);
         
-        log.push(`${character.name} does ${damage} damage to ${target.uniqueName}`);
+        log.push({
+          message: `${character.name} does ${damage} damage to ${target.uniqueName}`,
+          type: 'player'
+        });
         
         // Check if defeated
         if (updatedEnemies[enemyIndex].currentHP <= 0) {
-          log.push(`${target.uniqueName} was defeated!`);
+          log.push({
+            message: `${target.uniqueName} was defeated!`,
+            type: 'neutral'
+          });
         }
       }
     }
@@ -83,8 +92,14 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
     const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
     
     // Log enemy attack and defense
-    log.push(`${enemy.uniqueName} attacks ${target.name}`);
-    log.push(`${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`);
+    log.push({
+      message: `${enemy.uniqueName} attacks ${target.name}`,
+      type: 'enemy'
+    });
+    log.push({
+      message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
+      type: 'player'
+    });
     
     if (defenseResult.damage > 0) {
       // Find character in updatedParty array and apply damage
@@ -95,11 +110,17 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
           : updatedParty[charIndex].hitPoints;
         updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
         
-        log.push(`${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name}`);
+        log.push({
+          message: `${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name}`,
+          type: 'enemy'
+        });
         
         // Check if character is defeated
         if (updatedParty[charIndex].currentHP <= 0) {
-          log.push(`${target.name} was defeated!`);
+          log.push({
+            message: `${target.name} was defeated!`,
+            type: 'neutral'
+          });
           // Remove from alive party
           const aliveIndex = aliveParty.findIndex(c => c.partyId === target.partyId);
           if (aliveIndex !== -1) {
@@ -111,7 +132,10 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
     
     // Check for doubles - free counter attack
     if (defenseResult.hasDoubles) {
-      log.push(`${target.name} rolled doubles and gets a free counter-attack!`);
+      log.push({
+        message: `${target.name} rolled doubles and gets a free counter-attack!`,
+        type: 'player'
+      });
       
       // Counter attack
       const counterAttackScore = target.attackScore || 1;
@@ -119,7 +143,10 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
       const counterRolls = rollDice(counterAttackScore);
       const counterDamage = calculateDamage(counterRolls);
       
-      log.push(`${target.name} counter-attacks ${enemy.uniqueName} with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`);
+      log.push({
+        message: `${target.name} counter-attacks ${enemy.uniqueName} with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
+        type: 'player'
+      });
       
       if (counterDamage > 0) {
         // Apply counter damage to enemy
@@ -130,11 +157,17 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
             : updatedEnemies[enemyIndex].trackLength;
           updatedEnemies[enemyIndex].currentHP = Math.max(0, currentHP - counterDamage);
           
-          log.push(`${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`);
+          log.push({
+            message: `${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
+            type: 'player'
+          });
           
           // Check if enemy is defeated by counter
           if (updatedEnemies[enemyIndex].currentHP <= 0) {
-            log.push(`${enemy.uniqueName} was defeated by the counter-attack!`);
+            log.push({
+              message: `${enemy.uniqueName} was defeated by the counter-attack!`,
+              type: 'neutral'
+            });
           }
         }
       }
@@ -149,7 +182,7 @@ export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,
     return {
       updatedParty: party,
       updatedEnemies: enemies,
-      log: ["Cannot simulate: missing party or encounter"],
+      log: [{ message: "Cannot simulate: missing party or encounter", type: 'neutral' }],
       combatResult: null
     };
   }
@@ -160,12 +193,12 @@ export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,
     return {
       updatedParty: party,
       updatedEnemies: enemies,
-      log: ["Combat over: All enemies defeated!"],
+      log: [{ message: "Combat over: All enemies defeated!", type: 'neutral' }],
       combatResult: null
     };
   }
 
-  const roundLog = [`--- Round ${currentRound} ---`];
+  const roundLog = [{ message: `--- Round ${currentRound} ---`, type: 'neutral' }];
   
   // Player attack phase
   const playerPhase = simulatePlayerAttackPhase(party, enemies);
@@ -181,10 +214,10 @@ export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,
   
   if (winCheck.isOver) {
     if (winCheck.result === 'win') {
-      roundLog.push("The players win!");
+      roundLog.push({ message: "The players win!", type: 'player' });
       combatResult = `The players WON after ${currentRound} rounds`;
     } else {
-      roundLog.push("The players lose!");
+      roundLog.push({ message: "The players lose!", type: 'enemy' });
       combatResult = `The players LOST after ${currentRound} rounds`;
     }
   }

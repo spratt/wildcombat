@@ -284,8 +284,8 @@ const SimulateTab = () => {
           <h3>Log</h3>
           <div className="combat-log">
             {combatLog.map((entry, index) => (
-              <div key={index} className="log-entry">
-                {entry}
+              <div key={index} className={`log-entry ${entry.type || 'neutral'}`}>
+                {entry.message || entry}
               </div>
             ))}
           </div>
