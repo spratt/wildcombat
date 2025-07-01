@@ -23,7 +23,8 @@ export const simulateFullSession = (
   startingRound: number = 1, 
   damageModel: string = '0,1,2,counter', 
   enemyAttacksPerRound: number = 1, 
-  useAbilities: boolean = true
+  useAbilities: boolean = true,
+  debugMode: boolean = false
 ): FullSessionResult => {
   const startTime = Date.now();
   const timeout = 1000; // 1 second timeout
@@ -74,7 +75,8 @@ export const simulateFullSession = (
       currentRoundNum, 
       damageModel, 
       enemyAttacksPerRound, 
-      useAbilities
+      useAbilities,
+      debugMode
     );
     
     // Add round log to session log

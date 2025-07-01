@@ -2,20 +2,24 @@
   "name": "Shadowclaw Spider",
   "blurb": "A massive arachnid that hunts from the canopy depths, using stealth and venom to disable its prey.",
   "description": "The Shadowclaw Spider is a formidable predator that has adapted to life in the dense Wildsea canopy. Its jet-black carapace is covered in fine hairs that absorb light, making it nearly invisible in shadow. Eight razor-sharp legs end in hooked claws that can anchor into bark or pierce flesh with equal ease. Most terrifying are its mandibles, which drip with a paralytic venom that can immobilize even the largest prey. These creatures are known to construct elaborate web traps between the great branches, waiting patiently for unwary travelers to stumble into their domain.",
-  "trackLength": 6,
   "size": "large",
   "aspects": [
     {
       "name": "Venomous Bite",
-      "description": "The spider's bite injects a potent paralytic toxin. Mark to inflict the Paralyzed condition on a target."
+      "description": "The spider's bite injects a potent paralytic toxin. Mark to inflict the Paralyzed condition on a target.",
+      "abilityCode": "incapacitate",
+      "trackLength": 6
     },
     {
       "name": "Web Trap",
-      "description": "Can quickly weave restraining webs. Mark to entangle a target, preventing movement until they break free."
+      "description": "Can quickly weave restraining webs. Mark to entangle a target, preventing movement until they break free.",
+      "abilityCode": "incapacitate",
+      "trackLength": 3
     },
     {
       "name": "Shadowmeld",
-      "description": "Becomes nearly invisible in darkness or shadow. Mark to gain advantage on stealth and ambush attacks."
+      "description": "Becomes nearly invisible in darkness or shadow. Mark to gain advantage on stealth and ambush attacks.",
+      "trackLength": 3
     }
   ],
   "drives": [

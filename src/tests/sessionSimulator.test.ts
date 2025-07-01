@@ -128,6 +128,7 @@ describe('Session Simulator', () => {
         1,
         '1,2,aspect,counter',
         2,
+        false,
         false
       )
     })

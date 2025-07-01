@@ -78,6 +78,14 @@ const SimulateTab: React.FC = () => {
       return true; // Default to true (abilities enabled)
     }
   });
+  const [debugMode, setDebugMode] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('wildcombat-debug-mode') === 'true';
+    } catch (error) {
+      console.warn('Failed to load debug mode from localStorage:', error);
+      return false; // Default to false (debug disabled)
+    }
+  });
 
   useEffect(() => {
     loadParty();
@@ -154,6 +162,15 @@ const SimulateTab: React.FC = () => {
     }
   }, [useAbilities]);
 
+  // Save debug mode to localStorage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('wildcombat-debug-mode', debugMode.toString());
+    } catch (error) {
+      console.warn('Failed to save debug mode to localStorage:', error);
+    }
+  }, [debugMode]);
+
   // Get damage model explanation
   const getDamageModelExplanation = (model: string): string => {
     switch (model) {
@@ -190,7 +207,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
   };
 
   const handleSimulateOneRound = () => {
-    const result = simulateOneRound(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound, useAbilities);
+    const result = simulateOneRound(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound, useAbilities, debugMode);
     
     // Update state with results
     setUniqueEnemies(result.updatedEnemies);
@@ -225,7 +242,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
   };
 
   const handleSimulateOneSession = () => {
-    const sessionResult = simulateFullSession(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound, useAbilities);
+    const sessionResult = simulateFullSession(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound, useAbilities, debugMode);
     
     // Update state with final session results
     setUniqueEnemies(sessionResult.finalEnemies);
@@ -256,7 +273,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
       const sessionEnemies = initialEnemies.map(enemy => ({ ...enemy }));
       
       // Simulate one complete session
-      const sessionResult = simulateFullSession(sessionParty, sessionEnemies, 1, damageModel, enemyAttacksPerRound, useAbilities);
+      const sessionResult = simulateFullSession(sessionParty, sessionEnemies, 1, damageModel, enemyAttacksPerRound, useAbilities, false); // No debug for many sessions
       
       totalSessions++;
       totalRounds += sessionResult.finalRound - 1; // finalRound is 1 more than rounds completed
@@ -541,6 +558,18 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                 className="use-abilities-checkbox"
               />
               Use Abilities
+            </label>
+          </div>
+          <div className="option-group">
+            <label htmlFor="debug-mode">
+              <input
+                type="checkbox"
+                id="debug-mode"
+                checked={debugMode}
+                onChange={(e) => setDebugMode(e.target.checked)}
+                className="debug-mode-checkbox"
+              />
+              Debug Mode
             </label>
           </div>
           <div className="damage-model-explanation">

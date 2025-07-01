@@ -2,20 +2,22 @@
   "name": "Thornback Beetle",
   "blurb": "An armored insectoid with razor-sharp spines covering its carapace, known for its charging attacks.",
   "description": "The Thornback Beetle is a heavily armored creature that roams the lower reaches of the Wildsea. Its dark green carapace is covered in wicked thorns that can pierce through leather and even light metal. When threatened, it tucks its head low and charges with surprising speed, using its horn and spines as weapons. Despite its aggressive nature, the beetle is primarily a scavenger that feeds on fallen fruit and decaying wood.",
-  "trackLength": 4,
   "size": "medium",
   "aspects": [
     {
       "name": "Thorn Charge",
-      "description": "Rushes forward with spines extended. Mark to deal damage to all enemies in a line."
+      "description": "Rushes forward with spines extended. Mark to deal damage to all enemies in a line.",
+      "trackLength": 3
     },
     {
       "name": "Armored Carapace",
-      "description": "Thick natural armor provides protection. Mark to reduce incoming damage by half."
+      "description": "Thick natural armor provides protection. Mark to reduce incoming damage by half.",
+      "trackLength": 6
     },
     {
       "name": "Spike Shield",
-      "description": "Reflects damage back at attackers. Mark to deal damage to anyone who attacks in close quarters."
+      "description": "Reflects damage back at attackers. Mark to deal damage to anyone who attacks in close quarters.",
+      "trackLength": 3
     }
   ],
   "drives": [

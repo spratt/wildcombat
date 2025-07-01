@@ -129,7 +129,8 @@ export const simulateEnemyAttackPhase = (
   party: CombatCharacterInstance[], 
   damageModel: string = '0,1,2,counter', 
   enemyAttacksPerRound: number = 1, 
-  useAbilities: boolean = true
+  useAbilities: boolean = true,
+  debugMode: boolean = false
 ): EnemyAttackPhaseResult => {
   const log: CombatLogEntry[] = [];
   let updatedParty = [...party];
@@ -143,11 +144,31 @@ export const simulateEnemyAttackPhase = (
     (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0
   );
   
+  if (debugMode) {
+    log.push({
+      message: `DEBUG: Starting enemy attack phase with ${aliveEnemies.length} alive enemies and ${aliveParty.length} alive party members`,
+      type: 'neutral'
+    });
+  }
+  
   if (aliveEnemies.length === 0 || aliveParty.length === 0) {
+    if (debugMode) {
+      log.push({
+        message: `DEBUG: Enemy attack phase skipped - no valid targets (enemies: ${aliveEnemies.length}, party: ${aliveParty.length})`,
+        type: 'neutral'
+      });
+    }
     return { updatedParty, updatedEnemies, log };
   }
   
   aliveEnemies.forEach(enemy => {
+    if (debugMode) {
+      log.push({
+        message: `DEBUG: ${enemy.uniqueName} preparing to attack (${enemyAttacksPerRound} attacks per round)`,
+        type: 'neutral'
+      });
+    }
+    
     // Each enemy makes multiple attacks per round
     for (let attackNum = 1; attackNum <= enemyAttacksPerRound; attackNum++) {
       // Update alive party for each attack (some might have died)
@@ -155,7 +176,15 @@ export const simulateEnemyAttackPhase = (
         (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0
       );
       
-      if (aliveParty.length === 0) return; // No more targets
+      if (aliveParty.length === 0) {
+        if (debugMode) {
+          log.push({
+            message: `DEBUG: ${enemy.uniqueName} attack ${attackNum} cancelled - no alive party members`,
+            type: 'neutral'
+          });
+        }
+        return; // No more targets
+      }
       
       // Target player with lowest HP
       const target = aliveParty.reduce((lowest, player) => {
@@ -170,6 +199,13 @@ export const simulateEnemyAttackPhase = (
       ) || [];
       
       const useAbility = useAbilities && availableAbilities.length > 0; // Use abilities only if enabled and available
+      
+      if (debugMode) {
+        log.push({
+          message: `DEBUG: ${enemy.uniqueName} attack ${attackNum} - useAbilities: ${useAbilities}, availableAbilities: ${availableAbilities.length}, will use ability: ${useAbility}`,
+          type: 'neutral'
+        });
+      }
       
       if (useAbility) {
         // Use random available ability
@@ -393,7 +429,8 @@ export const simulateOneRound = (
   currentRound: number, 
   damageModel: string = '0,1,2,counter', 
   enemyAttacksPerRound: number = 1, 
-  useAbilities: boolean = true
+  useAbilities: boolean = true,
+  debugMode: boolean = false
 ): SimulateRoundResult => {
   if (party.length === 0 || enemies.length === 0) {
     return {
@@ -430,7 +467,7 @@ export const simulateOneRound = (
   roundLog.push(...playerPhase.log);
   
   // Enemy attack phase
-  const enemyPhase = simulateEnemyAttackPhase(playerPhase.updatedEnemies, updatedParty, damageModel, enemyAttacksPerRound, useAbilities);
+  const enemyPhase = simulateEnemyAttackPhase(playerPhase.updatedEnemies, updatedParty, damageModel, enemyAttacksPerRound, useAbilities, debugMode);
   roundLog.push(...enemyPhase.log);
   
   // Check win/lose conditions
