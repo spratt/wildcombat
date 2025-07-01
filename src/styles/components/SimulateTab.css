@@ -1,0 +1,362 @@
+/* Simulate Tab Layout */
+.simulate-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.party-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.party-column .party-section {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.party-column .party-section h3 {
+  color: #98c379;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+/* Empty States */
+.empty-encounter {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+  font-style: italic;
+}
+
+/* Party Stats in Simulate */
+.simulate-layout .party-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.simulate-layout .party-stats .stat {
+  background: #2a2a2a;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.25rem;
+}
+
+.simulate-layout .party-stats .stat-label {
+  font-weight: bold;
+  color: #ccc;
+  font-size: 0.8rem;
+}
+
+.simulate-layout .party-stats .stat-value {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #61dafb;
+}
+
+/* Party Characters Grid in Simulate */
+.simulate-layout .party-characters {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.simulate-layout .party-character {
+  background: #2a2a2a;
+  padding: 1rem;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Enemy Info in Simulate */
+.enemy-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.enemy-name {
+  font-weight: bold;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.enemy-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.enemy-hp {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #61dafb;
+}
+
+.enemy-track {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #ff6b6b;
+  letter-spacing: 0.1rem;
+}
+
+/* Simulation Operations */
+.simulation-section {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.simulation-section h3 {
+  color: #98c379;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.simulation-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.simulate-round-button {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.simulate-round-button:hover:not(:disabled) {
+  background: #ff5252;
+}
+
+.simulate-round-button:disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.simulate-session-button {
+  background: #ff8c42;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.simulate-session-button:hover:not(:disabled) {
+  background: #e67a2e;
+}
+
+.simulate-session-button:disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.clear-simulation-button {
+  background: #666;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.clear-simulation-button:hover:not(:disabled) {
+  background: #555;
+}
+
+.clear-simulation-button:disabled {
+  background: #444;
+  color: #777;
+  cursor: not-allowed;
+}
+
+/* Simulation Options */
+.simulation-options-section {
+  margin-top: 2rem;
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.simulation-options-section h3 {
+  color: #ff6b6b;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.simulation-options {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.option-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.option-group label {
+  font-weight: bold;
+  color: #d1d1d1;
+}
+
+.damage-model-select {
+  background: #2a2a2a;
+  color: #d1d1d1;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.damage-model-select:hover {
+  background: #3a3a3a;
+}
+
+.damage-model-select:focus {
+  outline: 2px solid #61dafb;
+  outline-offset: 2px;
+}
+
+/* Simulation Stats */
+.simulation-stats-section {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.simulation-stats-section h3 {
+  color: #98c379;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.simulation-stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.simulation-stats .stat {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #2a2a2a;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+}
+
+.simulation-stats .stat-label {
+  font-weight: bold;
+  color: #ccc;
+}
+
+.simulation-stats .stat-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #61dafb;
+}
+
+.simulation-stats .result-stat {
+  background: #2d5a2d;
+  border: 2px solid #98c379;
+}
+
+.simulation-stats .result-stat .stat-value {
+  color: #98c379;
+  font-size: 1.3rem;
+}
+
+/* Combat Log */
+.combat-log-section {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.combat-log-section h3 {
+  color: #98c379;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.combat-log {
+  background: #2a2a2a;
+  border-radius: 4px;
+  padding: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+}
+
+.log-entry {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .simulate-layout {
+    flex-direction: column;
+  }
+  
+  .party-column {
+    min-width: 0;
+  }
+  
+  .simulate-layout .party-characters {
+    grid-template-columns: 1fr;
+  }
+  
+  .simulate-layout .party-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .simulate-layout .party-stats {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,28 @@
+/* Global styles and layout */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Common button styles */
+button {
+  font-family: inherit;
+}
+
+button:focus {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Common section styles */
+.section {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}

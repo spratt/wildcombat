@@ -1,0 +1,56 @@
+/* Tabs Component Styles */
+.tabs {
+  margin-bottom: 2rem;
+}
+
+.tab-list {
+  display: flex;
+  justify-content: center;
+  border-bottom: 2px solid #2a2a2a;
+  margin-bottom: 2rem;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #888;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  color: #61dafb;
+  background: #1a1a1a;
+}
+
+.tab.active {
+  color: #61dafb;
+  border-bottom-color: #61dafb;
+  background: #1a1a1a;
+}
+
+/* Tab Content */
+.tab-content {
+  min-height: 400px;
+}
+
+/* TODO Placeholder */
+.todo-placeholder {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.todo-placeholder h2 {
+  color: #61dafb;
+  margin-bottom: 1rem;
+}
+
+.todo-placeholder p {
+  font-size: 1.5rem;
+  color: #888;
+  font-style: italic;
+}
