@@ -41,6 +41,7 @@ const SimulateTab = () => {
   const [encounter, setEncounter] = useState([]);
   const [enemies, setEnemies] = useState([]);
   const [uniqueEnemies, setUniqueEnemies] = useState([]);
+  const [combatLog, setCombatLog] = useState([]);
 
   useEffect(() => {
     loadParty();
@@ -123,8 +124,94 @@ const SimulateTab = () => {
 
   // Calculate encounter stats
   const totalEncounterHP = uniqueEnemies.reduce((total, enemy) => {
-    return total + (enemy.trackLength || 0);
+    return total + (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength || 0);
   }, 0);
+
+  // Combat simulation functions
+  const rollDice = (count) => {
+    const rolls = [];
+    for (let i = 0; i < count; i++) {
+      rolls.push(Math.floor(Math.random() * 6) + 1);
+    }
+    return rolls;
+  };
+
+  const calculateDamage = (rolls) => {
+    if (rolls.length === 0) return 0;
+    
+    const highest = Math.max(...rolls);
+    let damage = 0;
+    
+    // Base damage from highest die
+    if (highest === 6) damage = 2;
+    else if (highest >= 4) damage = 1;
+    else damage = 0;
+    
+    // Check for doubles (any two dice with same value)
+    const counts = {};
+    rolls.forEach(roll => {
+      counts[roll] = (counts[roll] || 0) + 1;
+    });
+    
+    const hasDoubles = Object.values(counts).some(count => count >= 2);
+    if (hasDoubles) damage += 1;
+    
+    return damage;
+  };
+
+  const simulateOneRound = () => {
+    if (partyCharacters.length === 0 || uniqueEnemies.length === 0) {
+      setCombatLog(prev => [...prev, "Cannot simulate: missing party or encounter"]);
+      return;
+    }
+
+    // Filter out defeated enemies (HP <= 0)
+    const aliveEnemies = uniqueEnemies.filter(enemy => (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0);
+    
+    if (aliveEnemies.length === 0) {
+      setCombatLog(prev => [...prev, "Combat over: All enemies defeated!"]);
+      return;
+    }
+
+    const newLog = [];
+    let updatedEnemies = [...uniqueEnemies];
+
+    partyCharacters.forEach(character => {
+      const stillAlive = updatedEnemies.filter(enemy => (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0);
+      if (stillAlive.length === 0) return; // No more targets
+      
+      // Choose random enemy from those still alive
+      const targetIndex = Math.floor(Math.random() * stillAlive.length);
+      const target = stillAlive[targetIndex];
+      
+      // Roll dice
+      const attackScore = character.attackScore || 1;
+      const rolls = rollDice(attackScore);
+      const damage = calculateDamage(rolls);
+      
+      // Log dice roll
+      newLog.push(`${character.name} rolled ${rolls.join(', ')} (${attackScore} dice)`);
+      
+      if (damage > 0) {
+        // Find enemy in updatedEnemies array and apply damage
+        const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === target.instanceId);
+        if (enemyIndex !== -1) {
+          const currentHP = updatedEnemies[enemyIndex].currentHP !== undefined ? updatedEnemies[enemyIndex].currentHP : updatedEnemies[enemyIndex].trackLength;
+          updatedEnemies[enemyIndex].currentHP = Math.max(0, currentHP - damage);
+          
+          newLog.push(`${character.name} attacked ${target.uniqueName} for ${damage} damage`);
+          
+          // Check if defeated
+          if (updatedEnemies[enemyIndex].currentHP <= 0) {
+            newLog.push(`${target.uniqueName} was defeated!`);
+          }
+        }
+      }
+    });
+
+    setUniqueEnemies(updatedEnemies);
+    setCombatLog(prev => [...prev, ...newLog]);
+  };
 
   return (
     <div className="tab-content">
@@ -207,23 +294,63 @@ const SimulateTab = () => {
 
                 {/* Encounter Enemies */}
                 <div className="encounter-enemies">
-                  {uniqueEnemies.map(enemy => (
-                    <div key={enemy.instanceId} className="encounter-enemy">
-                      <div className="enemy-info">
-                        <span className="enemy-name">{enemy.uniqueName}</span>
-                        <div className="enemy-stats">
-                          <span className="enemy-hp">HP: {enemy.trackLength}</span>
-                          <span className="enemy-track">Track: {renderTrackLength(enemy.trackLength)}</span>
+                  {uniqueEnemies.map(enemy => {
+                    const currentHP = enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength;
+                    const maxHP = enemy.trackLength;
+                    const damageTaken = maxHP - currentHP;
+                    
+                    // Create track with damage marked
+                    const trackDisplay = Array(maxHP).fill('⦾').map((bubble, index) => {
+                      if (index < damageTaken) return '⦿'; // Marked (damaged)
+                      return bubble; // Empty
+                    }).join('-');
+                    
+                    return (
+                      <div key={enemy.instanceId} className="encounter-enemy">
+                        <div className="enemy-info">
+                          <span className="enemy-name">{enemy.uniqueName}</span>
+                          <div className="enemy-stats">
+                            <span className="enemy-hp">HP: {currentHP}/{maxHP}</span>
+                            <span className="enemy-track">Track: {trackDisplay}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </>
             )}
           </div>
         </div>
       </div>
+      
+      {/* Simulation Operations */}
+      <div className="simulation-section">
+        <h3>Simulation Operations</h3>
+        <div className="simulation-controls">
+          <button 
+            className="simulate-round-button"
+            onClick={simulateOneRound}
+            disabled={partyCharacters.length === 0 || uniqueEnemies.length === 0}
+          >
+            Simulate One Round
+          </button>
+        </div>
+      </div>
+
+      {/* Combat Log */}
+      {combatLog.length > 0 && (
+        <div className="combat-log-section">
+          <h3>Log</h3>
+          <div className="combat-log">
+            {combatLog.map((entry, index) => (
+              <div key={index} className="log-entry">
+                {entry}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

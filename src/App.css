@@ -1403,3 +1403,84 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
+
+/* Simulation Operations */
+.simulation-section {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.simulation-section h3 {
+  color: #98c379;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.simulation-controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.simulate-round-button {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.simulate-round-button:hover:not(:disabled) {
+  background: #ff5252;
+}
+
+.simulate-round-button:disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* Combat Log */
+.combat-log-section {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.combat-log-section h3 {
+  color: #98c379;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.combat-log {
+  background: #2a2a2a;
+  border-radius: 4px;
+  padding: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+}
+
+.log-entry {
+  color: #ccc;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #3a3a3a;
+}
+
+.log-entry:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
