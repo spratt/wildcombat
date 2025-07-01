@@ -1,5 +1,14 @@
-import { describe, it, expect } from 'vitest'
-import { calculateEnemyTrackLength, calculatePartyStats, calculateEncounterStats } from '../utils/dataManager'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { 
+  calculateEnemyTrackLength, 
+  calculatePartyStats, 
+  calculateEncounterStats,
+  loadPartyFromStorage,
+  loadEncounterFromStorage,
+  generateUniqueEnemyNames,
+  renderTrackLength,
+  resetCombatState
+} from '../utils/dataManager'
 import type { Enemy, Character, EnemyAspect, Aspect } from '../types'
 
 describe('Data Manager', () => {
@@ -168,6 +177,240 @@ describe('Data Manager', () => {
       ]
       const stats = calculateEncounterStats(enemiesWithoutAspects)
       expect(stats.totalHP).toBe(0)
+    })
+  })
+
+  describe('loadPartyFromStorage', () => {
+    beforeEach(() => {
+      // Mock localStorage
+      global.localStorage = {
+        getItem: vi.fn(),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+        length: 0,
+        key: vi.fn()
+      }
+    })
+
+    afterEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it('should return empty array when no party in storage', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue(null)
+      const result = loadPartyFromStorage()
+      expect(result).toEqual([])
+      expect(localStorage.getItem).toHaveBeenCalledWith('wildcombat-party')
+    })
+
+    it('should return empty array when localStorage throws error', () => {
+      vi.mocked(localStorage.getItem).mockImplementation(() => {
+        throw new Error('Storage error')
+      })
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      
+      const result = loadPartyFromStorage()
+      expect(result).toEqual([])
+      expect(consoleSpy).toHaveBeenCalled()
+      
+      consoleSpy.mockRestore()
+    })
+
+    it('should parse and enhance character data from storage', () => {
+      const mockCharacterData = [{
+        name: 'Test Character',
+        aspects: [
+          { type: 'trait', name: 'Aspect 1', value: [0, 0, 0] },
+          { type: 'trait', name: 'Aspect 2', value: [0, 0] }
+        ],
+        skills: {
+          BREAK: [1, 1, 0],
+          BRACE: [1, 0, 0],
+          HUNT: [1, 1, 1, 0]
+        }
+      }]
+      
+      vi.mocked(localStorage.getItem).mockReturnValue(JSON.stringify(mockCharacterData))
+      
+      const result = loadPartyFromStorage()
+      expect(result).toHaveLength(1)
+      expect(result[0].name).toBe('Test Character')
+      expect(result[0].hitPoints).toBe(5) // 3 + 2 unchecked bubbles
+      expect(result[0].attackScore).toBe(4) // 1 + 3 filled HUNT bubbles
+      expect(result[0].attackSkill).toBe('HUNT')
+      expect(result[0].defenseScore).toBe(2) // 1 + 1 filled BRACE bubble
+      expect(result[0].defenseSkill).toBe('BRACE')
+    })
+  })
+
+  describe('loadEncounterFromStorage', () => {
+    beforeEach(() => {
+      global.localStorage = {
+        getItem: vi.fn(),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn(),
+        length: 0,
+        key: vi.fn()
+      }
+    })
+
+    afterEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it('should return empty array when no encounter in storage', () => {
+      vi.mocked(localStorage.getItem).mockReturnValue(null)
+      const result = loadEncounterFromStorage()
+      expect(result).toEqual([])
+      expect(localStorage.getItem).toHaveBeenCalledWith('wildcombat-encounter')
+    })
+
+    it('should return empty array when localStorage throws error', () => {
+      vi.mocked(localStorage.getItem).mockImplementation(() => {
+        throw new Error('Storage error')
+      })
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      
+      const result = loadEncounterFromStorage()
+      expect(result).toEqual([])
+      expect(consoleSpy).toHaveBeenCalled()
+      
+      consoleSpy.mockRestore()
+    })
+
+    it('should parse encounter data from storage', () => {
+      const mockEncounterData = [
+        { enemyId: 'spider-1', count: 2 },
+        { enemyId: 'beetle-1', count: 1 }
+      ]
+      
+      vi.mocked(localStorage.getItem).mockReturnValue(JSON.stringify(mockEncounterData))
+      
+      const result = loadEncounterFromStorage()
+      expect(result).toEqual(mockEncounterData)
+    })
+  })
+
+  describe('generateUniqueEnemyNames', () => {
+    const mockEnemies = [
+      {
+        id: 'spider-1',
+        name: 'Spider',
+        aspects: [{ name: 'Bite', trackLength: 3 }]
+      },
+      {
+        id: 'beetle-1', 
+        name: 'Beetle',
+        aspects: [{ name: 'Shell', trackLength: 5 }]
+      }
+    ]
+
+    it('should generate unique names for multiple instances of same enemy', () => {
+      const encounter = [
+        { enemyId: 'spider-1', count: 3 }
+      ]
+      
+      const result = generateUniqueEnemyNames(encounter, mockEnemies)
+      expect(result).toHaveLength(3)
+      expect(result[0].uniqueName).toBe('Spider 1')
+      expect(result[1].uniqueName).toBe('Spider 2')
+      expect(result[2].uniqueName).toBe('Spider 3')
+      expect(result[0].instanceId).toBe('spider-1-1')
+      expect(result[1].instanceId).toBe('spider-1-2')
+      expect(result[2].instanceId).toBe('spider-1-3')
+    })
+
+    it('should handle multiple different enemies', () => {
+      const encounter = [
+        { enemyId: 'spider-1', count: 2 },
+        { enemyId: 'beetle-1', count: 1 }
+      ]
+      
+      const result = generateUniqueEnemyNames(encounter, mockEnemies)
+      expect(result).toHaveLength(3)
+      expect(result[0].uniqueName).toBe('Spider 1')
+      expect(result[1].uniqueName).toBe('Spider 2')
+      expect(result[2].uniqueName).toBe('Beetle 1')
+    })
+
+    it('should handle empty encounter', () => {
+      const result = generateUniqueEnemyNames([], mockEnemies)
+      expect(result).toEqual([])
+    })
+
+    it('should filter out enemies not found in enemy data', () => {
+      const encounter = [
+        { enemyId: 'spider-1', count: 1 },
+        { enemyId: 'unknown-enemy', count: 1 }
+      ]
+      
+      const result = generateUniqueEnemyNames(encounter, mockEnemies)
+      expect(result).toHaveLength(1)
+      expect(result[0].uniqueName).toBe('Spider 1')
+    })
+  })
+
+  describe('renderTrackLength', () => {
+    it('should render track with empty bubbles', () => {
+      expect(renderTrackLength(3)).toBe('⦾-⦾-⦾')
+      expect(renderTrackLength(5)).toBe('⦾-⦾-⦾-⦾-⦾')
+    })
+
+    it('should return empty string for zero length', () => {
+      expect(renderTrackLength(0)).toBe('')
+    })
+
+    it('should return empty string for negative length', () => {
+      expect(renderTrackLength(-1)).toBe('')
+    })
+
+    it('should handle undefined/null length', () => {
+      expect(renderTrackLength(null)).toBe('')
+      expect(renderTrackLength(undefined)).toBe('')
+    })
+  })
+
+  describe('resetCombatState', () => {
+    const mockEnemies = [
+      {
+        id: 'spider-1',
+        name: 'Spider',
+        uniqueName: 'Spider 1',
+        instanceId: 'spider-1-1',
+        currentHP: 3,
+        aspects: [{ name: 'Bite', trackLength: 6 }]
+      }
+    ]
+
+    const mockParty = [
+      {
+        name: 'Hero',
+        hitPoints: 10,
+        currentHP: 5,
+        attackScore: 3,
+        attackSkill: 'BREAK',
+        defenseScore: 2,
+        defenseSkill: 'BRACE',
+        aspects: []
+      }
+    ]
+
+    it('should reset enemy HP to full', () => {
+      const result = resetCombatState(mockEnemies, mockParty)
+      expect(result.resetEnemies[0].currentHP).toBe(6) // Full trackLength
+    })
+
+    it('should reset party HP to full', () => {
+      const result = resetCombatState(mockEnemies, mockParty)
+      expect(result.resetParty[0].currentHP).toBe(10) // Full hitPoints
+    })
+
+    it('should handle empty arrays', () => {
+      const result = resetCombatState([], [])
+      expect(result.resetEnemies).toEqual([])
+      expect(result.resetParty).toEqual([])
     })
   })
 })
