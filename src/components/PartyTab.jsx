@@ -102,18 +102,64 @@ const PartyTab = () => {
     }
   }, []);
 
+  // Load last viewed character on component mount
+  useEffect(() => {
+    try {
+      const savedCharacter = localStorage.getItem('wildcombat-last-character');
+      if (savedCharacter) {
+        const characterData = JSON.parse(savedCharacter);
+        setSelectedCharacter(characterData);
+      }
+    } catch (error) {
+      console.error('Error loading last character:', error);
+    }
+  }, []);
+
+  // Fallback: Load first party character if no character is selected and party exists
+  useEffect(() => {
+    if (!selectedCharacter && !uploadedCharacter && !healedCharacter && partyCharacters.length > 0) {
+      const firstPartyCharacter = partyCharacters[0];
+      setSelectedCharacter(firstPartyCharacter);
+      
+      // Save fallback character to localStorage
+      try {
+        localStorage.setItem('wildcombat-last-character', JSON.stringify(firstPartyCharacter));
+      } catch (error) {
+        console.error('Error saving fallback character:', error);
+      }
+    }
+  }, [partyCharacters, selectedCharacter, uploadedCharacter, healedCharacter]);
+
 
   // Character viewer handlers
   const handleCharacterViewerSelect = (character) => {
     setSelectedCharacter(character);
     setUploadedCharacter(null);
     setHealedCharacter(null);
+    
+    // Save to localStorage
+    try {
+      if (character) {
+        localStorage.setItem('wildcombat-last-character', JSON.stringify(character));
+      }
+    } catch (error) {
+      console.error('Error saving last character:', error);
+    }
   };
 
   const handleCharacterUpload = (character) => {
     setUploadedCharacter(character);
     setSelectedCharacter(null);
     setHealedCharacter(null);
+    
+    // Save to localStorage
+    try {
+      if (character) {
+        localStorage.setItem('wildcombat-last-character', JSON.stringify(character));
+      }
+    } catch (error) {
+      console.error('Error saving last character:', error);
+    }
   };
 
   const handleCharacterSaved = () => {
@@ -122,6 +168,15 @@ const PartyTab = () => {
 
   const handleCharacterHealed = (healedChar) => {
     setHealedCharacter(healedChar);
+    
+    // Save to localStorage
+    try {
+      if (healedChar) {
+        localStorage.setItem('wildcombat-last-character', JSON.stringify(healedChar));
+      }
+    } catch (error) {
+      console.error('Error saving last character:', error);
+    }
   };
 
   const displayCharacter = healedCharacter || uploadedCharacter || selectedCharacter;
