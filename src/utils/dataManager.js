@@ -74,9 +74,9 @@ export const generateUniqueEnemyNames = (encounter, enemies) => {
       enemyCounts[baseName]++;
       const uniqueName = encounterEnemy.count > 1 ? `${baseName} ${enemyCounts[baseName]}` : baseName;
       instances.push({
+        ...enemy, // Copy all enemy data fields
         uniqueName,
         baseName,
-        trackLength: enemy.trackLength,
         enemyId: encounterEnemy.enemyId,
         instanceId: `${encounterEnemy.enemyId}-${enemyCounts[baseName]}`
       });

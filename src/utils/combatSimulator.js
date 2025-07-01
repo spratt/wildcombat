@@ -106,11 +106,13 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
         aspect.abilityCode && !enemy.usedAbilities?.includes(aspect.name)
       ) || [];
       
-      const useAbility = availableAbilities.length > 0 && Math.random() < 0.3; // 30% chance per attack
+      
+      const useAbility = availableAbilities.length > 0; // Always use available abilities
       
       if (useAbility) {
         // Use random available ability
         const ability = availableAbilities[Math.floor(Math.random() * availableAbilities.length)];
+        
         
         // Mark ability as used
         if (!enemy.usedAbilities) {
@@ -228,6 +230,7 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
         }
       } else {
         // Regular attack
+        
         // Target defends with their defense skill
         const defenseScore = target.defenseScore || 1;
       const defenseSkill = target.defenseSkill || 'BRACE';
