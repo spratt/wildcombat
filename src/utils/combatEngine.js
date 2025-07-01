@@ -123,9 +123,15 @@ export const calculateIncapacitateDefense = (rolls, targetCharacter) => {
 };
 
 export const checkWinConditions = (enemies, party) => {
-  const aliveEnemies = enemies.filter(enemy => 
-    (enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy)) > 0
-  );
+  const aliveEnemies = enemies.filter(enemy => {
+    if (enemy.currentHP !== undefined) {
+      return enemy.currentHP > 0;
+    }
+    // Try aspects-based calculation first, then fall back to trackLength
+    const aspectsHP = calculateEnemyTrackLength(enemy);
+    const hp = aspectsHP > 0 ? aspectsHP : (enemy.trackLength || 0);
+    return hp > 0;
+  });
   const aliveParty = party.filter(char => 
     (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0
   );
