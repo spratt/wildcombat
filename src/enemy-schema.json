@@ -35,6 +35,11 @@
       "description": "Whether this enemy is unique (only one allowed per encounter)",
       "default": false
     },
+    "damageModel": {
+      "type": "string",
+      "enum": ["0,1,2,counter", "1,2,aspect,counter", "1,aspect,2aspect,counter", "areaOfEffect"],
+      "description": "Damage model used for this enemy's attacks"
+    },
     "aspects": {
       "type": "array",
       "minItems": 1,
@@ -57,7 +62,7 @@
           },
           "abilityCode": {
             "type": "string",
-            "enum": ["incapacitate", "dualWieldBarrage", "highNoonDuel", "desertMirage"],
+            "enum": ["incapacitate", "dualWieldBarrage", "highNoonDuel", "desertMirage", "violetHaze", "bonniesRevenge", "ganglandExecution"],
             "description": "Special ability code for combat mechanics"
           }
         },

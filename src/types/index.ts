@@ -60,6 +60,7 @@ export interface Enemy {
   name: string;
   description?: string;
   unique?: boolean;
+  damageModel?: string;
   aspects: EnemyAspect[];
   drives?: (string | { name: string; description?: string })[];
   quirks?: (string | { name: string; description?: string })[];
@@ -70,7 +71,7 @@ export interface EnemyAspect {
   name: string;
   trackLength: number;
   ability?: string;
-  abilityCode?: 'Incapacitate' | 'dualWieldBarrage' | 'highNoonDuel' | 'desertMirage';
+  abilityCode?: 'Incapacitate' | 'dualWieldBarrage' | 'highNoonDuel' | 'desertMirage' | 'violetHaze' | 'bonniesRevenge' | 'ganglandExecution';
 }
 
 // Combat types
