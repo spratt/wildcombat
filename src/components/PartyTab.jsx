@@ -297,9 +297,20 @@ const PartyTab = () => {
             >
               Save Party
             </button>
+            <button 
+              className="heal-party-button"
+              onClick={healParty}
+            >
+              Heal Party
+            </button>
             {saveStatus && (
               <span className={`party-save-status ${saveStatus.includes('Error') ? 'error' : 'success'}`}>
                 {saveStatus}
+              </span>
+            )}
+            {healStatus && (
+              <span className={`party-heal-status ${healStatus.includes('Error') ? 'error' : 'success'}`}>
+                {healStatus}
               </span>
             )}
           </div>
@@ -329,25 +340,6 @@ const PartyTab = () => {
         </div>
       </div>
 
-      {/* Party Operations */}
-      {partyCharacters.length > 0 && (
-        <div className="party-section">
-          <h3>Party Operations</h3>
-          <div className="party-operations">
-            <button 
-              className="heal-party-button"
-              onClick={healParty}
-            >
-              Heal Party
-            </button>
-            {healStatus && (
-              <span className={`party-heal-status ${healStatus.includes('Error') ? 'error' : 'success'}`}>
-                {healStatus}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Party Characters */}
       <div className="party-section">
