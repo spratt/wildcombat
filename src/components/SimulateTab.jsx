@@ -200,7 +200,7 @@ const SimulateTab = () => {
           const currentHP = updatedEnemies[enemyIndex].currentHP !== undefined ? updatedEnemies[enemyIndex].currentHP : updatedEnemies[enemyIndex].trackLength;
           updatedEnemies[enemyIndex].currentHP = Math.max(0, currentHP - damage);
           
-          newLog.push(`${character.name} attacked ${target.uniqueName} for ${damage} damage`);
+          newLog.push(`${character.name} does ${damage} damage to ${target.uniqueName}`);
           
           // Check if defeated
           if (updatedEnemies[enemyIndex].currentHP <= 0) {
