@@ -220,7 +220,7 @@ export const generateUniqueEnemyNames = (
     const instances: EnemyInstance[] = [];
     for (let i = 0; i < encounterEnemy.count; i++) {
       enemyCounts[baseName]++;
-      const uniqueName = encounterEnemy.count > 1 ? `${baseName} ${enemyCounts[baseName]}` : baseName;
+      const uniqueName = `${baseName} ${enemyCounts[baseName]}`;
       instances.push({
         ...enemy, // Copy all enemy data fields
         uniqueName,

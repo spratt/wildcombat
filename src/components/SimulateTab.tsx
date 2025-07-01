@@ -418,9 +418,9 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                     }).join('-');
                     
                     return (
-                      <div key={enemy.name} className="encounter-enemy">
+                      <div key={enemy.instanceId} className="encounter-enemy">
                         <div className="enemy-info">
-                          <span className="enemy-name">{enemy.name}</span>
+                          <span className="enemy-name">{enemy.uniqueName}</span>
                           <div className="enemy-stats">
                             <Tooltip content="Hit Points: Number of unmarked track bubbles (⦾ = empty, ⦿ = marked/damaged)">
                               <span className="enemy-hp">HP: {currentHP}/{maxHP}</span>
