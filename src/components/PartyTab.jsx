@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 import CombinedCharacterSelector from './CombinedCharacterSelector';
+import CharacterUpload from './CharacterUpload';
+import SaveCharacterButton from './SaveCharacterButton';
+import ExportCharacterButton from './ExportCharacterButton';
+import HealAllAspectsButton from './HealAllAspectsButton';
+import Character from './Character';
 
 // Helper function to calculate unchecked aspect tracks (hit points)
 const calculateHitPoints = (character) => {
@@ -77,6 +82,11 @@ const PartyTab = () => {
   const [savedCharactersRefresh, setSavedCharactersRefresh] = useState(0);
   const [saveStatus, setSaveStatus] = useState('');
   const [healStatus, setHealStatus] = useState('');
+  
+  // Character viewer state
+  const [selectedCharacter, setSelectedCharacter] = useState(null);
+  const [uploadedCharacter, setUploadedCharacter] = useState(null);
+  const [healedCharacter, setHealedCharacter] = useState(null);
 
   // Load party from localStorage on component mount
   useEffect(() => {
@@ -91,6 +101,30 @@ const PartyTab = () => {
     }
   }, []);
 
+  // Character viewer handlers
+  const handleCharacterViewerSelect = (character) => {
+    setSelectedCharacter(character);
+    setUploadedCharacter(null);
+    setHealedCharacter(null);
+  };
+
+  const handleCharacterUpload = (character) => {
+    setUploadedCharacter(character);
+    setSelectedCharacter(null);
+    setHealedCharacter(null);
+  };
+
+  const handleCharacterSaved = () => {
+    setSavedCharactersRefresh(prev => prev + 1);
+  };
+
+  const handleCharacterHealed = (healedChar) => {
+    setHealedCharacter(healedChar);
+  };
+
+  const displayCharacter = healedCharacter || uploadedCharacter || selectedCharacter;
+
+  // Party handlers
   const handleCharacterSelect = (character) => {
     if (!character) return;
     
@@ -209,13 +243,47 @@ const PartyTab = () => {
     <div className="tab-content">
       <h2>Party Management</h2>
       
-      {/* Character Selection */}
-      <div className="party-section">
-        <h3>Build & Save Party</h3>
-        <CombinedCharacterSelector 
-          onCharacterSelect={handleCharacterSelect}
-          refreshTrigger={savedCharactersRefresh}
-        />
+      <div className="party-layout">
+        {/* Character Viewer Column */}
+        <div className="character-viewer-column">
+          <div className="character-viewer-section">
+            <h3>Character Viewer</h3>
+            
+            <div className="character-input-section">
+              <CombinedCharacterSelector 
+                onCharacterSelect={handleCharacterViewerSelect}
+                refreshTrigger={savedCharactersRefresh}
+              />
+              <div className="input-divider">or</div>
+              <CharacterUpload onCharacterUpload={handleCharacterUpload} />
+            </div>
+            
+            {displayCharacter && (
+              <div className="character-actions">
+                <SaveCharacterButton 
+                  characterData={displayCharacter} 
+                  onSave={handleCharacterSaved}
+                />
+                <ExportCharacterButton characterData={displayCharacter} />
+                <HealAllAspectsButton 
+                  characterData={displayCharacter}
+                  onCharacterHealed={handleCharacterHealed}
+                />
+              </div>
+            )}
+            
+            <Character characterData={displayCharacter} />
+          </div>
+        </div>
+
+        {/* Party Management Column */}
+        <div className="party-management-column">
+          <div className="party-section">
+            <h3>Build & Save Party</h3>
+            <CombinedCharacterSelector 
+              onCharacterSelect={handleCharacterSelect}
+              refreshTrigger={savedCharactersRefresh}
+            />
         
         {partyCharacters.length > 0 && (
           <div className="party-save-section">
@@ -307,6 +375,8 @@ const PartyTab = () => {
             ))}
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );

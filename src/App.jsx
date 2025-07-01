@@ -1,21 +1,19 @@
 import { useState } from 'react'
 import './App.css'
-import CharacterViewerTab from './components/CharacterViewerTab'
 import PartyTab from './components/PartyTab'
 import EnemiesTab from './components/EnemiesTab'
 import SimulateTab from './components/SimulateTab'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('character-viewer')
+  const [activeTab, setActiveTab] = useState('party')
 
   const tabs = [
-    { id: 'character-viewer', label: 'Character Viewer', component: CharacterViewerTab },
     { id: 'party', label: 'Party', component: PartyTab },
     { id: 'enemies', label: 'Enemies', component: EnemiesTab },
     { id: 'simulate', label: 'Simulate!', component: SimulateTab }
   ]
 
-  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || CharacterViewerTab
+  const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || PartyTab
 
   return (
     <>

@@ -66,6 +66,37 @@ h1 {
   font-style: italic;
 }
 
+/* Party Tab Layout */
+.party-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.character-viewer-column {
+  flex: 2;
+  min-width: 0;
+}
+
+.party-management-column {
+  flex: 1;
+  min-width: 300px;
+}
+
+.character-viewer-section {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.character-viewer-section h3 {
+  color: #98c379;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
 /* Party Tab */
 .party-section {
   margin-bottom: 3rem;
@@ -1396,6 +1427,16 @@ h1 {
 @media (max-width: 480px) {
   .simulate-layout .party-stats {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .party-layout {
+    flex-direction: column;
+  }
+  
+  .party-management-column {
+    min-width: 0;
   }
 }
 
