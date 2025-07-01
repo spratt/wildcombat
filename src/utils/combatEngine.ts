@@ -9,11 +9,22 @@ import type {
   Enemy
 } from '../types';
 
-export const rollDice = (count: number): DiceRoll => {
+export const rollDice = (count: number, cut: number = 0): DiceRoll => {
   const rolls: number[] = [];
   for (let i = 0; i < count; i++) {
     rolls.push(Math.floor(Math.random() * 6) + 1);
   }
+  
+  // Apply cut: remove the highest dice, but always keep at least one die (the lowest)
+  if (cut > 0 && rolls.length > 1) {
+    // Sort dice in descending order to remove highest first
+    const sortedRolls = [...rolls].sort((a, b) => b - a);
+    // Remove up to 'cut' dice, but never remove all dice (keep at least 1)
+    const dicesToRemove = Math.min(cut, rolls.length - 1);
+    // Return the remaining dice (lowest dice are kept)
+    return sortedRolls.slice(dicesToRemove);
+  }
+  
   return rolls;
 };
 

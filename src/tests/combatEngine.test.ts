@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { 
   rollDice, 
   calculateDamage, 
@@ -26,6 +26,55 @@ describe('Combat Engine', () => {
     it('should return empty array for 0 dice', () => {
       const result: DiceRoll = rollDice(0)
       expect(result).toEqual([])
+    })
+
+    it('should apply cut parameter correctly', () => {
+      // Mock Math.random to return predictable results
+      const spy = vi.spyOn(Math, 'random')
+        .mockReturnValueOnce(0.83) // 0.83*6=4.98, floor=4, +1=5
+        .mockReturnValueOnce(0.33) // 0.33*6=1.98, floor=1, +1=2
+        .mockReturnValueOnce(0.66) // 0.66*6=3.96, floor=3, +1=4
+        .mockReturnValueOnce(0.16) // 0.16*6=0.96, floor=0, +1=1
+
+      const result = rollDice(4, 2) // Roll 4 dice, cut 2 highest
+      // Original rolls would be [5, 2, 4, 1], after cutting 2 highest: [2, 1]
+      expect(result).toHaveLength(2)
+      expect(result).toContain(2)
+      expect(result).toContain(1)
+      expect(result).not.toContain(5)
+      expect(result).not.toContain(4)
+
+      spy.mockRestore()
+    })
+
+    it('should never cut all dice (always keep at least one)', () => {
+      const spy = vi.spyOn(Math, 'random')
+        .mockReturnValueOnce(0.83) // 0.83*6=4.98, floor=4, +1=5
+        .mockReturnValueOnce(0.33) // 0.33*6=1.98, floor=1, +1=2
+
+      const result = rollDice(2, 5) // Try to cut 5 dice from 2 dice
+      expect(result).toHaveLength(1) // Should keep 1 die (the lowest)
+      expect(result).toEqual([2]) // Should keep the lowest die
+
+      spy.mockRestore()
+    })
+
+    it('should not modify dice when cut is 0', () => {
+      const spy = vi.spyOn(Math, 'random')
+        .mockReturnValueOnce(0.83) // 0.83*6=4.98, floor=4, +1=5
+        .mockReturnValueOnce(0.33) // 0.33*6=1.98, floor=1, +1=2
+
+      const result = rollDice(2, 0)
+      expect(result).toHaveLength(2)
+      expect(result).toContain(5)
+      expect(result).toContain(2)
+
+      spy.mockRestore()
+    })
+
+    it('should not modify single die when cut > 0', () => {
+      const result = rollDice(1, 2) // Try to cut from 1 die
+      expect(result).toHaveLength(1) // Should keep the single die
     })
   })
 
