@@ -625,5 +625,22 @@ describe('Combat Simulator', () => {
       expect(result.updatedEnemies).toBeDefined()
       expect(Array.isArray(result.log)).toBe(true)
     })
+
+    it('should handle violetHaze ability correctly', () => {
+      const enemyWithVioletHaze: MockCombatEnemy[] = [{
+        ...mockEnemies[0],
+        aspects: [
+          { name: 'Violet Haze', abilityCode: 'violetHaze', trackLength: 3 }
+        ],
+        usedAbilities: new Set()
+      }]
+      
+      const result = simulateEnemyAttackPhase(enemyWithVioletHaze, mockParty, '0,1,2,counter', 1, true, false)
+      
+      // Should complete without errors (full testing done in manual verification)
+      expect(result.updatedParty).toBeDefined()
+      expect(result.updatedEnemies).toBeDefined()
+      expect(Array.isArray(result.log)).toBe(true)
+    })
   })
 })

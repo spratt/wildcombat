@@ -599,6 +599,104 @@ export const simulateEnemyAttackPhase = (
               }
             }
           }
+        } else if (ability.abilityCode === 'violetHaze') {
+          // Violet Haze: Creates poisonous cloud affecting all players
+          const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
+          log.push({
+            message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - releasing toxic wisteria pollen!`,
+            type: 'enemy'
+          });
+          
+          log.push({
+            message: `Purple clouds of poisonous pollen fill the air, choking all enemies`,
+            type: 'enemy'
+          });
+          
+          // Attack each alive player with poison damage
+          const aliveParty = updatedParty.filter(char => {
+            const hp = char.currentHP !== undefined ? char.currentHP : char.hitPoints || 0;
+            return hp > 0;
+          });
+          
+          for (const partyTarget of aliveParty) {
+            const defenseScore = partyTarget.defenseScore || 1;
+            const defenseSkill = partyTarget.defenseSkill || 'BRACE';
+            const defenseRolls = rollDice(defenseScore);
+            const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, partyTarget);
+            
+            log.push({
+              message: `${partyTarget.name} tries to resist the toxic pollen with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
+              type: 'player'
+            });
+            
+            if (defenseResult.damage > 0) {
+              const charIndex = updatedParty.findIndex(c => c.partyId === partyTarget.partyId);
+              if (charIndex !== -1) {
+                const currentHP = updatedParty[charIndex].currentHP !== undefined 
+                  ? updatedParty[charIndex].currentHP 
+                  : updatedParty[charIndex].hitPoints || 0;
+                updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
+                
+                log.push({
+                  message: `${partyTarget.name} takes ${defenseResult.damage} poison damage from the violet haze`,
+                  type: 'enemy'
+                });
+                
+                if (updatedParty[charIndex].currentHP <= 0) {
+                  log.push({
+                    message: `${partyTarget.name} succumbs to the toxic pollen!`,
+                    type: 'neutral'
+                  });
+                }
+              }
+            } else {
+              log.push({
+                message: `${partyTarget.name} successfully resists the poisonous cloud`,
+                type: 'player'
+              });
+            }
+            
+            // Handle counter-attack on doubles (represents fighting through the poison)
+            if (defenseResult.counter) {
+              log.push({
+                message: `${partyTarget.name} rolled doubles and fights through the poison for a counter-attack!`,
+                type: 'player'
+              });
+              
+              const counterAttackScore = partyTarget.attackScore || 1;
+              const counterAttackSkill = partyTarget.attackSkill || 'BREAK';
+              const counterRolls = rollDice(counterAttackScore);
+              const counterDamage = calculateDamage(counterRolls);
+              
+              log.push({
+                message: `${partyTarget.name} counter-attacks through the haze with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
+                type: 'player'
+              });
+              
+              if (counterDamage > 0) {
+                const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
+                if (enemyIndex !== -1) {
+                  const currentEnemyHP = updatedEnemies[enemyIndex].currentHP !== undefined 
+                    ? updatedEnemies[enemyIndex].currentHP 
+                    : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
+                  updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
+                  
+                  log.push({
+                    message: `${partyTarget.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
+                    type: 'player'
+                  });
+                  
+                  if (updatedEnemies[enemyIndex].currentHP <= 0) {
+                    log.push({
+                      message: `${enemy.uniqueName} was defeated by the counter-attack!`,
+                      type: 'neutral'
+                    });
+                    break; // Enemy is defeated, stop processing haze
+                  }
+                }
+              }
+            }
+          }
         } else {
           if (debugMode) {
             log.push({

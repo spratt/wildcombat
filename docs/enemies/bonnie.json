@@ -1,0 +1,64 @@
+{
+  "name": "Bonnie",
+  "blurb": "An anchored ektus gangster whose soul refused to follow her body into the depths, now wielding a Thompson submachine gun with deadly precision.",
+  "description": "Bonnie cuts a striking figure against the twisted branches - a cactus woman whose body bears the telltale signs of the depths' claim, yet her spirit burns with defiant fire. Purple wisteria blossoms cascade from her head like flowing hair, their sweet fragrance masking the scent of gun oil and violence. Her green flesh is smooth rather than spiky, marked with dark veins where the depths tried to pull her down. She moves with the fluid grace of someone caught between worlds, her Tommy gun held with practiced ease. The 1930's-style pinstripe vest and fedora she wears are riddled with bullet holes - evidence of countless shootouts where her anchored nature kept her standing when others would have fallen. Her eyes glow with an otherworldly light, and when she smiles, it's with the confidence of someone who has already died once and refuses to do it again.",
+  "size": "medium",
+  "unique": true,
+  "damageModel": "areaOfEffect",
+  "aspects": [
+    {
+      "name": "Violet Haze",
+      "description": "Releases toxic pollen from her wisteria blossoms, creating a poisonous cloud that damages all enemies over time while providing cover.",
+      "abilityCode": "violetHaze",
+      "trackLength": 3
+    },
+    {
+      "name": "Bonnie's Revenge",
+      "description": "If any ally has been defeated, enters a vengeful rage state with increased damage and accuracy for the remainder of combat.",
+      "abilityCode": "bonniesRevenge",
+      "trackLength": 4
+    },
+    {
+      "name": "Gangland Execution",
+      "description": "A cold, calculated point-blank shot that can only target already-wounded enemies, immediately reducing them to 1 HP regardless of their current health.",
+      "abilityCode": "ganglandExecution",
+      "trackLength": 2
+    },
+    {
+      "name": "Thompson Mastery",
+      "description": "Expert handling of her Thompson submachine gun allows for rapid-fire bursts that can suppress multiple targets.",
+      "trackLength": 5
+    },
+    {
+      "name": "Anchored Soul",
+      "description": "Her supernatural resilience from being caught between life and the depths provides resistance to finishing blows.",
+      "trackLength": 4
+    }
+  ],
+  "drives": [
+    {
+      "name": "Loyalty to the Fallen",
+      "description": "Never abandons a partner and will seek vengeance for any fallen allies with ruthless determination."
+    },
+    {
+      "name": "Defiance of Fate",
+      "description": "Refuses to accept death or defeat, always finding a way to keep fighting against impossible odds."
+    }
+  ],
+  "quirks": [
+    {
+      "name": "Vintage Style",
+      "description": "Always impeccably dressed in 1930's gangster attire, complete with bullet-holed vest and tilted fedora."
+    },
+    {
+      "name": "Flower Petals",
+      "description": "Leaves a trail of purple wisteria petals wherever she goes, creating an almost romantic contrast to her violent nature."
+    }
+  ],
+  "presence": {
+    "Sight": "A cactus woman in pinstripe and fedora, wisteria blossoms flowing like hair, Thompson gun gleaming in her hands.",
+    "Sound": "The distinctive rattle of a Thompson submachine gun mixed with the soft whisper of falling flower petals.",
+    "Smell": "Sweet wisteria blooms mingled with gun oil, cordite, and the faint ozone scent of the depths' touch.",
+    "Taste": "The air carries a metallic tang of gunpowder and the cloying sweetness of poisonous pollen."
+  }
+}
