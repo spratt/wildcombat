@@ -42,6 +42,7 @@ const SimulateTab = () => {
   const [enemies, setEnemies] = useState([]);
   const [uniqueEnemies, setUniqueEnemies] = useState([]);
   const [combatLog, setCombatLog] = useState([]);
+  const [currentRound, setCurrentRound] = useState(1);
 
   useEffect(() => {
     loadParty();
@@ -200,7 +201,7 @@ const SimulateTab = () => {
       return;
     }
 
-    const newLog = [];
+    const newLog = [`--- Round ${currentRound} ---`];
     let updatedEnemies = [...uniqueEnemies];
     let updatedParty = [...partyCharacters];
 
@@ -328,6 +329,9 @@ const SimulateTab = () => {
     }
     
     setCombatLog(prev => [...prev, ...newLog]);
+    
+    // Increment round counter
+    setCurrentRound(prev => prev + 1);
   };
 
   const clearSimulation = () => {
@@ -345,8 +349,9 @@ const SimulateTab = () => {
     }));
     setPartyCharacters(resetParty);
     
-    // Clear combat log
+    // Clear combat log and reset round counter
     setCombatLog([]);
+    setCurrentRound(1);
   };
 
   return (
@@ -478,6 +483,17 @@ const SimulateTab = () => {
           >
             Clear
           </button>
+        </div>
+      </div>
+
+      {/* Simulation Stats */}
+      <div className="simulation-stats-section">
+        <h3>Simulation Stats</h3>
+        <div className="simulation-stats">
+          <div className="stat">
+            <span className="stat-label">Round:</span>
+            <span className="stat-value">{currentRound}</span>
+          </div>
         </div>
       </div>
 

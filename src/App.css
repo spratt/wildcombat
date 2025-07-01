@@ -1469,6 +1469,47 @@ h1 {
   cursor: not-allowed;
 }
 
+/* Simulation Stats */
+.simulation-stats-section {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 2rem;
+}
+
+.simulation-stats-section h3 {
+  color: #98c379;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.simulation-stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.simulation-stats .stat {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #2a2a2a;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+}
+
+.simulation-stats .stat-label {
+  font-weight: bold;
+  color: #ccc;
+}
+
+.simulation-stats .stat-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #61dafb;
+}
+
 /* Combat Log */
 .combat-log-section {
   background: #1a1a1a;
