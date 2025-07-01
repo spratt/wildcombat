@@ -19,12 +19,14 @@ const calculateHitPoints = (character) => {
   }
   
   return character.aspects.reduce((total, aspect) => {
-    if (!aspect.value || !Array.isArray(aspect.value)) {
+    // Use aspect.value or default to [0] if missing
+    const aspectValue = aspect.value || [0];
+    if (!Array.isArray(aspectValue)) {
       return total;
     }
     
     // Count unchecked bubbles (0 values)
-    const uncheckedBubbles = aspect.value.filter(bubble => bubble === 0).length;
+    const uncheckedBubbles = aspectValue.filter(bubble => bubble === 0).length;
     return total + uncheckedBubbles;
   }, 0);
 };
