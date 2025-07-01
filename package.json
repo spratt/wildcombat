@@ -13,6 +13,7 @@
     "test:run": "vitest run",
     "coverage": "vitest run --coverage",
     "validate:characters": "tsx scripts/validate-characters.ts",
+    "validate:enemies": "tsx scripts/validate-enemies.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

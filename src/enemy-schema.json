@@ -6,7 +6,6 @@
     "name",
     "blurb",
     "description",
-    "trackLength",
     "size",
     "aspects",
     "drives",
@@ -26,11 +25,6 @@
       "type": "string",
       "description": "Detailed description of the enemy"
     },
-    "trackLength": {
-      "type": "integer",
-      "minimum": 1,
-      "description": "Length of the enemy's track (hit points)"
-    },
     "size": {
       "type": "string",
       "enum": ["small", "medium", "large", "variable"],
@@ -38,9 +32,10 @@
     },
     "aspects": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["name", "description"],
+        "required": ["name", "description", "trackLength"],
         "properties": {
           "name": {
             "type": "string",
@@ -49,10 +44,21 @@
           "description": {
             "type": "string",
             "description": "Aspect description"
+          },
+          "trackLength": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Number of track bubbles for this aspect"
+          },
+          "abilityCode": {
+            "type": "string",
+            "enum": ["incapacitate"],
+            "description": "Special ability code for combat mechanics"
           }
-        }
+        },
+        "additionalProperties": false
       },
-      "description": "Enemy aspects and abilities"
+      "description": "Enemy aspects and abilities with track lengths"
     },
     "drives": {
       "type": "array",
@@ -68,7 +74,8 @@
             "type": "string",
             "description": "Drive description"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "description": "Enemy motivations and goals"
     },
@@ -86,18 +93,21 @@
             "type": "string",
             "description": "Quirk description"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "description": "Enemy behavioral quirks and traits"
     },
     "presence": {
       "type": "object",
       "patternProperties": {
-        "^.*$": {
+        "^(Sight|Sound|Smell|Taste|Touch)$": {
           "type": "string"
         }
       },
+      "additionalProperties": false,
       "description": "Sensory descriptions of the enemy"
     }
-  }
+  },
+  "additionalProperties": false
 }
