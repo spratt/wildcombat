@@ -19,6 +19,27 @@ interface CombatLogEntry {
   type: 'player' | 'enemy' | 'neutral';
 }
 
+interface AbilityContext {
+  enemy: CombatEnemyInstance;
+  ability: { name: string; abilityCode: string };
+  target: CombatCharacterInstance;
+  updatedParty: CombatCharacterInstance[];
+  updatedEnemies: CombatEnemyInstance[];
+  damageModel: string;
+  enemyAttacksPerRound: number;
+  attackNum: number;
+  log: CombatLogEntry[];
+}
+
+interface AbilityResult {
+  updatedParty: CombatCharacterInstance[];
+  updatedEnemies: CombatEnemyInstance[];
+  log: CombatLogEntry[];
+  shouldContinue: boolean; // false if enemy was defeated or ability should stop further processing
+}
+
+type AbilityFunction = (context: AbilityContext) => AbilityResult;
+
 interface PlayerAttackPhaseResult {
   updatedEnemies: CombatEnemy[];
   log: CombatLogEntry[];
@@ -54,6 +75,418 @@ interface CombatEnemyInstance extends CombatEnemy {
   uniqueName: string;
   currentHP?: number;
 }
+
+// Helper function to handle counter-attacks
+const handleCounterAttack = (
+  target: CombatCharacterInstance,
+  enemy: CombatEnemyInstance,
+  updatedEnemies: CombatEnemyInstance[],
+  log: CombatLogEntry[]
+): { updatedEnemies: CombatEnemyInstance[]; shouldContinue: boolean } => {
+  const counterAttackScore = target.attackScore || 1;
+  const counterAttackSkill = target.attackSkill || 'BREAK';
+  const counterRolls = rollDice(counterAttackScore);
+  const counterDamage = calculateDamage(counterRolls);
+  
+  log.push({
+    message: `${target.name} counter-attacks with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
+    type: 'player'
+  });
+  
+  if (counterDamage > 0) {
+    const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
+    if (enemyIndex !== -1) {
+      const currentEnemyHP = updatedEnemies[enemyIndex].currentHP !== undefined 
+        ? updatedEnemies[enemyIndex].currentHP 
+        : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
+      updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
+      
+      log.push({
+        message: `${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
+        type: 'player'
+      });
+      
+      if (updatedEnemies[enemyIndex].currentHP <= 0) {
+        log.push({
+          message: `${enemy.uniqueName} was defeated by the counter-attack!`,
+          type: 'neutral'
+        });
+        return { updatedEnemies, shouldContinue: false };
+      }
+    }
+  }
+  
+  return { updatedEnemies, shouldContinue: true };
+};
+
+// Incapacitate ability
+const incapacitateAbility: AbilityFunction = (context) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { enemy, ability, target, updatedParty, updatedEnemies, damageModel, enemyAttacksPerRound, attackNum, log } = context;
+  
+  const defenseScore = target.defenseScore || 1;
+  const defenseSkill = target.defenseSkill || 'BRACE';
+  const defenseRolls = rollDice(defenseScore);
+  const abilityResult = calculateIncapacitateDefense(defenseRolls, target);
+  
+  // Log ability use and defense
+  const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
+  log.push({
+    message: `${enemy.uniqueName} uses ${ability.name}${attackLabel}`,
+    type: 'enemy'
+  });
+  log.push({
+    message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
+    type: 'player'
+  });
+  
+  // Apply ability effects
+  if (abilityResult.fullIncapacitation) {
+    const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
+    if (charIndex !== -1) {
+      updatedParty[charIndex].currentHP = 0;
+      log.push({
+        message: `${target.name} is fully incapacitated and loses all HP!`,
+        type: 'enemy'
+      });
+      log.push({
+        message: `${target.name} was defeated!`,
+        type: 'neutral'
+      });
+    }
+  } else if (abilityResult.incapacitated) {
+    const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
+    if (charIndex !== -1) {
+      updatedParty[charIndex].incapacitated = true;
+      log.push({
+        message: `${target.name} is incapacitated and cannot attack next turn!`,
+        type: 'enemy'
+      });
+    }
+  } else if (abilityResult.damage > 0) {
+    const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
+    if (charIndex !== -1) {
+      const currentHP = updatedParty[charIndex].currentHP !== undefined 
+        ? updatedParty[charIndex].currentHP 
+        : updatedParty[charIndex].hitPoints || 0;
+      updatedParty[charIndex].currentHP = Math.max(0, currentHP - abilityResult.damage);
+      
+      log.push({
+        message: `${enemy.uniqueName} does ${abilityResult.damage} damage to ${target.name}`,
+        type: 'enemy'
+      });
+      
+      if (updatedParty[charIndex].currentHP <= 0) {
+        log.push({
+          message: `${target.name} was defeated!`,
+          type: 'neutral'
+        });
+      }
+    }
+  }
+  
+  // Handle counter-attack on doubles
+  let shouldContinue = true;
+  if (abilityResult.counter) {
+    log.push({
+      message: `${target.name} rolled doubles and gets a free counter-attack!`,
+      type: 'player'
+    });
+    
+    const counterResult = handleCounterAttack(target, enemy, updatedEnemies, log);
+    shouldContinue = counterResult.shouldContinue;
+  }
+  
+  return { updatedParty, updatedEnemies, log, shouldContinue };
+};
+
+// Dual Wield Barrage ability
+const dualWieldBarrageAbility: AbilityFunction = (context) => {
+  const { enemy, ability, updatedParty, updatedEnemies, damageModel, enemyAttacksPerRound, attackNum, log } = context;
+  
+  const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
+  log.push({
+    message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - targeting ALL players!`,
+    type: 'enemy'
+  });
+  
+  // Attack each alive player
+  const aliveParty = updatedParty.filter(char => {
+    const hp = char.currentHP !== undefined ? char.currentHP : char.hitPoints || 0;
+    return hp > 0;
+  });
+  
+  let shouldContinue = true;
+  for (const partyTarget of aliveParty) {
+    if (!shouldContinue) break;
+    
+    const defenseScore = partyTarget.defenseScore || 1;
+    const defenseSkill = partyTarget.defenseSkill || 'BRACE';
+    const defenseRolls = rollDice(defenseScore, 0, 1); // 1 advantage for defending against barrage
+    const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, partyTarget);
+    
+    log.push({
+      message: `${partyTarget.name} defends with ${defenseSkill} (with advantage) and rolled ${defenseRolls.join(', ')} (${defenseScore + 1} dice)`,
+      type: 'player'
+    });
+    
+    if (defenseResult.damage > 0) {
+      const charIndex = updatedParty.findIndex(c => c.partyId === partyTarget.partyId);
+      if (charIndex !== -1) {
+        const currentHP = updatedParty[charIndex].currentHP !== undefined 
+          ? updatedParty[charIndex].currentHP 
+          : updatedParty[charIndex].hitPoints || 0;
+        updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
+        
+        log.push({
+          message: `${partyTarget.name} takes ${defenseResult.damage} damage from the barrage`,
+          type: 'enemy'
+        });
+        
+        if (updatedParty[charIndex].currentHP <= 0) {
+          log.push({
+            message: `${partyTarget.name} was defeated!`,
+            type: 'neutral'
+          });
+        }
+      }
+    } else {
+      log.push({
+        message: `${partyTarget.name} successfully defends against the barrage`,
+        type: 'player'
+      });
+    }
+    
+    // Handle counter-attack on doubles
+    if (defenseResult.counter) {
+      log.push({
+        message: `${partyTarget.name} rolled doubles and gets a free counter-attack!`,
+        type: 'player'
+      });
+      
+      const counterResult = handleCounterAttack(partyTarget, enemy, updatedEnemies, log);
+      shouldContinue = counterResult.shouldContinue;
+    }
+  }
+  
+  return { updatedParty, updatedEnemies, log, shouldContinue };
+};
+
+// High Noon Duel ability
+const highNoonDuelAbility: AbilityFunction = (context) => {
+  const { enemy, ability, target, updatedParty, updatedEnemies, damageModel, enemyAttacksPerRound, attackNum, log } = context;
+  
+  const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
+  log.push({
+    message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - challenging ${target.name} to a duel!`,
+    type: 'enemy'
+  });
+  
+  const defenseScore = target.defenseScore || 1;
+  const defenseSkill = target.defenseSkill || 'BRACE';
+  const defenseRolls = rollDice(defenseScore);
+  const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
+  
+  log.push({
+    message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
+    type: 'player'
+  });
+  
+  if (defenseResult.damage > 0) {
+    const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
+    if (charIndex !== -1) {
+      const currentHP = updatedParty[charIndex].currentHP !== undefined 
+        ? updatedParty[charIndex].currentHP 
+        : updatedParty[charIndex].hitPoints || 0;
+      updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
+      
+      log.push({
+        message: `${target.name} takes ${defenseResult.damage} damage in the duel`,
+        type: 'enemy'
+      });
+      
+      if (updatedParty[charIndex].currentHP <= 0) {
+        log.push({
+          message: `${target.name} was defeated in the duel!`,
+          type: 'neutral'
+        });
+      }
+    }
+  } else {
+    log.push({
+      message: `${target.name} successfully defends in the duel`,
+      type: 'player'
+    });
+  }
+  
+  // Handle counter-attack
+  let shouldContinue = true;
+  if (defenseResult.counter) {
+    log.push({
+      message: `${target.name} rolled doubles and gets a free counter-attack in the duel!`,
+      type: 'player'
+    });
+    
+    const counterResult = handleCounterAttack(target, enemy, updatedEnemies, log);
+    shouldContinue = counterResult.shouldContinue;
+  }
+  
+  return { updatedParty, updatedEnemies, log, shouldContinue };
+};
+
+// Desert Mirage ability
+const desertMirageAbility: AbilityFunction = (context) => {
+  const { enemy, ability, target, updatedParty, updatedEnemies, damageModel, enemyAttacksPerRound, attackNum, log } = context;
+  
+  const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
+  log.push({
+    message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - reality shimmers and distorts!`,
+    type: 'enemy'
+  });
+  
+  log.push({
+    message: `Shimmering mirages make it harder for players to focus their attacks`,
+    type: 'neutral'
+  });
+  
+  const defenseScore = target.defenseScore || 1;
+  const defenseSkill = target.defenseSkill || 'BRACE';
+  const defenseRolls = rollDice(defenseScore);
+  const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
+  
+  log.push({
+    message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
+    type: 'player'
+  });
+  
+  if (defenseResult.damage > 0) {
+    const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
+    if (charIndex !== -1) {
+      const currentHP = updatedParty[charIndex].currentHP !== undefined 
+        ? updatedParty[charIndex].currentHP 
+        : updatedParty[charIndex].hitPoints || 0;
+      updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
+      
+      log.push({
+        message: `${target.name} takes ${defenseResult.damage} damage through the mirage`,
+        type: 'enemy'
+      });
+      
+      if (updatedParty[charIndex].currentHP <= 0) {
+        log.push({
+          message: `${target.name} was defeated!`,
+          type: 'neutral'
+        });
+      }
+    }
+  } else {
+    log.push({
+      message: `${target.name} successfully defends against the mirage attack`,
+      type: 'player'
+    });
+  }
+  
+  // Handle counter-attack
+  let shouldContinue = true;
+  if (defenseResult.counter) {
+    log.push({
+      message: `${target.name} rolled doubles and gets a free counter-attack!`,
+      type: 'player'
+    });
+    
+    const counterResult = handleCounterAttack(target, enemy, updatedEnemies, log);
+    shouldContinue = counterResult.shouldContinue;
+  }
+  
+  return { updatedParty, updatedEnemies, log, shouldContinue };
+};
+
+// Violet Haze ability
+const violetHazeAbility: AbilityFunction = (context) => {
+  const { enemy, ability, updatedParty, updatedEnemies, damageModel, enemyAttacksPerRound, attackNum, log } = context;
+  
+  const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
+  log.push({
+    message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - releasing toxic wisteria pollen!`,
+    type: 'enemy'
+  });
+  
+  log.push({
+    message: `Purple clouds of poisonous pollen fill the air, choking all enemies`,
+    type: 'enemy'
+  });
+  
+  // Attack each alive player with poison damage
+  const aliveParty = updatedParty.filter(char => {
+    const hp = char.currentHP !== undefined ? char.currentHP : char.hitPoints || 0;
+    return hp > 0;
+  });
+  
+  let shouldContinue = true;
+  for (const partyTarget of aliveParty) {
+    if (!shouldContinue) break;
+    
+    const defenseScore = partyTarget.defenseScore || 1;
+    const defenseSkill = partyTarget.defenseSkill || 'BRACE';
+    const defenseRolls = rollDice(defenseScore);
+    const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, partyTarget);
+    
+    log.push({
+      message: `${partyTarget.name} tries to resist the toxic pollen with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
+      type: 'player'
+    });
+    
+    if (defenseResult.damage > 0) {
+      const charIndex = updatedParty.findIndex(c => c.partyId === partyTarget.partyId);
+      if (charIndex !== -1) {
+        const currentHP = updatedParty[charIndex].currentHP !== undefined 
+          ? updatedParty[charIndex].currentHP 
+          : updatedParty[charIndex].hitPoints || 0;
+        updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
+        
+        log.push({
+          message: `${partyTarget.name} takes ${defenseResult.damage} poison damage from the violet haze`,
+          type: 'enemy'
+        });
+        
+        if (updatedParty[charIndex].currentHP <= 0) {
+          log.push({
+            message: `${partyTarget.name} succumbs to the toxic pollen!`,
+            type: 'neutral'
+          });
+        }
+      }
+    } else {
+      log.push({
+        message: `${partyTarget.name} successfully resists the poisonous cloud`,
+        type: 'player'
+      });
+    }
+    
+    // Handle counter-attack on doubles (represents fighting through the poison)
+    if (defenseResult.counter) {
+      log.push({
+        message: `${partyTarget.name} rolled doubles and fights through the poison for a counter-attack!`,
+        type: 'player'
+      });
+      
+      const counterResult = handleCounterAttack(partyTarget, enemy, updatedEnemies, log);
+      shouldContinue = counterResult.shouldContinue;
+    }
+  }
+  
+  return { updatedParty, updatedEnemies, log, shouldContinue };
+};
+
+// Ability mapping
+const abilityMap: Record<string, AbilityFunction> = {
+  'incapacitate': incapacitateAbility,
+  'Incapacitate': incapacitateAbility,
+  'dualWieldBarrage': dualWieldBarrageAbility,
+  'highNoonDuel': highNoonDuelAbility,
+  'desertMirage': desertMirageAbility,
+  'violetHaze': violetHazeAbility,
+};
 
 export const simulatePlayerAttackPhase = (
   party: CombatCharacterInstance[], 
@@ -224,480 +657,37 @@ export const simulateEnemyAttackPhase = (
         }
         enemy.usedAbilities.add(ability.name);
         
-        // Target defends against ability
-        const defenseScore = target.defenseScore || 1;
-        const defenseSkill = target.defenseSkill || 'BRACE';
-        const defenseRolls = rollDice(defenseScore);
+        // Use ability mapping system to handle special abilities
+        const abilityFunction = abilityMap[ability.abilityCode || ''];
         
-        if (ability.abilityCode === 'incapacitate' || ability.abilityCode === 'Incapacitate') {
-          const abilityResult = calculateIncapacitateDefense(defenseRolls, target);
+        if (abilityFunction) {
+          // Create context for ability function
+          const context: AbilityContext = {
+            enemy,
+            ability,
+            target,
+            updatedParty,
+            updatedEnemies,
+            damageModel,
+            enemyAttacksPerRound,
+            attackNum,
+            log
+          };
           
-          // Log ability use and defense
-          const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
-          log.push({
-            message: `${enemy.uniqueName} uses ${ability.name}${attackLabel}`,
-            type: 'enemy'
-          });
-          log.push({
-            message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
-            type: 'player'
-          });
+          // Execute the ability and get results
+          const abilityResult = abilityFunction(context);
           
-          // Apply ability effects
-          if (abilityResult.fullIncapacitation) {
-            // Remove all HP
-            const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
-            if (charIndex !== -1) {
-              updatedParty[charIndex].currentHP = 0;
-              log.push({
-                message: `${target.name} is fully incapacitated and loses all HP!`,
-                type: 'enemy'
-              });
-              log.push({
-                message: `${target.name} was defeated!`,
-                type: 'neutral'
-              });
-            }
-          } else if (abilityResult.incapacitated) {
-            // Mark as incapacitated for next turn
-            const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
-            if (charIndex !== -1) {
-              updatedParty[charIndex].incapacitated = true;
-              log.push({
-                message: `${target.name} is incapacitated and cannot attack next turn!`,
-                type: 'enemy'
-              });
-            }
-          } else if (abilityResult.damage > 0) {
-            // Apply regular damage
-            const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
-            if (charIndex !== -1) {
-              const currentHP = updatedParty[charIndex].currentHP !== undefined 
-                ? updatedParty[charIndex].currentHP 
-                : updatedParty[charIndex].hitPoints || 0;
-              updatedParty[charIndex].currentHP = Math.max(0, currentHP - abilityResult.damage);
-              
-              log.push({
-                message: `${enemy.uniqueName} does ${abilityResult.damage} damage to ${target.name}`,
-                type: 'enemy'
-              });
-              
-              // Check if character is defeated
-              if (updatedParty[charIndex].currentHP <= 0) {
-                log.push({
-                  message: `${target.name} was defeated!`,
-                  type: 'neutral'
-                });
-              }
-            }
-          }
+          // Update state from ability results
+          updatedParty = abilityResult.updatedParty;
+          updatedEnemies = abilityResult.updatedEnemies;
+          log.push(...abilityResult.log);
           
-          // Handle counter-attack on doubles
-          if (abilityResult.counter) {
-            log.push({
-              message: `${target.name} rolled doubles and gets a free counter-attack!`,
-              type: 'player'
-            });
-            
-            const counterAttackScore = target.attackScore || 1;
-            const counterAttackSkill = target.attackSkill || 'BREAK';
-            const counterRolls = rollDice(counterAttackScore);
-            const counterDamage = calculateDamage(counterRolls);
-            
-            log.push({
-              message: `${target.name} counter-attacks ${enemy.uniqueName} with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
-              type: 'player'
-            });
-            
-            if (counterDamage > 0) {
-              const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
-              if (enemyIndex !== -1) {
-                const currentEnemyHP = updatedEnemies[enemyIndex].currentHP !== undefined 
-                  ? updatedEnemies[enemyIndex].currentHP 
-                  : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
-                updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
-                
-                log.push({
-                  message: `${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
-                  type: 'player'
-                });
-                
-                if (updatedEnemies[enemyIndex].currentHP <= 0) {
-                  log.push({
-                    message: `${enemy.uniqueName} was defeated by the counter-attack!`,
-                    type: 'neutral'
-                  });
-                }
-              }
-            }
-          }
-        } else if (ability.abilityCode === 'dualWieldBarrage') {
-          // Dual Wield Barrage: Attack all players, they defend with advantage
-          const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
-          log.push({
-            message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - targeting ALL players!`,
-            type: 'enemy'
-          });
-          
-          // Attack each alive player
-          const aliveParty = updatedParty.filter(char => {
-            const hp = char.currentHP !== undefined ? char.currentHP : char.hitPoints || 0;
-            return hp > 0;
-          });
-          
-          for (const partyTarget of aliveParty) {
-            const defenseScore = partyTarget.defenseScore || 1;
-            const defenseSkill = partyTarget.defenseSkill || 'BRACE';
-            const defenseRolls = rollDice(defenseScore, 0, 1); // 1 advantage for defending against barrage
-            const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, partyTarget);
-            
-            log.push({
-              message: `${partyTarget.name} defends with ${defenseSkill} (with advantage) and rolled ${defenseRolls.join(', ')} (${defenseScore + 1} dice)`,
-              type: 'player'
-            });
-            
-            if (defenseResult.damage > 0) {
-              const charIndex = updatedParty.findIndex(c => c.partyId === partyTarget.partyId);
-              if (charIndex !== -1) {
-                const currentHP = updatedParty[charIndex].currentHP !== undefined 
-                  ? updatedParty[charIndex].currentHP 
-                  : updatedParty[charIndex].hitPoints || 0;
-                updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
-                
-                log.push({
-                  message: `${partyTarget.name} takes ${defenseResult.damage} damage from the barrage`,
-                  type: 'enemy'
-                });
-                
-                if (updatedParty[charIndex].currentHP <= 0) {
-                  log.push({
-                    message: `${partyTarget.name} was defeated!`,
-                    type: 'neutral'
-                  });
-                }
-              }
-            } else {
-              log.push({
-                message: `${partyTarget.name} successfully defends against the barrage`,
-                type: 'player'
-              });
-            }
-            
-            // Handle counter-attack on doubles
-            if (defenseResult.counter) {
-              log.push({
-                message: `${partyTarget.name} rolled doubles and gets a free counter-attack!`,
-                type: 'player'
-              });
-              
-              const counterAttackScore = partyTarget.attackScore || 1;
-              const counterAttackSkill = partyTarget.attackSkill || 'BREAK';
-              const counterRolls = rollDice(counterAttackScore);
-              const counterDamage = calculateDamage(counterRolls);
-              
-              log.push({
-                message: `${partyTarget.name} counter-attacks with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
-                type: 'player'
-              });
-              
-              if (counterDamage > 0) {
-                const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
-                if (enemyIndex !== -1) {
-                  const currentEnemyHP = updatedEnemies[enemyIndex].currentHP !== undefined 
-                    ? updatedEnemies[enemyIndex].currentHP 
-                    : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
-                  updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
-                  
-                  log.push({
-                    message: `${partyTarget.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
-                    type: 'player'
-                  });
-                  
-                  if (updatedEnemies[enemyIndex].currentHP <= 0) {
-                    log.push({
-                      message: `${enemy.uniqueName} was defeated by the counter-attack!`,
-                      type: 'neutral'
-                    });
-                    break; // Enemy is defeated, stop processing barrage
-                  }
-                }
-              }
-            }
-          }
-        } else if (ability.abilityCode === 'highNoonDuel') {
-          // High Noon Duel: Target one player, create duel state (simplified for now)
-          const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
-          log.push({
-            message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - challenging ${target.name} to a duel!`,
-            type: 'enemy'
-          });
-          
-          // For now, treat as a powerful single attack (duel mechanics would require more complex state)
-          const defenseScore = target.defenseScore || 1;
-          const defenseSkill = target.defenseSkill || 'BRACE';
-          const defenseRolls = rollDice(defenseScore);
-          const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
-          
-          log.push({
-            message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
-            type: 'player'
-          });
-          
-          if (defenseResult.damage > 0) {
-            const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
-            if (charIndex !== -1) {
-              const currentHP = updatedParty[charIndex].currentHP !== undefined 
-                ? updatedParty[charIndex].currentHP 
-                : updatedParty[charIndex].hitPoints || 0;
-              updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
-              
-              log.push({
-                message: `${target.name} takes ${defenseResult.damage} damage in the duel`,
-                type: 'enemy'
-              });
-              
-              if (updatedParty[charIndex].currentHP <= 0) {
-                log.push({
-                  message: `${target.name} was defeated in the duel!`,
-                  type: 'neutral'
-                });
-              }
-            }
-          } else {
-            log.push({
-              message: `${target.name} successfully defends in the duel`,
-              type: 'player'
-            });
-          }
-          
-          // Handle counter-attack
-          if (defenseResult.counter) {
-            log.push({
-              message: `${target.name} rolled doubles and gets a free counter-attack in the duel!`,
-              type: 'player'
-            });
-            
-            const counterAttackScore = target.attackScore || 1;
-            const counterAttackSkill = target.attackSkill || 'BREAK';
-            const counterRolls = rollDice(counterAttackScore);
-            const counterDamage = calculateDamage(counterRolls);
-            
-            log.push({
-              message: `${target.name} counter-attacks with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
-              type: 'player'
-            });
-            
-            if (counterDamage > 0) {
-              const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
-              if (enemyIndex !== -1) {
-                const currentEnemyHP = updatedEnemies[enemyIndex].currentHP !== undefined 
-                  ? updatedEnemies[enemyIndex].currentHP 
-                  : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
-                updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
-                
-                log.push({
-                  message: `${target.name} does ${counterDamage} damage to ${enemy.uniqueName} in the duel`,
-                  type: 'player'
-                });
-                
-                if (updatedEnemies[enemyIndex].currentHP <= 0) {
-                  log.push({
-                    message: `${enemy.uniqueName} was defeated in the duel!`,
-                    type: 'neutral'
-                  });
-                }
-              }
-            }
-          }
-        } else if (ability.abilityCode === 'desertMirage') {
-          // Desert Mirage: All player attacks get +1 cut next round (simplified - just affect this attack)
-          const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
-          log.push({
-            message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - reality shimmers and distorts!`,
-            type: 'enemy'
-          });
-          
-          log.push({
-            message: `Shimmering mirages make it harder for players to focus their attacks`,
-            type: 'neutral'
-          });
-          
-          // For now, treat as a regular attack (mirage effects would require state tracking)
-          const defenseScore = target.defenseScore || 1;
-          const defenseSkill = target.defenseSkill || 'BRACE';
-          const defenseRolls = rollDice(defenseScore);
-          const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
-          
-          log.push({
-            message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
-            type: 'player'
-          });
-          
-          if (defenseResult.damage > 0) {
-            const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
-            if (charIndex !== -1) {
-              const currentHP = updatedParty[charIndex].currentHP !== undefined 
-                ? updatedParty[charIndex].currentHP 
-                : updatedParty[charIndex].hitPoints || 0;
-              updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
-              
-              log.push({
-                message: `${target.name} takes ${defenseResult.damage} damage through the mirage`,
-                type: 'enemy'
-              });
-              
-              if (updatedParty[charIndex].currentHP <= 0) {
-                log.push({
-                  message: `${target.name} was defeated!`,
-                  type: 'neutral'
-                });
-              }
-            }
-          } else {
-            log.push({
-              message: `${target.name} successfully defends against the mirage attack`,
-              type: 'player'
-            });
-          }
-          
-          // Handle counter-attack
-          if (defenseResult.counter) {
-            log.push({
-              message: `${target.name} rolled doubles and gets a free counter-attack!`,
-              type: 'player'
-            });
-            
-            const counterAttackScore = target.attackScore || 1;
-            const counterAttackSkill = target.attackSkill || 'BREAK';
-            const counterRolls = rollDice(counterAttackScore);
-            const counterDamage = calculateDamage(counterRolls);
-            
-            log.push({
-              message: `${target.name} counter-attacks with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
-              type: 'player'
-            });
-            
-            if (counterDamage > 0) {
-              const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
-              if (enemyIndex !== -1) {
-                const currentEnemyHP = updatedEnemies[enemyIndex].currentHP !== undefined 
-                  ? updatedEnemies[enemyIndex].currentHP 
-                  : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
-                updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
-                
-                log.push({
-                  message: `${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
-                  type: 'player'
-                });
-                
-                if (updatedEnemies[enemyIndex].currentHP <= 0) {
-                  log.push({
-                    message: `${enemy.uniqueName} was defeated by the counter-attack!`,
-                    type: 'neutral'
-                  });
-                }
-              }
-            }
-          }
-        } else if (ability.abilityCode === 'violetHaze') {
-          // Violet Haze: Creates poisonous cloud affecting all players
-          const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
-          log.push({
-            message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - releasing toxic wisteria pollen!`,
-            type: 'enemy'
-          });
-          
-          log.push({
-            message: `Purple clouds of poisonous pollen fill the air, choking all enemies`,
-            type: 'enemy'
-          });
-          
-          // Attack each alive player with poison damage
-          const aliveParty = updatedParty.filter(char => {
-            const hp = char.currentHP !== undefined ? char.currentHP : char.hitPoints || 0;
-            return hp > 0;
-          });
-          
-          for (const partyTarget of aliveParty) {
-            const defenseScore = partyTarget.defenseScore || 1;
-            const defenseSkill = partyTarget.defenseSkill || 'BRACE';
-            const defenseRolls = rollDice(defenseScore);
-            const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, partyTarget);
-            
-            log.push({
-              message: `${partyTarget.name} tries to resist the toxic pollen with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
-              type: 'player'
-            });
-            
-            if (defenseResult.damage > 0) {
-              const charIndex = updatedParty.findIndex(c => c.partyId === partyTarget.partyId);
-              if (charIndex !== -1) {
-                const currentHP = updatedParty[charIndex].currentHP !== undefined 
-                  ? updatedParty[charIndex].currentHP 
-                  : updatedParty[charIndex].hitPoints || 0;
-                updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
-                
-                log.push({
-                  message: `${partyTarget.name} takes ${defenseResult.damage} poison damage from the violet haze`,
-                  type: 'enemy'
-                });
-                
-                if (updatedParty[charIndex].currentHP <= 0) {
-                  log.push({
-                    message: `${partyTarget.name} succumbs to the toxic pollen!`,
-                    type: 'neutral'
-                  });
-                }
-              }
-            } else {
-              log.push({
-                message: `${partyTarget.name} successfully resists the poisonous cloud`,
-                type: 'player'
-              });
-            }
-            
-            // Handle counter-attack on doubles (represents fighting through the poison)
-            if (defenseResult.counter) {
-              log.push({
-                message: `${partyTarget.name} rolled doubles and fights through the poison for a counter-attack!`,
-                type: 'player'
-              });
-              
-              const counterAttackScore = partyTarget.attackScore || 1;
-              const counterAttackSkill = partyTarget.attackSkill || 'BREAK';
-              const counterRolls = rollDice(counterAttackScore);
-              const counterDamage = calculateDamage(counterRolls);
-              
-              log.push({
-                message: `${partyTarget.name} counter-attacks through the haze with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
-                type: 'player'
-              });
-              
-              if (counterDamage > 0) {
-                const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
-                if (enemyIndex !== -1) {
-                  const currentEnemyHP = updatedEnemies[enemyIndex].currentHP !== undefined 
-                    ? updatedEnemies[enemyIndex].currentHP 
-                    : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
-                  updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
-                  
-                  log.push({
-                    message: `${partyTarget.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
-                    type: 'player'
-                  });
-                  
-                  if (updatedEnemies[enemyIndex].currentHP <= 0) {
-                    log.push({
-                      message: `${enemy.uniqueName} was defeated by the counter-attack!`,
-                      type: 'neutral'
-                    });
-                    break; // Enemy is defeated, stop processing haze
-                  }
-                }
-              }
-            }
+          // If ability indicates we should stop (enemy defeated), break from attack loop
+          if (!abilityResult.shouldContinue) {
+            return { updatedParty, updatedEnemies, log };
           }
         } else {
+          // Unknown ability code - treat as regular attack with fallback logic
           if (debugMode) {
             log.push({
               message: `DEBUG: ${enemy.uniqueName} ability "${ability.name}" has unknown abilityCode "${ability.abilityCode}" - treating as regular attack`,
@@ -705,16 +695,17 @@ export const simulateEnemyAttackPhase = (
             });
           }
           
-          // For unknown ability codes, treat as regular attack for now
-          // This ensures enemies still do something rather than nothing
+          // Set up defense for unknown ability (fallback to regular attack)
+          const defenseScore = target.defenseScore || 1;
+          const defenseSkill = target.defenseSkill || 'BRACE';
+          const defenseRolls = rollDice(defenseScore);
+          const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
+          
           const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
           log.push({
             message: `${enemy.uniqueName} uses ${ability.name}${attackLabel}`,
             type: 'enemy'
           });
-          
-          // Use regular attack mechanics
-          const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
           
           log.push({
             message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
@@ -722,7 +713,6 @@ export const simulateEnemyAttackPhase = (
           });
         
           if (defenseResult.damage > 0) {
-            // Find character in updatedParty array and apply damage
             const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
             if (charIndex !== -1) {
               const currentHP = updatedParty[charIndex].currentHP !== undefined 
@@ -735,7 +725,6 @@ export const simulateEnemyAttackPhase = (
                 type: 'enemy'
               });
               
-              // Check if character is defeated
               if (updatedParty[charIndex].currentHP <= 0) {
                 log.push({
                   message: `${target.name} was defeated!`,
@@ -752,36 +741,9 @@ export const simulateEnemyAttackPhase = (
               type: 'player'
             });
             
-            const counterAttackScore = target.attackScore || 1;
-            const counterAttackSkill = target.attackSkill || 'BREAK';
-            const counterRolls = rollDice(counterAttackScore);
-            const counterDamage = calculateDamage(counterRolls);
-            
-            log.push({
-              message: `${target.name} counter-attacks ${enemy.uniqueName} with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
-              type: 'player'
-            });
-            
-            if (counterDamage > 0) {
-              const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
-              if (enemyIndex !== -1) {
-                const currentEnemyHP = updatedEnemies[enemyIndex].currentHP !== undefined 
-                  ? updatedEnemies[enemyIndex].currentHP 
-                  : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
-                updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
-                
-                log.push({
-                  message: `${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
-                  type: 'player'
-                });
-                
-                if (updatedEnemies[enemyIndex].currentHP <= 0) {
-                  log.push({
-                    message: `${enemy.uniqueName} was defeated by the counter-attack!`,
-                    type: 'neutral'
-                  });
-                }
-              }
+            const counterResult = handleCounterAttack(target, enemy, updatedEnemies, log);
+            if (!counterResult.shouldContinue) {
+              return { updatedParty, updatedEnemies, log };
             }
           }
         }
