@@ -166,6 +166,29 @@
   flex-wrap: wrap;
 }
 
+/* Add to Party Button */
+.add-to-party-button {
+  background: #98c379;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-to-party-button:hover:not(:disabled) {
+  background: #7fb069;
+}
+
+.add-to-party-button:disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+}
+
 /* Save Character Button */
 .save-character-section {
   display: flex;

@@ -262,6 +262,12 @@ const PartyTab = () => {
             
             {displayCharacter && (
               <div className="character-actions">
+                <button 
+                  className="add-to-party-button"
+                  onClick={() => handleCharacterSelect(displayCharacter)}
+                >
+                  Add to Party
+                </button>
                 <SaveCharacterButton 
                   characterData={displayCharacter} 
                   onSave={handleCharacterSaved}
@@ -281,11 +287,7 @@ const PartyTab = () => {
         {/* Party Management Column */}
         <div className="party-management-column">
           <div className="party-section">
-            <h3>Build & Save Party</h3>
-            <CombinedCharacterSelector 
-              onCharacterSelect={handleCharacterSelect}
-              refreshTrigger={savedCharactersRefresh}
-            />
+            <h3>Party</h3>
         
         {partyCharacters.length > 0 && (
           <div className="party-save-section">
