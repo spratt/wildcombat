@@ -29,9 +29,11 @@ Wildcombat is a Vite React application for managing Wildsea RPG character sheets
 ### Simulate Tab
 - **Combat Simulation**: Full dice-based combat system
 - **Party vs Encounter**: Displays party and enemy stats side-by-side
-- **Simulation Options**: Configurable damage models
-- **Combat Controls**: Simulate rounds, sessions, or clear state
-- **Combat Log**: Detailed round-by-round combat results
+- **Simulation Options**: Configurable damage models and enemy attacks per round
+- **Ability Controls**: Checkbox to enable/disable enemy ability usage
+- **Combat Controls**: Simulate rounds, sessions, or many sessions with statistics
+- **Session Statistics**: Win/loss rates, average rounds, average HP tracking
+- **Combat Log**: Detailed round-by-round combat results with message styling
 
 ## Character System
 The project contains character data for a Wildsea RPG campaign with four characters:
@@ -75,11 +77,34 @@ Characters are validated against a JSON Schema (draft-07) located at `src/charac
    - Roll 1-3: Damage = longest aspect track length
    - Doubles: Counter-attack
 
+3. **1,aspect,2aspect,counter**: Double aspect model
+   - Roll 6: 1 damage
+   - Roll 4-5: Damage = longest aspect track length
+   - Roll 1-3: Damage = 2x longest aspect track length
+   - Doubles: Counter-attack
+
+### Enemy Abilities
+- **Incapacitate**: Special enemy attack that can disable characters
+  - Roll 6: 1 damage
+  - Roll 4-5: Character incapacitated for 1 round
+  - Roll 1-3: Character fully incapacitated (all HP removed)
+- **Usage Control**: Abilities can be enabled/disabled via checkbox
+- **Once Per Session**: Each enemy ability can only be used once per combat session
+- **Aspect-Based**: Abilities are tied to specific enemy aspects with abilityCode
+
 ### Combat Flow
-1. **Player Attack Phase**: Each party member attacks lowest HP enemy
-2. **Enemy Attack Phase**: Each enemy attacks lowest HP player
-3. **Defense Resolution**: Target rolls defense, takes damage, potential counter
-4. **Win/Lose Conditions**: Combat ends when one side is eliminated
+1. **Incapacitation Clear**: All incapacitation status cleared at round start
+2. **Player Attack Phase**: Each party member attacks lowest HP enemy
+3. **Enemy Attack Phase**: Each enemy attacks lowest HP player or uses abilities
+4. **Defense Resolution**: Target rolls defense, takes damage, potential counter
+5. **Win/Lose Conditions**: Combat ends when one side is eliminated
+
+### Session Statistics
+- **Multi-Session Simulation**: Run 1-100 sessions with full statistics
+- **Win/Loss Tracking**: Percentage breakdown of session outcomes
+- **Round Averaging**: Calculate average combat duration
+- **HP Tracking**: Average remaining HP for wins/losses
+- **State Management**: Proper button disable/enable based on combat state
 
 ## CSS Architecture
 Modular CSS structure in `src/styles/`:
@@ -97,6 +122,7 @@ Modular CSS structure in `src/styles/`:
 - `wildcombat-encounter` - Current enemy encounter
 - `wildcombat-active-tab` - Last selected tab
 - `wildcombat-last-character` - Last viewed character in Character Viewer
+- `wildcombat-use-abilities` - Enemy ability usage setting
 
 ### Auto-save Behavior
 - **Party**: Saves on add/remove character, heal party
@@ -110,25 +136,31 @@ Modular CSS structure in `src/styles/`:
 - `rollDice(count)` - Roll specified number of d6
 - `calculateDamage(rolls)` - Calculate attack damage from rolls
 - `calculateDefenseDamage(rolls, damageModel, character)` - Calculate defense damage
+- `calculateIncapacitateDefense(rolls)` - Calculate incapacitation effects
 - `checkWinConditions(enemies, party)` - Determine combat end state
 
 ### Combat Simulator (`src/utils/combatSimulator.js`)
-- `simulatePlayerAttackPhase(party, enemies)` - Player attacks
-- `simulateEnemyAttackPhase(enemies, party, damageModel)` - Enemy attacks
-- `simulateOneRound(party, enemies, round, damageModel)` - Complete round
+- `simulatePlayerAttackPhase(party, enemies, damageModel, attacksPerRound)` - Player attacks
+- `simulateEnemyAttackPhase(enemies, party, damageModel, attacksPerRound, useAbilities)` - Enemy attacks
+- `simulateOneRound(party, enemies, round, damageModel, attacksPerRound, useAbilities)` - Complete round
 
 ### Session Simulator (`src/utils/sessionSimulator.js`)
-- `simulateFullSession(party, enemies, startRound, damageModel)` - Full combat with timeout
+- `simulateFullSession(party, enemies, startRound, damageModel, attacksPerRound, useAbilities)` - Full combat with timeout
 
 ### Data Manager (`src/utils/dataManager.js`)
+- `calculateEnemyTrackLength(enemy)` - Calculate total HP from aspect trackLengths
+- `calculatePartyStats(party)` - Calculate total party statistics
+- `calculateEncounterStats(enemies)` - Calculate total encounter statistics
 - Party and encounter loading functions
-- Statistics calculations
 - State reset utilities
 
 ## Commands
 - `npm run dev` - Start development server
 - `npm run build` - Build for production  
+- `npm run build:pages` - Build for GitHub Pages deployment
 - `npm run lint` - Run ESLint
+- `npm test` - Run unit tests (Vitest)
+- `npm run test:run` - Run tests once and exit
 - `npm run validate:characters` - Validate all character JSON files
 
 ## Important Notes
@@ -136,7 +168,7 @@ Modular CSS structure in `src/styles/`:
 ### File Modification Rules
 ⚠️ **DO NOT modify any files in `public/characters/*.json`** - These are player character sheets that should only be edited by the players themselves or through the application interface.
 
-⚠️ **DO NOT modify any files in `public/enemies/*.json`** - These are enemy definitions used by the combat system.
+⚠️ **DO NOT modify any files in `public/enemies/*.json`** - These are enemy definitions used by the combat system. Note: Enemy trackLength field has been moved to individual aspects.
 
 ### Data Integrity
 - All character and enemy data is validated against JSON schemas
@@ -162,10 +194,25 @@ Modular CSS structure in `src/styles/`:
 - Vite 7.0.0
 - AJV 8.17.1 (JSON schema validation)
 - AJV CLI 5.0.0
+- Vitest 2.1.8 (testing framework)
+
+## Testing
+- **Unit Test Coverage**: Comprehensive tests for combat simulation logic
+- **Test Files**: Located in `src/tests/` directory
+  - `combatEngine.test.js` - Core combat mechanics (28 tests)
+  - `combatSimulator.test.js` - Attack phases and rounds (15 tests)
+  - `dataManager.test.js` - Data calculations and statistics (14 tests)
+  - `sessionSimulator.test.js` - Full session simulation (7 tests)
+- **Test Framework**: Vitest with mocking for deterministic results
+- **Test Coverage**: 64 tests covering dice rolling, damage calculation, abilities, win conditions
+- **CI/CD Ready**: Tests run once and exit for automation compatibility
 
 ## Development Workflow
 1. Characters are managed in the Party tab (view, add to party, heal)
 2. Encounters are built in the Enemies tab (add enemies, set counts)
 3. Combat is simulated in the Simulate tab (configure options, run simulation)
-4. All data persists automatically via localStorage
-5. Tab selection and character views are remembered across sessions
+4. Enemy abilities can be toggled on/off for different simulation scenarios
+5. Multi-session statistics provide balance analysis for game design
+6. All data persists automatically via localStorage
+7. Tab selection and character views are remembered across sessions
+8. Unit tests ensure combat logic reliability and catch regressions

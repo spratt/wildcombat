@@ -17,7 +17,10 @@ Try the live demo: [https://spratt.github.io/wildcombat/](https://spratt.github.
 ### Combat Simulation
 - **Dice-Based Combat**: Full implementation of Wildsea combat mechanics
 - **Multiple Damage Models**: Choose between different damage calculation systems
+- **Enemy Abilities**: Special attacks like incapacitation with toggle controls
+- **Multi-Session Statistics**: Run hundreds of simulations for balance analysis
 - **Real-Time Combat Log**: Detailed round-by-round combat results with color coding
+- **Session Analytics**: Win/loss rates, average rounds, HP tracking
 - **Win/Loss Detection**: Automatic combat resolution
 
 ### Enemy Management
@@ -59,7 +62,7 @@ npm run build:pages
 
 1. **Party Tab**: Upload character sheets or use the provided example characters to build your party
 2. **Enemies Tab**: Select enemies and build encounters for your party to face
-3. **Simulate Tab**: Run combat simulations with configurable damage models and view detailed results
+3. **Simulate Tab**: Run combat simulations with configurable damage models, enemy abilities, and statistical analysis
 
 ## 🏗️ Project Structure
 
@@ -73,7 +76,9 @@ src/
 ├── utils/               # Core game logic
 │   ├── combatEngine.js  # Dice rolling and damage calculation
 │   ├── combatSimulator.js # Combat round simulation
+│   ├── sessionSimulator.js # Full session simulation
 │   └── dataManager.js   # Data loading and statistics
+├── tests/               # Unit test suites (Vitest)
 ├── styles/              # Modular CSS architecture
 └── schemas/             # JSON Schema validation
 ```
@@ -94,11 +99,23 @@ src/
 - Roll 1-3: Damage = longest aspect track length
 - Doubles: Counter-attack opportunity
 
+**Double Aspect (1,aspect,2aspect,counter)**
+- Roll 6: 1 damage
+- Roll 4-5: Damage = longest aspect track length
+- Roll 1-3: Damage = 2x longest aspect track length
+- Doubles: Counter-attack opportunity
+
+### Enemy Abilities
+- **Incapacitate**: Special attack that can disable characters temporarily or permanently
+- **Once Per Session**: Each ability can only be used once per combat session
+- **Toggle Control**: Enable/disable ability usage via checkbox for different scenarios
+
 ### Combat Flow
-1. **Player Attack Phase**: Each party member attacks lowest HP enemy
-2. **Enemy Attack Phase**: Each enemy attacks lowest HP player
-3. **Defense Resolution**: Target rolls defense, takes damage, potential counter
-4. **Win/Lose Conditions**: Combat ends when one side is eliminated
+1. **Incapacitation Clear**: All status effects cleared at round start
+2. **Player Attack Phase**: Each party member attacks lowest HP enemy
+3. **Enemy Attack Phase**: Each enemy attacks lowest HP player or uses special abilities
+4. **Defense Resolution**: Target rolls defense, takes damage, potential counter
+5. **Win/Lose Conditions**: Combat ends when one side is eliminated
 
 ## 📊 Character System
 
@@ -117,23 +134,34 @@ Characters are validated against JSON Schema and include:
 - `npm run build` - Build for production
 - `npm run build:pages` - Build for GitHub Pages
 - `npm run lint` - Run ESLint
+- `npm test` - Run unit tests
 - `npm run validate:characters` - Validate character JSON files
 
 ### Technologies Used
 
 - **Frontend**: React 19, Vite 7
+- **Testing**: Vitest with comprehensive unit tests (64 tests)
 - **Validation**: AJV with JSON Schema
 - **State Management**: localStorage for persistence
 - **Styling**: Modular CSS with responsive design
+
+### Testing
+
+The project includes comprehensive unit tests covering all combat simulation logic:
+- **64 tests** across 4 test suites
+- **Combat Engine**: Dice rolling, damage calculation, win conditions
+- **Combat Simulator**: Attack phases, rounds, abilities
+- **Data Manager**: Statistics and calculations
+- **Session Simulator**: Full session simulation with timeout protection
 
 ## 🎮 Example Characters
 
 The project includes 4 example characters showcasing different Wildsea bloodlines and roles:
 
-- **Zara**: Ardent Dredger Sawbones (medical specialist)
-- **Thresh**: Ketra Rootless Navigator (weather prediction)
-- **Felix**: Tzelicrae Spit Corsair (acrobatic fighter)
-- **Nova**: Cacophony Shankling Spit-Lyre (sonic musician)
+- **Cap**: Ironbound Screw (metal-controlling character with magnetic abilities)
+- **Cosmia**: Mothryn Augur (fortune-telling moth person with astral abilities)
+- **Kari**: Itzenko Tempest (lightning-wielding insectoid stowaway)
+- **Phil**: Gau Char (mushroom person chef with psychotropic spores)
 
 ## 🤝 Contributing
 
