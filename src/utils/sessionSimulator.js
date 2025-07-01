@@ -17,14 +17,20 @@ export const simulateFullSession = (party, enemies, startingRound = 1, damageMod
   while (true) {
     // Check timeout
     if (Date.now() - startTime > timeout) {
-      sessionLog.push("Session simulation timed out after 1 second");
+      sessionLog.push({
+        message: "Session simulation timed out after 1 second",
+        type: 'neutral'
+      });
       timeoutOccurred = true;
       break;
     }
     
     // Check max rounds safeguard
     if (currentRoundNum - startingRound >= maxRounds) {
-      sessionLog.push(`Session simulation stopped after ${maxRounds} rounds to prevent infinite loop`);
+      sessionLog.push({
+        message: `Session simulation stopped after ${maxRounds} rounds to prevent infinite loop`,
+        type: 'neutral'
+      });
       break;
     }
     

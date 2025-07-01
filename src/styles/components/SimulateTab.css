@@ -196,6 +196,78 @@
   cursor: not-allowed;
 }
 
+/* Simulate Many Sessions */
+.simulate-many-sessions-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.simulate-many-sessions-button {
+  background: #9c88ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.simulate-many-sessions-button:hover:not(:disabled) {
+  background: #8a75ff;
+}
+
+.simulate-many-sessions-button:disabled {
+  background: #666;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.sessions-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #2a2a2a;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+
+.counter-button {
+  background: #555;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.counter-button:hover:not(:disabled) {
+  background: #666;
+}
+
+.counter-button:disabled {
+  background: #444;
+  color: #777;
+  cursor: not-allowed;
+}
+
+.counter-value {
+  color: #fff;
+  font-weight: bold;
+  min-width: 2rem;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
 /* Simulation Options */
 .simulation-options-section {
   margin-top: 2rem;

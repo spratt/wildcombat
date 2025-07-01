@@ -39,6 +39,20 @@ const SimulateTab = () => {
       return 1;
     }
   });
+  const [sessionsToSimulate, setSessionsToSimulate] = useState(() => {
+    try {
+      return parseInt(localStorage.getItem('wildcombat-sessions-to-simulate')) || 2;
+    } catch (error) {
+      console.warn('Failed to load sessions to simulate from localStorage:', error);
+      return 2;
+    }
+  });
+  const [sessionStats, setSessionStats] = useState({
+    totalSessions: 0,
+    wins: 0,
+    losses: 0,
+    totalRounds: 0
+  });
 
   useEffect(() => {
     loadParty();
@@ -95,6 +109,15 @@ const SimulateTab = () => {
       console.warn('Failed to save enemy attacks per round to localStorage:', error);
     }
   }, [enemyAttacksPerRound]);
+
+  // Save sessions to simulate to localStorage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('wildcombat-sessions-to-simulate', sessionsToSimulate.toString());
+    } catch (error) {
+      console.warn('Failed to save sessions to simulate to localStorage:', error);
+    }
+  }, [sessionsToSimulate]);
 
   // Get damage model explanation
   const getDamageModelExplanation = (model) => {
@@ -157,6 +180,12 @@ This model uses aspect track lengths as the basis for damage calculations, makin
     setCombatLog([]);
     setCurrentRound(1);
     setCombatResult(null);
+    setSessionStats({
+      totalSessions: 0,
+      wins: 0,
+      losses: 0,
+      totalRounds: 0
+    });
   };
 
   const handleSimulateOneSession = () => {
@@ -171,6 +200,69 @@ This model uses aspect track lengths as the basis for damage calculations, makin
     if (sessionResult.combatResult) {
       setCombatResult(sessionResult.combatResult);
     }
+  };
+
+  const handleSimulateManySessions = () => {
+    const initialParty = partyCharacters.map(char => ({ ...char, currentHP: char.hitPoints }));
+    const initialEnemies = resetCombatState(uniqueEnemies, partyCharacters).resetEnemies;
+    
+    let totalSessions = 0;
+    let wins = 0;
+    let losses = 0;
+    let totalRounds = 0;
+    const allSessionLogs = [];
+
+    for (let i = 0; i < sessionsToSimulate; i++) {
+      // Reset for each session
+      const sessionParty = initialParty.map(char => ({ ...char }));
+      const sessionEnemies = initialEnemies.map(enemy => ({ ...enemy }));
+      
+      // Simulate one complete session
+      const sessionResult = simulateFullSession(sessionParty, sessionEnemies, 1, damageModel, enemyAttacksPerRound);
+      
+      totalSessions++;
+      totalRounds += sessionResult.finalRound - 1; // finalRound is 1 more than rounds completed
+      
+      // Determine win/loss
+      if (sessionResult.combatResult && sessionResult.combatResult.includes('WON')) {
+        wins++;
+      } else {
+        losses++;
+      }
+      
+      // Add session header to logs
+      allSessionLogs.push({
+        message: `=== SESSION ${i + 1}/${sessionsToSimulate} ===`,
+        type: 'neutral'
+      });
+      allSessionLogs.push(...sessionResult.sessionLog);
+      allSessionLogs.push({
+        message: `Session ${i + 1} Result: ${sessionResult.combatResult || 'Unknown'}`,
+        type: 'neutral'
+      });
+      allSessionLogs.push({
+        message: ` `,
+        type: 'neutral'
+      });
+    }
+
+    // Update session stats
+    setSessionStats({
+      totalSessions,
+      wins,
+      losses,
+      totalRounds
+    });
+
+    // Update combat log with all session results
+    setCombatLog(allSessionLogs);
+
+    // Set final summary result
+    const winPercentage = totalSessions > 0 ? ((wins / totalSessions) * 100).toFixed(1) : 0;
+    const lossPercentage = totalSessions > 0 ? ((losses / totalSessions) * 100).toFixed(1) : 0;
+    const avgRounds = totalSessions > 0 ? (totalRounds / totalSessions).toFixed(1) : 0;
+    
+    setCombatResult(`Many Sessions Complete: ${wins}W/${losses}L (${winPercentage}%W, ${lossPercentage}%L), Avg: ${avgRounds} rounds`);
   };
 
   return (
@@ -318,6 +410,34 @@ This model uses aspect track lengths as the basis for damage calculations, makin
           >
             Simulate One Session
           </button>
+          
+          <div className="simulate-many-sessions-container">
+            <button 
+              className="simulate-many-sessions-button"
+              onClick={handleSimulateManySessions}
+              disabled={partyCharacters.length === 0 || uniqueEnemies.length === 0}
+            >
+              Simulate Many Sessions
+            </button>
+            <div className="sessions-counter">
+              <button 
+                className="counter-button"
+                onClick={() => setSessionsToSimulate(Math.max(1, sessionsToSimulate - 1))}
+                disabled={sessionsToSimulate <= 1}
+              >
+                -
+              </button>
+              <span className="counter-value">{sessionsToSimulate}</span>
+              <button 
+                className="counter-button"
+                onClick={() => setSessionsToSimulate(Math.min(100, sessionsToSimulate + 1))}
+                disabled={sessionsToSimulate >= 100}
+              >
+                +
+              </button>
+            </div>
+          </div>
+          
           <button 
             className="clear-simulation-button"
             onClick={clearSimulation}
@@ -391,6 +511,26 @@ This model uses aspect track lengths as the basis for damage calculations, makin
               <span className="stat-label">Result:</span>
               <span className="stat-value">{combatResult}</span>
             </div>
+          )}
+          {sessionStats.totalSessions > 0 && (
+            <>
+              <div className="stat">
+                <span className="stat-label">Sessions:</span>
+                <span className="stat-value">{sessionStats.totalSessions}</span>
+              </div>
+              <div className="stat">
+                <span className="stat-label">Wins:</span>
+                <span className="stat-value">{sessionStats.wins} ({sessionStats.totalSessions > 0 ? ((sessionStats.wins / sessionStats.totalSessions) * 100).toFixed(1) : 0}%)</span>
+              </div>
+              <div className="stat">
+                <span className="stat-label">Losses:</span>
+                <span className="stat-value">{sessionStats.losses} ({sessionStats.totalSessions > 0 ? ((sessionStats.losses / sessionStats.totalSessions) * 100).toFixed(1) : 0}%)</span>
+              </div>
+              <div className="stat">
+                <span className="stat-label">Avg Rounds:</span>
+                <span className="stat-value">{sessionStats.totalSessions > 0 ? (sessionStats.totalRounds / sessionStats.totalSessions).toFixed(1) : 0}</span>
+              </div>
+            </>
           )}
         </div>
       </div>
