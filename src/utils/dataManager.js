@@ -28,13 +28,20 @@ export const loadEncounterFromStorage = () => {
 
 export const loadEnemiesData = async () => {
   try {
-    // For now, we'll hardcode the test enemy
-    const enemyFiles = ['shadowclaw-spider.json'];
+    // Get the base path for assets (handles both dev and production builds)
+    const basePath = import.meta.env.BASE_URL || '/';
+    
+    // Load all enemy files
+    const enemyFiles = [
+      'shadowclaw-spider.json',
+      'thornback-beetle.json', 
+      'dire-squirrel.json'
+    ];
     
     const enemyData = await Promise.all(
       enemyFiles.map(async (filename) => {
         try {
-          const response = await fetch(`/enemies/${filename}`);
+          const response = await fetch(`${basePath}enemies/${filename}`);
           if (!response.ok) throw new Error(`Failed to load ${filename}`);
           const data = await response.json();
           return { id: filename, ...data };

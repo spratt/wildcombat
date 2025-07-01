@@ -1,0 +1,47 @@
+{
+  "name": "Dire Squirrel",
+  "blurb": "An oversized and aggressive squirrel with razor-sharp claws and an insatiable appetite for nuts and flesh.",
+  "description": "What was once a common tree squirrel has grown to enormous proportions in the magical environment of the Wildsea. Standing as tall as a person when reared up, the Dire Squirrel has retained all the agility and cunning of its smaller cousins while gaining fearsome strength. Its bushy tail can knock a grown person off their feet, and its enlarged teeth can crack shells, bones, and skulls with equal ease. These creatures are known to hoard not just nuts, but any shiny objects they find interesting.",
+  "trackLength": 3,
+  "size": "medium",
+  "aspects": [
+    {
+      "name": "Acrobatic Leap",
+      "description": "Incredibly agile and capable of impressive jumps. Mark to move to any position and gain advantage on next attack."
+    },
+    {
+      "name": "Tail Sweep",
+      "description": "Uses its massive fluffy tail as a weapon. Mark to knock down multiple opponents in an area."
+    },
+    {
+      "name": "Frenzied Gnawing",
+      "description": "Enters a biting frenzy when cornered. Mark to make multiple rapid attacks against a single target."
+    }
+  ],
+  "drives": [
+    {
+      "name": "Hoarder's Instinct",
+      "description": "Becomes fixated on acquiring shiny or interesting objects, sometimes abandoning combat to secure treasure."
+    },
+    {
+      "name": "Territorial Aggression",
+      "description": "Viciously defends its territory and food stores from any perceived threats."
+    }
+  ],
+  "quirks": [
+    {
+      "name": "Easily Distracted",
+      "description": "May abandon current actions if presented with particularly appealing nuts or shiny objects."
+    },
+    {
+      "name": "Chatter",
+      "description": "Constantly chatters and scolds intruders in a mix of squirrel sounds and broken words it has picked up."
+    }
+  ],
+  "presence": {
+    "Sight": "A squirrel the size of a large dog, with oversized front teeth and intelligent, manic eyes that dart constantly.",
+    "Sound": "Rapid chittering and chattering mixed with the scratch of claws on bark and the thump of a heavy tail.",
+    "Smell": "Nuts, tree sap, and the musky scent of a wild animal that has been marking its territory.",
+    "Taste": "The air carries the dusty flavor of cracked shells and the green taste of fresh acorns."
+  }
+}

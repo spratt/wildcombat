@@ -1,0 +1,47 @@
+{
+  "name": "Thornback Beetle",
+  "blurb": "An armored insectoid with razor-sharp spines covering its carapace, known for its charging attacks.",
+  "description": "The Thornback Beetle is a heavily armored creature that roams the lower reaches of the Wildsea. Its dark green carapace is covered in wicked thorns that can pierce through leather and even light metal. When threatened, it tucks its head low and charges with surprising speed, using its horn and spines as weapons. Despite its aggressive nature, the beetle is primarily a scavenger that feeds on fallen fruit and decaying wood.",
+  "trackLength": 4,
+  "size": "medium",
+  "aspects": [
+    {
+      "name": "Thorn Charge",
+      "description": "Rushes forward with spines extended. Mark to deal damage to all enemies in a line."
+    },
+    {
+      "name": "Armored Carapace",
+      "description": "Thick natural armor provides protection. Mark to reduce incoming damage by half."
+    },
+    {
+      "name": "Spike Shield",
+      "description": "Reflects damage back at attackers. Mark to deal damage to anyone who attacks in close quarters."
+    }
+  ],
+  "drives": [
+    {
+      "name": "Defensive Instinct",
+      "description": "Prioritizes protecting itself over aggressive attacks when heavily wounded."
+    },
+    {
+      "name": "Territory Defender",
+      "description": "Becomes increasingly aggressive when cornered or protecting its feeding grounds."
+    }
+  ],
+  "quirks": [
+    {
+      "name": "Fruit Attracted",
+      "description": "Can be distracted or lured by the scent of ripe fruit."
+    },
+    {
+      "name": "Shell Maintenance",
+      "description": "Occasionally stops to clean and sharpen its thorns, leaving it temporarily vulnerable."
+    }
+  ],
+  "presence": {
+    "Sight": "A tank-like beetle with a forest of sharp spines jutting from its back, its horn gleaming like polished jade.",
+    "Sound": "The grinding scrape of chitin against bark and the sharp crack of breaking wood under its weight.",
+    "Smell": "Earth and moss, with the sharp green scent of crushed leaves and sap.",
+    "Taste": "A bitter, vegetative flavor hangs in the air, reminiscent of chewed bark and bitter herbs."
+  }
+}
