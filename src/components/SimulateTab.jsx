@@ -127,6 +127,11 @@ const SimulateTab = () => {
     return total + (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength || 0);
   }, 0);
 
+  // Check if combat is over
+  const aliveEnemies = uniqueEnemies.filter(enemy => (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0);
+  const aliveParty = partyCharacters.filter(char => (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0);
+  const combatOver = aliveEnemies.length === 0 || aliveParty.length === 0;
+
   // Combat simulation functions
   const rollDice = (count) => {
     const rolls = [];
@@ -311,6 +316,17 @@ const SimulateTab = () => {
 
     setUniqueEnemies(updatedEnemies);
     setPartyCharacters(updatedParty);
+    
+    // Check win/lose conditions
+    const finalAliveEnemies = updatedEnemies.filter(enemy => (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0);
+    const finalAliveParty = updatedParty.filter(char => (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0);
+    
+    if (finalAliveEnemies.length === 0) {
+      newLog.push("The players win!");
+    } else if (finalAliveParty.length === 0) {
+      newLog.push("The players lose!");
+    }
+    
     setCombatLog(prev => [...prev, ...newLog]);
   };
 
@@ -451,7 +467,7 @@ const SimulateTab = () => {
           <button 
             className="simulate-round-button"
             onClick={simulateOneRound}
-            disabled={partyCharacters.length === 0 || uniqueEnemies.length === 0}
+            disabled={partyCharacters.length === 0 || uniqueEnemies.length === 0 || combatOver}
           >
             Simulate One Round
           </button>
