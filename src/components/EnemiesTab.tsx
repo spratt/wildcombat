@@ -37,7 +37,8 @@ const EnemiesTab: React.FC = () => {
       const enemyFiles = [
         'shadowclaw-spider.json',
         'thornback-beetle.json', 
-        'dire-squirrel.json'
+        'dire-squirrel.json',
+        'zitera.json'
       ];
       
       const enemyData = await Promise.all(
