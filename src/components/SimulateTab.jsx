@@ -43,6 +43,7 @@ const SimulateTab = () => {
   const [uniqueEnemies, setUniqueEnemies] = useState([]);
   const [combatLog, setCombatLog] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
+  const [combatResult, setCombatResult] = useState(null);
 
   useEffect(() => {
     loadParty();
@@ -324,14 +325,18 @@ const SimulateTab = () => {
     
     if (finalAliveEnemies.length === 0) {
       newLog.push("The players win!");
+      setCombatResult(`The players WON after ${currentRound} rounds`);
     } else if (finalAliveParty.length === 0) {
       newLog.push("The players lose!");
+      setCombatResult(`The players LOST after ${currentRound} rounds`);
     }
     
     setCombatLog(prev => [...prev, ...newLog]);
     
-    // Increment round counter
-    setCurrentRound(prev => prev + 1);
+    // Increment round counter only if combat continues
+    if (finalAliveEnemies.length > 0 && finalAliveParty.length > 0) {
+      setCurrentRound(prev => prev + 1);
+    }
   };
 
   const clearSimulation = () => {
@@ -349,9 +354,10 @@ const SimulateTab = () => {
     }));
     setPartyCharacters(resetParty);
     
-    // Clear combat log and reset round counter
+    // Clear combat log, reset round counter, and clear result
     setCombatLog([]);
     setCurrentRound(1);
+    setCombatResult(null);
   };
 
   return (
@@ -494,6 +500,12 @@ const SimulateTab = () => {
             <span className="stat-label">Round:</span>
             <span className="stat-value">{currentRound}</span>
           </div>
+          {combatResult && (
+            <div className="stat result-stat">
+              <span className="stat-label">Result:</span>
+              <span className="stat-value">{combatResult}</span>
+            </div>
+          )}
         </div>
       </div>
 

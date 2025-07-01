@@ -1510,6 +1510,16 @@ h1 {
   color: #61dafb;
 }
 
+.simulation-stats .result-stat {
+  background: #2d5a2d;
+  border: 2px solid #98c379;
+}
+
+.simulation-stats .result-stat .stat-value {
+  color: #98c379;
+  font-size: 1.3rem;
+}
+
 /* Combat Log */
 .combat-log-section {
   background: #1a1a1a;
