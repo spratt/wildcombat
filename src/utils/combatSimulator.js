@@ -11,9 +11,12 @@ export const simulatePlayerAttackPhase = (party, enemies) => {
     );
     if (stillAlive.length === 0) return; // No more targets
     
-    // Choose random enemy from those still alive
-    const targetIndex = Math.floor(Math.random() * stillAlive.length);
-    const target = stillAlive[targetIndex];
+    // Target enemy with lowest HP
+    const target = stillAlive.reduce((lowest, enemy) => {
+      const enemyHP = enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength;
+      const lowestHP = lowest.currentHP !== undefined ? lowest.currentHP : lowest.trackLength;
+      return enemyHP < lowestHP ? enemy : lowest;
+    });
     
     // Roll dice
     const attackScore = character.attackScore || 1;
@@ -66,9 +69,12 @@ export const simulateEnemyAttackPhase = (enemies, party) => {
   aliveEnemies.forEach(enemy => {
     if (aliveParty.length === 0) return; // No more targets
     
-    // Choose random player to attack
-    const targetIndex = Math.floor(Math.random() * aliveParty.length);
-    const target = aliveParty[targetIndex];
+    // Target player with lowest HP
+    const target = aliveParty.reduce((lowest, player) => {
+      const playerHP = player.currentHP !== undefined ? player.currentHP : player.hitPoints;
+      const lowestHP = lowest.currentHP !== undefined ? lowest.currentHP : lowest.hitPoints;
+      return playerHP < lowestHP ? player : lowest;
+    });
     
     // Target defends with their defense skill
     const defenseScore = target.defenseScore || 1;
