@@ -1,8 +1,21 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Character } from '../types';
 
-const SavedCharacters = ({ onCharacterSelect, refreshTrigger }) => {
-  const [savedCharacters, setSavedCharacters] = useState([]);
-  const [selectedSaved, setSelectedSaved] = useState('');
+interface SavedCharacter {
+  id: string;
+  name: string;
+  data: Character;
+  savedAt: string;
+}
+
+interface SavedCharactersProps {
+  onCharacterSelect: (character: Character | null) => void;
+  refreshTrigger?: number;
+}
+
+const SavedCharacters: React.FC<SavedCharactersProps> = ({ onCharacterSelect, refreshTrigger }) => {
+  const [savedCharacters, setSavedCharacters] = useState<SavedCharacter[]>([]);
+  const [selectedSaved, setSelectedSaved] = useState<string>('');
 
   useEffect(() => {
     loadSavedCharacters();
@@ -20,7 +33,7 @@ const SavedCharacters = ({ onCharacterSelect, refreshTrigger }) => {
     }
   };
 
-  const handleChange = (event) => {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = event.target.value;
     setSelectedSaved(selected);
     
@@ -34,7 +47,7 @@ const SavedCharacters = ({ onCharacterSelect, refreshTrigger }) => {
     }
   };
 
-  const deleteCharacter = (id, event) => {
+  const deleteCharacter = (id: string, event: React.MouseEvent) => {
     event.stopPropagation();
     const updatedCharacters = savedCharacters.filter(c => c.id !== id);
     setSavedCharacters(updatedCharacters);

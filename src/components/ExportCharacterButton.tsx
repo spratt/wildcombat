@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Character } from '../types';
 
-const ExportCharacterButton = ({ characterData }) => {
-  const [exportStatus, setExportStatus] = useState('');
+interface ExportCharacterButtonProps {
+  characterData: Character | null;
+}
+
+const ExportCharacterButton: React.FC<ExportCharacterButtonProps> = ({ characterData }) => {
+  const [exportStatus, setExportStatus] = useState<string>('');
 
   const exportCharacter = () => {
     if (!characterData || !characterData.name) {

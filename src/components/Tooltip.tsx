@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-const Tooltip = ({ children, content, className = '' }) => {
-  const [isVisible, setIsVisible] = useState(false);
+interface TooltipProps {
+  children: React.ReactNode;
+  content: string;
+  className?: string;
+}
+
+const Tooltip: React.FC<TooltipProps> = ({ children, content, className = '' }) => {
+  const [isVisible, setIsVisible] = useState<boolean>(false);
 
   return (
     <div 

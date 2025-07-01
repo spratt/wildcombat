@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Character } from '../types';
 
-const CharacterUpload = ({ onCharacterUpload }) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
+interface CharacterUploadProps {
+  onCharacterUpload: (character: Character) => void;
+}
 
-  const handleFileUpload = (file) => {
+const CharacterUpload: React.FC<CharacterUploadProps> = ({ onCharacterUpload }) => {
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleFileUpload = (file: File | null) => {
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith('.json')) {
@@ -13,38 +18,38 @@ const CharacterUpload = ({ onCharacterUpload }) => {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = (e: ProgressEvent<FileReader>) => {
       try {
-        const content = e.target.result;
+        const content = e.target?.result as string;
         const data = JSON.parse(content);
         setUploadError(null);
         onCharacterUpload(data);
       } catch (error) {
-        setUploadError(`Invalid JSON file: ${error.message}`);
+        setUploadError(`Invalid JSON file: ${(error as Error).message}`);
       }
     };
     reader.readAsText(file);
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
   };
 
-  const handleDragLeave = (e) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
     const file = e.dataTransfer.files[0];
     handleFileUpload(file);
   };
 
-  const handleFileInput = (e) => {
-    const file = e.target.files[0];
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
     handleFileUpload(file);
   };
 

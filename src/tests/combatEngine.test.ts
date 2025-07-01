@@ -5,25 +5,26 @@ import {
   calculateDefenseDamage, 
   calculateIncapacitateDefense,
   checkWinConditions 
-} from '../utils/combatEngine.js'
+} from '../utils/combatEngine'
+import type { Character, CombatCharacter, CombatEnemy, DiceRoll } from '../types'
 
 describe('Combat Engine', () => {
   describe('rollDice', () => {
     it('should return correct number of dice', () => {
-      const result = rollDice(3)
+      const result: DiceRoll = rollDice(3)
       expect(result).toHaveLength(3)
     })
 
     it('should return dice values between 1 and 6', () => {
-      const result = rollDice(10)
-      result.forEach(die => {
+      const result: DiceRoll = rollDice(10)
+      result.forEach((die: number) => {
         expect(die).toBeGreaterThanOrEqual(1)
         expect(die).toBeLessThanOrEqual(6)
       })
     })
 
     it('should return empty array for 0 dice', () => {
-      const result = rollDice(0)
+      const result: DiceRoll = rollDice(0)
       expect(result).toEqual([])
     })
   })
@@ -65,11 +66,11 @@ describe('Combat Engine', () => {
   })
 
   describe('calculateDefenseDamage', () => {
-    const mockCharacter = {
+    const mockCharacter: Partial<Character> = {
       aspects: [
-        { value: [0, 0, 0] }, // length 3
-        { value: [0, 0, 0, 0, 0] }, // length 5
-        { value: [0, 0] } // length 2
+        { type: 'trait', name: 'Aspect 1', value: [0, 0, 0] }, // length 3
+        { type: 'trait', name: 'Aspect 2', value: [0, 0, 0, 0, 0] }, // length 5
+        { type: 'trait', name: 'Aspect 3', value: [0, 0] } // length 2
       ]
     }
 
@@ -77,7 +78,7 @@ describe('Combat Engine', () => {
       it('should return 0 damage for roll of 6', () => {
         const result = calculateDefenseDamage([6], '0,1,2,counter')
         expect(result.damage).toBe(0)
-        expect(result.hasDoubles).toBe(false)
+        expect(result.counter).toBe(false)
       })
 
       it('should return 1 damage for rolls of 4-5', () => {
@@ -93,7 +94,7 @@ describe('Combat Engine', () => {
 
       it('should detect doubles', () => {
         const result = calculateDefenseDamage([4, 4], '0,1,2,counter')
-        expect(result.hasDoubles).toBe(true)
+        expect(result.counter).toBe(true)
       })
     })
 
@@ -133,56 +134,62 @@ describe('Combat Engine', () => {
   })
 
   describe('calculateIncapacitateDefense', () => {
+    const mockTarget: Partial<CombatCharacter> = {
+      name: 'Test Character',
+      hp: 5,
+      maxHp: 10
+    }
+
     it('should return 1 damage for roll of 6', () => {
-      const result = calculateIncapacitateDefense([6])
+      const result = calculateIncapacitateDefense([6], mockTarget as CombatCharacter)
       expect(result.damage).toBe(1)
-      expect(result.incapacitated).toBe(false)
-      expect(result.fullyIncapacitated).toBe(false)
+      expect(result.incapacitated).toBeUndefined()
+      expect(result.fullIncapacitation).toBeUndefined()
     })
 
     it('should incapacitate for rolls of 4-5', () => {
-      const result4 = calculateIncapacitateDefense([4])
+      const result4 = calculateIncapacitateDefense([4], mockTarget as CombatCharacter)
       expect(result4.damage).toBe(0)
       expect(result4.incapacitated).toBe(true)
-      expect(result4.fullyIncapacitated).toBe(false)
+      expect(result4.fullIncapacitation).toBeUndefined()
 
-      const result5 = calculateIncapacitateDefense([5])
+      const result5 = calculateIncapacitateDefense([5], mockTarget as CombatCharacter)
       expect(result5.damage).toBe(0)
       expect(result5.incapacitated).toBe(true)
-      expect(result5.fullyIncapacitated).toBe(false)
+      expect(result5.fullIncapacitation).toBeUndefined()
     })
 
     it('should fully incapacitate for rolls of 1-3', () => {
-      const result1 = calculateIncapacitateDefense([1])
+      const result1 = calculateIncapacitateDefense([1], mockTarget as CombatCharacter)
       expect(result1.damage).toBe(0)
-      expect(result1.incapacitated).toBe(false)
-      expect(result1.fullyIncapacitated).toBe(true)
+      expect(result1.incapacitated).toBeUndefined()
+      expect(result1.fullIncapacitation).toBe(true)
 
-      const result3 = calculateIncapacitateDefense([3])
+      const result3 = calculateIncapacitateDefense([3], mockTarget as CombatCharacter)
       expect(result3.damage).toBe(0)
-      expect(result3.incapacitated).toBe(false)
-      expect(result3.fullyIncapacitated).toBe(true)
+      expect(result3.incapacitated).toBeUndefined()
+      expect(result3.fullIncapacitation).toBe(true)
     })
 
     it('should detect doubles', () => {
-      const result = calculateIncapacitateDefense([4, 4])
-      expect(result.hasDoubles).toBe(true)
+      const result = calculateIncapacitateDefense([4, 4], mockTarget as CombatCharacter)
+      expect(result.counter).toBe(true)
     })
   })
 
   describe('checkWinConditions', () => {
-    const mockParty = [
+    const mockParty: Array<Partial<CombatCharacter>> = [
       { currentHP: 5, hitPoints: 10 },
       { currentHP: 3, hitPoints: 8 }
     ]
 
-    const mockEnemies = [
+    const mockEnemies: Array<Partial<CombatEnemy>> = [
       { currentHP: 4, trackLength: 6 },
       { currentHP: 0, trackLength: 5 }
     ]
 
     it('should return win when all enemies are defeated', () => {
-      const defeatedEnemies = [
+      const defeatedEnemies: Array<Partial<CombatEnemy>> = [
         { currentHP: 0, trackLength: 6 },
         { currentHP: 0, trackLength: 5 }
       ]
@@ -193,7 +200,7 @@ describe('Combat Engine', () => {
     })
 
     it('should return lose when all party members are defeated', () => {
-      const defeatedParty = [
+      const defeatedParty: Array<Partial<CombatCharacter>> = [
         { currentHP: 0, hitPoints: 10 },
         { currentHP: 0, hitPoints: 8 }
       ]
@@ -209,10 +216,10 @@ describe('Combat Engine', () => {
       expect(result.result).toBe(null)
     })
 
-    it('should handle enemies without currentHP (using trackLength)', () => {
-      const enemiesWithoutCurrentHP = [
-        { trackLength: 6 }, // alive
-        { currentHP: 0, trackLength: 5 } // dead
+    it('should handle enemies without currentHP (using hp/maxHp)', () => {
+      const enemiesWithoutCurrentHP: Array<Partial<CombatEnemy>> = [
+        { hp: 6, maxHp: 6 }, // alive
+        { currentHP: 0, hp: 0, maxHp: 5 } // dead
       ]
       
       const result = checkWinConditions(enemiesWithoutCurrentHP, mockParty)
@@ -220,7 +227,7 @@ describe('Combat Engine', () => {
     })
 
     it('should handle party without currentHP (using hitPoints)', () => {
-      const partyWithoutCurrentHP = [
+      const partyWithoutCurrentHP: Array<Partial<CombatCharacter>> = [
         { hitPoints: 10 }, // alive
         { hitPoints: 8 } // alive
       ]

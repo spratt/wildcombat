@@ -1,17 +1,33 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { simulateFullSession } from '../utils/sessionSimulator.js'
+import { simulateFullSession } from '../utils/sessionSimulator'
+import type { CombatCharacter, CombatEnemy } from '../types'
 
 // Mock the dependencies
-vi.mock('../utils/combatSimulator.js', () => ({
+vi.mock('../utils/combatSimulator', () => ({
   simulateOneRound: vi.fn()
 }))
 
-vi.mock('../utils/combatEngine.js', () => ({
+vi.mock('../utils/combatEngine', () => ({
   checkWinConditions: vi.fn()
 }))
 
+interface MockCombatCharacter extends Partial<CombatCharacter> {
+  name: string
+  hitPoints: number
+  currentHP: number
+  partyId: string
+}
+
+interface MockCombatEnemy extends Partial<CombatEnemy> {
+  name: string
+  uniqueName: string
+  currentHP: number
+  trackLength: number
+  instanceId: string
+}
+
 describe('Session Simulator', () => {
-  const mockParty = [
+  const mockParty: MockCombatCharacter[] = [
     {
       name: 'Hero 1',
       hitPoints: 5,
@@ -26,7 +42,7 @@ describe('Session Simulator', () => {
     }
   ]
 
-  const mockEnemies = [
+  const mockEnemies: MockCombatEnemy[] = [
     {
       name: 'Goblin',
       uniqueName: 'Goblin 1',
@@ -40,8 +56,8 @@ describe('Session Simulator', () => {
     vi.clearAllMocks()
     
     // Get the mocked functions
-    const { simulateOneRound } = await import('../utils/combatSimulator.js')
-    const { checkWinConditions } = await import('../utils/combatEngine.js')
+    const { simulateOneRound } = await import('../utils/combatSimulator')
+    const { checkWinConditions } = await import('../utils/combatEngine')
     
     // Set up default behaviors
     vi.mocked(checkWinConditions).mockReturnValue({ isOver: false, result: null })
@@ -81,8 +97,8 @@ describe('Session Simulator', () => {
     })
 
     it('should pass parameters to simulateOneRound', async () => {
-      const { simulateOneRound } = await import('../utils/combatSimulator.js')
-      const { checkWinConditions } = await import('../utils/combatEngine.js')
+      const { simulateOneRound } = await import('../utils/combatSimulator')
+      const { checkWinConditions } = await import('../utils/combatEngine')
       
       // Mock win condition after one round
       vi.mocked(checkWinConditions)
@@ -117,7 +133,7 @@ describe('Session Simulator', () => {
     })
 
     it('should stop session when isOver is true', async () => {
-      const { simulateOneRound } = await import('../utils/combatSimulator.js')
+      const { simulateOneRound } = await import('../utils/combatSimulator')
       
       vi.mocked(simulateOneRound).mockReturnValue({
         updatedParty: mockParty,
@@ -134,7 +150,7 @@ describe('Session Simulator', () => {
     })
 
     it('should timeout after max rounds', async () => {
-      const { simulateOneRound } = await import('../utils/combatSimulator.js')
+      const { simulateOneRound } = await import('../utils/combatSimulator')
       
       // Mock infinite combat that never ends
       vi.mocked(simulateOneRound).mockReturnValue({
@@ -147,13 +163,13 @@ describe('Session Simulator', () => {
 
       const result = simulateFullSession(mockParty, mockEnemies, 1)
 
-      expect(result.sessionLog.some(entry => 
+      expect(result.sessionLog.some((entry: any) => 
         typeof entry === 'object' && entry.message && entry.message.includes('100 rounds')
       )).toBe(true)
     })
 
     it('should handle win from simulateOneRound result', async () => {
-      const { simulateOneRound } = await import('../utils/combatSimulator.js')
+      const { simulateOneRound } = await import('../utils/combatSimulator')
       
       vi.mocked(simulateOneRound).mockReturnValue({
         updatedParty: mockParty,

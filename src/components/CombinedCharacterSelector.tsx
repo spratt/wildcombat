@@ -1,11 +1,26 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Character } from '../types';
 
-const CombinedCharacterSelector = ({ onCharacterSelect, refreshTrigger }) => {
-  const [preloadedCharacters, setPreloadedCharacters] = useState([]);
-  const [savedCharacters, setSavedCharacters] = useState([]);
-  const [selectedCharacter, setSelectedCharacter] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+interface CharacterOption {
+  id: string;
+  name: string;
+  data: Character;
+  type: 'preloaded' | 'saved';
+  displayName: string;
+  savedAt?: string;
+}
+
+interface CombinedCharacterSelectorProps {
+  onCharacterSelect: (character: Character | null) => void;
+  refreshTrigger?: number;
+}
+
+const CombinedCharacterSelector: React.FC<CombinedCharacterSelectorProps> = ({ onCharacterSelect, refreshTrigger }) => {
+  const [preloadedCharacters, setPreloadedCharacters] = useState<CharacterOption[]>([]);
+  const [savedCharacters, setSavedCharacters] = useState<CharacterOption[]>([]);
+  const [selectedCharacter, setSelectedCharacter] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadPreloadedCharacters();
@@ -24,7 +39,7 @@ const CombinedCharacterSelector = ({ onCharacterSelect, refreshTrigger }) => {
     ];
     
     Promise.all(
-      characterFiles.map(async (filename) => {
+      characterFiles.map(async (filename): Promise<CharacterOption | null> => {
         try {
           const response = await fetch(`./characters/${filename}`);
           if (!response.ok) throw new Error(`Failed to load ${filename}`);
@@ -43,12 +58,12 @@ const CombinedCharacterSelector = ({ onCharacterSelect, refreshTrigger }) => {
       })
     )
     .then(results => {
-      const validCharacters = results.filter(Boolean);
+      const validCharacters = results.filter((char): char is CharacterOption => char !== null);
       setPreloadedCharacters(validCharacters);
       setLoading(false);
     })
     .catch(err => {
-      setError(err.message);
+      setError((err as Error).message);
       setLoading(false);
     });
   };
@@ -58,9 +73,9 @@ const CombinedCharacterSelector = ({ onCharacterSelect, refreshTrigger }) => {
       const saved = localStorage.getItem('wildcombat-saved-characters');
       if (saved) {
         const characters = JSON.parse(saved);
-        const formattedCharacters = characters.map(char => ({
+        const formattedCharacters: CharacterOption[] = characters.map((char: any) => ({
           ...char,
-          type: 'saved',
+          type: 'saved' as const,
           displayName: `${char.name} (saved ${new Date(char.savedAt).toLocaleDateString()})`
         }));
         setSavedCharacters(formattedCharacters);
@@ -73,7 +88,7 @@ const CombinedCharacterSelector = ({ onCharacterSelect, refreshTrigger }) => {
     }
   };
 
-  const handleChange = (event) => {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = event.target.value;
     setSelectedCharacter(selected);
     
@@ -92,7 +107,7 @@ const CombinedCharacterSelector = ({ onCharacterSelect, refreshTrigger }) => {
     }
   };
 
-  const deleteCharacter = (id, event) => {
+  const deleteCharacter = (id: string, event: React.MouseEvent) => {
     event.stopPropagation();
     
     // Only allow deleting saved characters

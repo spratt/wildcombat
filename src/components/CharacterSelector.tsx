@@ -1,10 +1,21 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Character } from '../types';
 
-const CharacterSelector = ({ onCharacterSelect }) => {
-  const [characters, setCharacters] = useState([]);
-  const [selectedCharacter, setSelectedCharacter] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+interface CharacterFile {
+  filename: string;
+  name: string;
+  data: Character;
+}
+
+interface CharacterSelectorProps {
+  onCharacterSelect: (character: Character | null) => void;
+}
+
+const CharacterSelector: React.FC<CharacterSelectorProps> = ({ onCharacterSelect }) => {
+  const [characters, setCharacters] = useState<CharacterFile[]>([]);
+  const [selectedCharacter, setSelectedCharacter] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // In a real app, you might have an API endpoint to list characters
@@ -15,7 +26,7 @@ const CharacterSelector = ({ onCharacterSelect }) => {
     ];
     
     Promise.all(
-      characterFiles.map(async (filename) => {
+      characterFiles.map(async (filename): Promise<CharacterFile | null> => {
         try {
           const response = await fetch(`./characters/${filename}`);
           if (!response.ok) throw new Error(`Failed to load ${filename}`);
@@ -28,17 +39,17 @@ const CharacterSelector = ({ onCharacterSelect }) => {
       })
     )
     .then(results => {
-      const validCharacters = results.filter(Boolean);
+      const validCharacters = results.filter((char): char is CharacterFile => char !== null);
       setCharacters(validCharacters);
       setLoading(false);
     })
     .catch(err => {
-      setError(err.message);
+      setError((err as Error).message);
       setLoading(false);
     });
   }, []);
 
-  const handleChange = (event) => {
+  const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = event.target.value;
     setSelectedCharacter(selected);
     

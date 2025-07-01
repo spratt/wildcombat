@@ -1,22 +1,34 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, FC } from 'react'
 import './App.css'
 import PartyTab from './components/PartyTab'
 import EnemiesTab from './components/EnemiesTab'
 import SimulateTab from './components/SimulateTab'
 
-function App() {
-  const [activeTab, setActiveTab] = useState(() => {
+type TabId = 'party' | 'enemies' | 'simulate'
+
+interface Tab {
+  id: TabId
+  label: string
+  component: FC
+}
+
+function App(): JSX.Element {
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
     // Load saved tab from localStorage, default to 'party' if not found
     try {
-      const savedTab = localStorage.getItem('wildcombat-active-tab');
-      return savedTab || 'party';
+      const savedTab = localStorage.getItem('wildcombat-active-tab')
+      // Type guard to ensure saved tab is a valid TabId
+      if (savedTab === 'party' || savedTab === 'enemies' || savedTab === 'simulate') {
+        return savedTab
+      }
+      return 'party'
     } catch (error) {
-      console.error('Error loading saved tab:', error);
-      return 'party';
+      console.error('Error loading saved tab:', error)
+      return 'party'
     }
   })
 
-  const tabs = [
+  const tabs: Tab[] = [
     { id: 'party', label: 'Party', component: PartyTab },
     { id: 'enemies', label: 'Enemies', component: EnemiesTab },
     { id: 'simulate', label: 'Simulate!', component: SimulateTab }
@@ -25,11 +37,11 @@ function App() {
   // Save active tab to localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem('wildcombat-active-tab', activeTab);
+      localStorage.setItem('wildcombat-active-tab', activeTab)
     } catch (error) {
-      console.error('Error saving active tab:', error);
+      console.error('Error saving active tab:', error)
     }
-  }, [activeTab]);
+  }, [activeTab])
 
   const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component || PartyTab
 

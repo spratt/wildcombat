@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Character } from '../types';
 
-const HealAllAspectsButton = ({ characterData, onCharacterHealed }) => {
-  const [healStatus, setHealStatus] = useState('');
+interface HealAllAspectsButtonProps {
+  characterData: Character | null;
+  onCharacterHealed?: (healedCharacter: Character) => void;
+}
+
+const HealAllAspectsButton: React.FC<HealAllAspectsButtonProps> = ({ characterData, onCharacterHealed }) => {
+  const [healStatus, setHealStatus] = useState<string>('');
 
   const healAllAspects = () => {
     if (!characterData || !characterData.aspects) {
@@ -12,7 +18,7 @@ const HealAllAspectsButton = ({ characterData, onCharacterHealed }) => {
 
     try {
       // Create healed character data
-      const healedCharacter = {
+      const healedCharacter: Character = {
         ...characterData,
         aspects: characterData.aspects.map(aspect => {
           if (!aspect.value || !Array.isArray(aspect.value)) {

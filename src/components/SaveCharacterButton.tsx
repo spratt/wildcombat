@@ -1,7 +1,13 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Character } from '../types';
 
-const SaveCharacterButton = ({ characterData, onSave }) => {
-  const [saveStatus, setSaveStatus] = useState('');
+interface SaveCharacterButtonProps {
+  characterData: Character | null;
+  onSave?: () => void;
+}
+
+const SaveCharacterButton: React.FC<SaveCharacterButtonProps> = ({ characterData, onSave }) => {
+  const [saveStatus, setSaveStatus] = useState<string>('');
 
   const saveCharacter = () => {
     if (!characterData || !characterData.name) {
@@ -16,7 +22,7 @@ const SaveCharacterButton = ({ characterData, onSave }) => {
       const savedCharacters = existingSaved ? JSON.parse(existingSaved) : [];
 
       // Remove any existing character with the same name
-      const filteredCharacters = savedCharacters.filter(char => char.name !== characterData.name);
+      const filteredCharacters = savedCharacters.filter((char: any) => char.name !== characterData.name);
 
       // Create new save entry
       const saveEntry = {

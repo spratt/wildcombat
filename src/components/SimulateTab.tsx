@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { simulateOneRound } from '../utils/combatSimulator';
 import { simulateFullSession } from '../utils/sessionSimulator';
 import { checkWinConditions } from '../utils/combatEngine';
@@ -13,17 +13,32 @@ import {
   resetCombatState,
   calculateEnemyTrackLength
 } from '../utils/dataManager';
-import Tooltip from './Tooltip.jsx';
+import Tooltip from './Tooltip';
+import { Character, CombatCharacter, CombatEnemy, Enemy, CombatResult, SessionStatistics } from '../types';
 
-const SimulateTab = () => {
-  const [partyCharacters, setPartyCharacters] = useState([]);
-  const [encounter, setEncounter] = useState([]);
-  const [enemies, setEnemies] = useState([]);
-  const [uniqueEnemies, setUniqueEnemies] = useState([]);
-  const [combatLog, setCombatLog] = useState([]);
-  const [currentRound, setCurrentRound] = useState(1);
-  const [combatResult, setCombatResult] = useState(null);
-  const [damageModel, setDamageModel] = useState(() => {
+interface LogEntry {
+  message: string;
+  type?: 'neutral' | 'good' | 'bad';
+}
+
+interface SessionStats {
+  totalSessions: number;
+  wins: number;
+  losses: number;
+  totalRounds: number;
+  totalPlayerHPOnWin: number;
+  totalEnemyHPOnLoss: number;
+}
+
+const SimulateTab: React.FC = () => {
+  const [partyCharacters, setPartyCharacters] = useState<CombatCharacter[]>([]);
+  const [encounter, setEncounter] = useState<any[]>([]);
+  const [enemies, setEnemies] = useState<Enemy[]>([]);
+  const [uniqueEnemies, setUniqueEnemies] = useState<CombatEnemy[]>([]);
+  const [combatLog, setCombatLog] = useState<LogEntry[]>([]);
+  const [currentRound, setCurrentRound] = useState<number>(1);
+  const [combatResult, setCombatResult] = useState<string | null>(null);
+  const [damageModel, setDamageModel] = useState<string>(() => {
     try {
       return localStorage.getItem('wildcombat-damage-model') || '0,1,2,counter';
     } catch (error) {
@@ -31,23 +46,23 @@ const SimulateTab = () => {
       return '0,1,2,counter';
     }
   });
-  const [enemyAttacksPerRound, setEnemyAttacksPerRound] = useState(() => {
+  const [enemyAttacksPerRound, setEnemyAttacksPerRound] = useState<number>(() => {
     try {
-      return parseInt(localStorage.getItem('wildcombat-enemy-attacks-per-round')) || 1;
+      return parseInt(localStorage.getItem('wildcombat-enemy-attacks-per-round') || '1') || 1;
     } catch (error) {
       console.warn('Failed to load enemy attacks per round from localStorage:', error);
       return 1;
     }
   });
-  const [sessionsToSimulate, setSessionsToSimulate] = useState(() => {
+  const [sessionsToSimulate, setSessionsToSimulate] = useState<number>(() => {
     try {
-      return parseInt(localStorage.getItem('wildcombat-sessions-to-simulate')) || 2;
+      return parseInt(localStorage.getItem('wildcombat-sessions-to-simulate') || '2') || 2;
     } catch (error) {
       console.warn('Failed to load sessions to simulate from localStorage:', error);
       return 2;
     }
   });
-  const [sessionStats, setSessionStats] = useState({
+  const [sessionStats, setSessionStats] = useState<SessionStats>({
     totalSessions: 0,
     wins: 0,
     losses: 0,
@@ -55,7 +70,7 @@ const SimulateTab = () => {
     totalPlayerHPOnWin: 0,
     totalEnemyHPOnLoss: 0
   });
-  const [useAbilities, setUseAbilities] = useState(() => {
+  const [useAbilities, setUseAbilities] = useState<boolean>(() => {
     try {
       return localStorage.getItem('wildcombat-use-abilities') === 'true';
     } catch (error) {
@@ -65,7 +80,6 @@ const SimulateTab = () => {
   });
 
   useEffect(() => {
-    console.log('SimulateTab mounting, loading data...');
     loadParty();
     loadEncounter();
     loadEnemies();
@@ -73,10 +87,8 @@ const SimulateTab = () => {
 
   // Generate unique enemy names when encounter or enemies change
   useEffect(() => {
-    console.log('Encounter/enemies changed:', { encounter, enemies });
     if (encounter.length > 0 && enemies.length > 0) {
       const uniqueEnemyList = generateUniqueEnemyNames(encounter, enemies);
-      console.log('Generated unique enemies:', uniqueEnemyList);
       setUniqueEnemies(uniqueEnemyList);
     } else {
       setUniqueEnemies([]);
@@ -85,13 +97,11 @@ const SimulateTab = () => {
 
   const loadParty = () => {
     const partyData = loadPartyFromStorage();
-    console.log('Loaded party data:', partyData);
     setPartyCharacters(partyData);
   };
 
   const loadEncounter = () => {
     const encounterData = loadEncounterFromStorage();
-    console.log('Loaded encounter data:', encounterData);
     setEncounter(encounterData);
   };
 
@@ -107,15 +117,6 @@ const SimulateTab = () => {
   // Check if combat is over using utility function
   const { isOver: combatOver, aliveEnemies, aliveParty } = checkWinConditions(uniqueEnemies, partyCharacters);
   
-  // Debug button state
-  const buttonDisabled = partyCharacters.length === 0 || uniqueEnemies.length === 0 || combatOver || sessionStats.totalSessions > 0;
-  console.log('Button state:', {
-    partyCharactersLength: partyCharacters.length,
-    uniqueEnemiesLength: uniqueEnemies.length,
-    combatOver,
-    sessionStatsTotal: sessionStats.totalSessions,
-    buttonDisabled
-  });
 
   // Save damage model to localStorage when it changes
   useEffect(() => {
@@ -154,7 +155,7 @@ const SimulateTab = () => {
   }, [useAbilities]);
 
   // Get damage model explanation
-  const getDamageModelExplanation = (model) => {
+  const getDamageModelExplanation = (model: string): string => {
     switch (model) {
       case '0,1,2,counter':
         return `Original damage model:
@@ -187,7 +188,6 @@ This model uses aspect track lengths as the basis for damage calculations, makin
         return 'Unknown damage model selected.';
     }
   };
-
 
   const handleSimulateOneRound = () => {
     const result = simulateOneRound(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound, useAbilities);
@@ -239,7 +239,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
   };
 
   const handleSimulateManySessions = () => {
-    const initialParty = partyCharacters.map(char => ({ ...char, currentHP: char.hitPoints }));
+    const initialParty = partyCharacters.map(char => ({ ...char, currentHP: char.hp }));
     const initialEnemies = resetCombatState(uniqueEnemies, partyCharacters).resetEnemies;
     
     let totalSessions = 0;
@@ -248,7 +248,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
     let totalRounds = 0;
     let totalPlayerHPOnWin = 0;
     let totalEnemyHPOnLoss = 0;
-    const allSessionLogs = [];
+    const allSessionLogs: LogEntry[] = [];
 
     for (let i = 0; i < sessionsToSimulate; i++) {
       // Reset for each session
@@ -266,7 +266,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
         wins++;
         // Calculate total remaining player HP on win
         const remainingPlayerHP = sessionResult.finalParty.reduce((total, char) => {
-          const currentHP = char.currentHP !== undefined ? char.currentHP : char.hitPoints;
+          const currentHP = char.hp !== undefined ? char.hp : char.maxHp;
           return total + currentHP;
         }, 0);
         totalPlayerHPOnWin += remainingPlayerHP;
@@ -274,7 +274,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
         losses++;
         // Calculate total remaining enemy HP on loss
         const remainingEnemyHP = sessionResult.finalEnemies.reduce((total, enemy) => {
-          const currentHP = enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy);
+          const currentHP = enemy.hp !== undefined ? enemy.hp : calculateEnemyTrackLength(enemy);
           return total + currentHP;
         }, 0);
         totalEnemyHPOnLoss += remainingEnemyHP;
@@ -310,9 +310,9 @@ This model uses aspect track lengths as the basis for damage calculations, makin
     setCombatLog(allSessionLogs);
 
     // Set final summary result
-    const winPercentage = totalSessions > 0 ? ((wins / totalSessions) * 100).toFixed(1) : 0;
-    const lossPercentage = totalSessions > 0 ? ((losses / totalSessions) * 100).toFixed(1) : 0;
-    const avgRounds = totalSessions > 0 ? (totalRounds / totalSessions).toFixed(1) : 0;
+    const winPercentage = totalSessions > 0 ? ((wins / totalSessions) * 100).toFixed(1) : '0';
+    const lossPercentage = totalSessions > 0 ? ((losses / totalSessions) * 100).toFixed(1) : '0';
+    const avgRounds = totalSessions > 0 ? (totalRounds / totalSessions).toFixed(1) : '0';
     
     setCombatResult(`Many Sessions Complete: ${wins}W/${losses}L (${winPercentage}%W, ${lossPercentage}%L), Avg: ${avgRounds} rounds`);
   };
@@ -362,18 +362,12 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                 {/* Party Characters */}
                 <div className="party-characters">
                   {partyCharacters.map(character => (
-                    <div key={character.partyId} className="party-character">
+                    <div key={character.name} className="party-character">
                       <div className="character-info">
                         <span className="character-name">{character.name}</span>
                         <div className="character-stats">
                           <Tooltip content="Hit Points: Number of unmarked aspect bubbles">
-                            <span className="character-hp">HP: {character.currentHP !== undefined ? character.currentHP : character.hitPoints}/{character.hitPoints}</span>
-                          </Tooltip>
-                          <Tooltip content="Attack Score: Highest skill from BREAK, HUNT, FLOURISH">
-                            <span className="character-attack">ATK: {character.attackScore} ({character.attackSkill})</span>
-                          </Tooltip>
-                          <Tooltip content="Defense Score: Highest skill from BRACE, VAULT, RATTLE">
-                            <span className="character-defense">DEF: {character.defenseScore} ({character.defenseSkill})</span>
+                            <span className="character-hp">HP: {character.hp !== undefined ? character.hp : character.maxHp}/{character.maxHp}</span>
                           </Tooltip>
                         </div>
                       </div>
@@ -413,7 +407,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                 {/* Encounter Enemies */}
                 <div className="encounter-enemies">
                   {uniqueEnemies.map(enemy => {
-                    const currentHP = enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy);
+                    const currentHP = enemy.hp !== undefined ? enemy.hp : calculateEnemyTrackLength(enemy);
                     const maxHP = calculateEnemyTrackLength(enemy);
                     const damageTaken = maxHP - currentHP;
                     
@@ -424,9 +418,9 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                     }).join('-');
                     
                     return (
-                      <div key={enemy.instanceId} className="encounter-enemy">
+                      <div key={enemy.name} className="encounter-enemy">
                         <div className="enemy-info">
-                          <span className="enemy-name">{enemy.uniqueName}</span>
+                          <span className="enemy-name">{enemy.name}</span>
                           <div className="enemy-stats">
                             <Tooltip content="Hit Points: Number of unmarked track bubbles (⦾ = empty, ⦿ = marked/damaged)">
                               <span className="enemy-hp">HP: {currentHP}/{maxHP}</span>
@@ -556,7 +550,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
               value={getDamageModelExplanation(damageModel)}
               readOnly
               className="damage-model-details"
-              rows="8"
+              rows={8}
             />
           </div>
         </div>
@@ -620,7 +614,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
           <div className="combat-log">
             {combatLog.map((entry, index) => (
               <div key={index} className={`log-entry ${entry.type || 'neutral'}`}>
-                {entry.message || entry}
+                {entry.message}
               </div>
             ))}
           </div>

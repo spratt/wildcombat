@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import CombinedCharacterSelector from './CombinedCharacterSelector';
 import CharacterUpload from './CharacterUpload';
 import SaveCharacterButton from './SaveCharacterButton';
@@ -6,9 +6,29 @@ import ExportCharacterButton from './ExportCharacterButton';
 import HealAllAspectsButton from './HealAllAspectsButton';
 import Character from './Character';
 import Tooltip from './Tooltip';
+import { Character as CharacterType } from '../types';
+
+interface PartyCharacter extends CharacterType {
+  partyId: string;
+  hitPoints: number;
+  attackSkill: string;
+  attackScore: number;
+  defenseSkill: string;
+  defenseScore: number;
+}
+
+interface AttackStats {
+  skill: string;
+  score: number;
+}
+
+interface DefenseStats {
+  skill: string;
+  score: number;
+}
 
 // Helper function to calculate unchecked aspect tracks (hit points)
-const calculateHitPoints = (character) => {
+const calculateHitPoints = (character: CharacterType): number => {
   if (!character.aspects || !Array.isArray(character.aspects)) {
     return 0;
   }
@@ -27,7 +47,7 @@ const calculateHitPoints = (character) => {
 };
 
 // Helper function to calculate attack skill and score
-const calculateAttackStats = (character) => {
+const calculateAttackStats = (character: CharacterType): AttackStats => {
   if (!character.skills) {
     return { skill: 'BREAK', score: 1 };
   }
@@ -39,7 +59,7 @@ const calculateAttackStats = (character) => {
   attackSkills.forEach(skillName => {
     const skill = character.skills[skillName];
     if (skill && Array.isArray(skill)) {
-      const filledBubbles = skill.filter(bubble => bubble === 1).length;
+      const filledBubbles = skill.filter((bubble: number) => bubble === 1).length;
       if (filledBubbles > maxFilledBubbles) {
         maxFilledBubbles = filledBubbles;
         bestSkill = skillName;
@@ -54,7 +74,7 @@ const calculateAttackStats = (character) => {
 };
 
 // Helper function to calculate defense skill and score
-const calculateDefenseStats = (character) => {
+const calculateDefenseStats = (character: CharacterType): DefenseStats => {
   if (!character.skills) {
     return { skill: 'BRACE', score: 1 };
   }
@@ -66,7 +86,7 @@ const calculateDefenseStats = (character) => {
   defenseSkills.forEach(skillName => {
     const skill = character.skills[skillName];
     if (skill && Array.isArray(skill)) {
-      const filledBubbles = skill.filter(bubble => bubble === 1).length;
+      const filledBubbles = skill.filter((bubble: number) => bubble === 1).length;
       if (filledBubbles > maxFilledBubbles) {
         maxFilledBubbles = filledBubbles;
         bestSkill = skillName;
@@ -80,15 +100,15 @@ const calculateDefenseStats = (character) => {
   };
 };
 
-const PartyTab = () => {
-  const [partyCharacters, setPartyCharacters] = useState([]);
-  const [savedCharactersRefresh, setSavedCharactersRefresh] = useState(0);
-  const [healStatus, setHealStatus] = useState('');
+const PartyTab: React.FC = () => {
+  const [partyCharacters, setPartyCharacters] = useState<PartyCharacter[]>([]);
+  const [savedCharactersRefresh, setSavedCharactersRefresh] = useState<number>(0);
+  const [healStatus, setHealStatus] = useState<string>('');
   
   // Character viewer state
-  const [selectedCharacter, setSelectedCharacter] = useState(null);
-  const [uploadedCharacter, setUploadedCharacter] = useState(null);
-  const [healedCharacter, setHealedCharacter] = useState(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<CharacterType | null>(null);
+  const [uploadedCharacter, setUploadedCharacter] = useState<CharacterType | null>(null);
+  const [healedCharacter, setHealedCharacter] = useState<CharacterType | null>(null);
 
   // Load party from localStorage on component mount
   useEffect(() => {
@@ -131,9 +151,8 @@ const PartyTab = () => {
     }
   }, [partyCharacters, selectedCharacter, uploadedCharacter, healedCharacter]);
 
-
   // Character viewer handlers
-  const handleCharacterViewerSelect = (character) => {
+  const handleCharacterViewerSelect = (character: CharacterType | null) => {
     setSelectedCharacter(character);
     setUploadedCharacter(null);
     setHealedCharacter(null);
@@ -148,7 +167,7 @@ const PartyTab = () => {
     }
   };
 
-  const handleCharacterUpload = (character) => {
+  const handleCharacterUpload = (character: CharacterType) => {
     setUploadedCharacter(character);
     setSelectedCharacter(null);
     setHealedCharacter(null);
@@ -167,7 +186,7 @@ const PartyTab = () => {
     setSavedCharactersRefresh(prev => prev + 1);
   };
 
-  const handleCharacterHealed = (healedChar) => {
+  const handleCharacterHealed = (healedChar: CharacterType) => {
     setHealedCharacter(healedChar);
     
     // Save to localStorage
@@ -183,7 +202,7 @@ const PartyTab = () => {
   const displayCharacter = healedCharacter || uploadedCharacter || selectedCharacter;
 
   // Party handlers
-  const handleCharacterSelect = (character) => {
+  const handleCharacterSelect = (character: CharacterType) => {
     if (!character) return;
     
     // Check if character is already in party
@@ -198,7 +217,7 @@ const PartyTab = () => {
     const attackStats = calculateAttackStats(character);
     const defenseStats = calculateDefenseStats(character);
     
-    const partyCharacter = {
+    const partyCharacter: PartyCharacter = {
       ...character,
       partyId: `${character.name}-${Date.now()}`,
       hitPoints: hitPoints,
@@ -218,7 +237,7 @@ const PartyTab = () => {
     }
   };
 
-  const removeCharacterFromParty = (partyId) => {
+  const removeCharacterFromParty = (partyId: string) => {
     const newParty = partyCharacters.filter(char => char.partyId !== partyId);
     setPartyCharacters(newParty);
     
@@ -242,7 +261,6 @@ const PartyTab = () => {
   const totalPartyDefenseScore = partyCharacters.reduce((total, character) => {
     return total + (character.defenseScore || 1);
   }, 0);
-
 
   // Heal all characters in the party
   const healParty = () => {
@@ -352,89 +370,88 @@ const PartyTab = () => {
           <div className="party-section">
             <h3>Party</h3>
         
-        {partyCharacters.length > 0 && (
-          <div className="party-actions-section">
-            <button 
-              className="heal-party-button"
-              onClick={healParty}
-            >
-              Heal Party
-            </button>
-            {healStatus && (
-              <span className={`party-heal-status ${healStatus.includes('Error') ? 'error' : 'success'}`}>
-                {healStatus}
-              </span>
+            {partyCharacters.length > 0 && (
+              <div className="party-actions-section">
+                <button 
+                  className="heal-party-button"
+                  onClick={healParty}
+                >
+                  Heal Party
+                </button>
+                {healStatus && (
+                  <span className={`party-heal-status ${healStatus.includes('Error') ? 'error' : 'success'}`}>
+                    {healStatus}
+                  </span>
+                )}
+              </div>
             )}
           </div>
-        )}
-      </div>
 
-      {/* Party Stats */}
-      <div className="party-section">
-        <h3>Party Stats</h3>
-        <div className="party-stats">
-          <div className="stat">
-            <span className="stat-label">Characters in Party:</span>
-            <span className="stat-value">{partyCharacters.length}</span>
-          </div>
-          <div className="stat">
-            <span className="stat-label">Total Hit Points:</span>
-            <Tooltip content="Sum of unmarked aspect bubbles across all party characters">
-              <span className="stat-value">{totalPartyHitPoints}</span>
-            </Tooltip>
-          </div>
-          <div className="stat">
-            <span className="stat-label">Total Attack Score:</span>
-            <Tooltip content="Sum of attack scores (highest skill from BREAK, HUNT, FLOURISH)">
-              <span className="stat-value">{totalPartyAttackScore}</span>
-            </Tooltip>
-          </div>
-          <div className="stat">
-            <span className="stat-label">Total Defense Score:</span>
-            <Tooltip content="Sum of defense scores (highest skill from BRACE, VAULT, RATTLE)">
-              <span className="stat-value">{totalPartyDefenseScore}</span>
-            </Tooltip>
-          </div>
-        </div>
-      </div>
-
-
-      {/* Party Characters */}
-      <div className="party-section">
-        <h3>Characters</h3>
-        {partyCharacters.length === 0 ? (
-          <div className="empty-party">
-            <p>No characters in party. Select a character above to add them.</p>
-          </div>
-        ) : (
-          <div className="party-characters">
-            {partyCharacters.map(character => (
-              <div key={character.partyId} className="party-character">
-                <div className="character-info">
-                  <span className="character-name">{character.name}</span>
-                  <div className="character-stats">
-                    <Tooltip content="Hit Points: Number of unmarked aspect bubbles">
-                      <span className="character-hp">HP: {character.hitPoints}</span>
-                    </Tooltip>
-                    <Tooltip content="Attack Score: Highest skill from BREAK, HUNT, FLOURISH">
-                      <span className="character-attack">ATK: {character.attackScore} ({character.attackSkill})</span>
-                    </Tooltip>
-                    <Tooltip content="Defense Score: Highest skill from BRACE, VAULT, RATTLE">
-                      <span className="character-defense">DEF: {character.defenseScore} ({character.defenseSkill})</span>
-                    </Tooltip>
-                  </div>
-                </div>
-                <button 
-                  className="remove-character-button"
-                  onClick={() => removeCharacterFromParty(character.partyId)}
-                  title="Remove from party"
-                >
-                  🗑️
-                </button>
+          {/* Party Stats */}
+          <div className="party-section">
+            <h3>Party Stats</h3>
+            <div className="party-stats">
+              <div className="stat">
+                <span className="stat-label">Characters in Party:</span>
+                <span className="stat-value">{partyCharacters.length}</span>
               </div>
-            ))}
+              <div className="stat">
+                <span className="stat-label">Total Hit Points:</span>
+                <Tooltip content="Sum of unmarked aspect bubbles across all party characters">
+                  <span className="stat-value">{totalPartyHitPoints}</span>
+                </Tooltip>
+              </div>
+              <div className="stat">
+                <span className="stat-label">Total Attack Score:</span>
+                <Tooltip content="Sum of attack scores (highest skill from BREAK, HUNT, FLOURISH)">
+                  <span className="stat-value">{totalPartyAttackScore}</span>
+                </Tooltip>
+              </div>
+              <div className="stat">
+                <span className="stat-label">Total Defense Score:</span>
+                <Tooltip content="Sum of defense scores (highest skill from BRACE, VAULT, RATTLE)">
+                  <span className="stat-value">{totalPartyDefenseScore}</span>
+                </Tooltip>
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Party Characters */}
+          <div className="party-section">
+            <h3>Characters</h3>
+            {partyCharacters.length === 0 ? (
+              <div className="empty-party">
+                <p>No characters in party. Select a character above to add them.</p>
+              </div>
+            ) : (
+              <div className="party-characters">
+                {partyCharacters.map(character => (
+                  <div key={character.partyId} className="party-character">
+                    <div className="character-info">
+                      <span className="character-name">{character.name}</span>
+                      <div className="character-stats">
+                        <Tooltip content="Hit Points: Number of unmarked aspect bubbles">
+                          <span className="character-hp">HP: {character.hitPoints}</span>
+                        </Tooltip>
+                        <Tooltip content="Attack Score: Highest skill from BREAK, HUNT, FLOURISH">
+                          <span className="character-attack">ATK: {character.attackScore} ({character.attackSkill})</span>
+                        </Tooltip>
+                        <Tooltip content="Defense Score: Highest skill from BRACE, VAULT, RATTLE">
+                          <span className="character-defense">DEF: {character.defenseScore} ({character.defenseSkill})</span>
+                        </Tooltip>
+                      </div>
+                    </div>
+                    <button 
+                      className="remove-character-button"
+                      onClick={() => removeCharacterFromParty(character.partyId)}
+                      title="Remove from party"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

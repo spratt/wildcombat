@@ -1,19 +1,30 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Tooltip from './Tooltip';
 import { calculateEnemyTrackLength } from '../utils/dataManager';
+import { Enemy } from '../types';
 
 // Helper function to render trackLength as empty bubbles
-const renderTrackLength = (length) => {
+const renderTrackLength = (length: number): string => {
   if (!length || length <= 0) return '';
   return Array(length).fill('⦾').join('-');
 };
 
-const EnemiesTab = () => {
-  const [enemies, setEnemies] = useState([]);
-  const [selectedEnemy, setSelectedEnemy] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [encounter, setEncounter] = useState([]);
+interface EnemyFile extends Enemy {
+  id: string;
+}
+
+interface EncounterEnemy {
+  enemyId: string;
+  name: string;
+  count: number;
+}
+
+const EnemiesTab: React.FC = () => {
+  const [enemies, setEnemies] = useState<EnemyFile[]>([]);
+  const [selectedEnemy, setSelectedEnemy] = useState<EnemyFile | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [encounter, setEncounter] = useState<EncounterEnemy[]>([]);
 
   useEffect(() => {
     loadEnemies();
@@ -36,7 +47,7 @@ const EnemiesTab = () => {
       ];
       
       const enemyData = await Promise.all(
-        enemyFiles.map(async (filename) => {
+        enemyFiles.map(async (filename): Promise<EnemyFile | null> => {
           try {
             const response = await fetch(`./enemies/${filename}`);
             if (!response.ok) throw new Error(`Failed to load ${filename}`);
@@ -49,11 +60,11 @@ const EnemiesTab = () => {
         })
       );
 
-      const validEnemies = enemyData.filter(Boolean);
+      const validEnemies = enemyData.filter((enemy): enemy is EnemyFile => enemy !== null);
       setEnemies(validEnemies);
       setLoading(false);
     } catch (err) {
-      setError(err.message);
+      setError((err as Error).message);
       setLoading(false);
     }
   };
@@ -77,17 +88,17 @@ const EnemiesTab = () => {
     }
   };
 
-  const handleEnemySelect = (enemyId) => {
+  const handleEnemySelect = (enemyId: string) => {
     const enemy = enemies.find(e => e.id === enemyId);
     setSelectedEnemy(enemy || null);
   };
 
   // Add enemy to encounter
-  const addToEncounter = (enemy) => {
+  const addToEncounter = (enemy: EnemyFile) => {
     if (!enemy) return;
     
     const existingEnemy = encounter.find(e => e.enemyId === enemy.id);
-    let newEncounter;
+    let newEncounter: EncounterEnemy[];
     
     if (existingEnemy) {
       // Increment count if enemy already in encounter
@@ -116,7 +127,7 @@ const EnemiesTab = () => {
   };
 
   // Remove enemy from encounter entirely
-  const removeFromEncounter = (enemyId) => {
+  const removeFromEncounter = (enemyId: string) => {
     const newEncounter = encounter.filter(e => e.enemyId !== enemyId);
     setEncounter(newEncounter);
     
@@ -129,7 +140,7 @@ const EnemiesTab = () => {
   };
 
   // Increment enemy count in encounter
-  const incrementEnemyCount = (enemyId) => {
+  const incrementEnemyCount = (enemyId: string) => {
     const newEncounter = encounter.map(e => 
       e.enemyId === enemyId 
         ? { ...e, count: e.count + 1 }
@@ -146,7 +157,7 @@ const EnemiesTab = () => {
   };
 
   // Decrement enemy count in encounter
-  const decrementEnemyCount = (enemyId) => {
+  const decrementEnemyCount = (enemyId: string) => {
     const newEncounter = encounter.map(e => 
       e.enemyId === enemyId 
         ? { ...e, count: Math.max(1, e.count - 1) }
@@ -161,7 +172,6 @@ const EnemiesTab = () => {
       console.error('Error saving encounter:', error);
     }
   };
-
 
   if (loading) return <div className="tab-content">Loading enemies...</div>;
   if (error) return <div className="tab-content">Error loading enemies: {error}</div>;
@@ -195,10 +205,6 @@ const EnemiesTab = () => {
                   <h1>{selectedEnemy.name}</h1>
                   <div className="enemy-basic-stats">
                     <div className="enemy-stat">
-                      <span className="stat-label">Size:</span>
-                      <span className="stat-value">{selectedEnemy.size}</span>
-                    </div>
-                    <div className="enemy-stat">
                       <span className="stat-label">Track:</span>
                       <span className="stat-value">{renderTrackLength(calculateEnemyTrackLength(selectedEnemy))}</span>
                     </div>
@@ -214,15 +220,23 @@ const EnemiesTab = () => {
                 </div>
               </div>
 
-              <div className="enemy-blurb">
-                <h2>Blurb</h2>
-                <p>{selectedEnemy.blurb}</p>
-              </div>
-
               <div className="enemy-description">
                 <h2>Description</h2>
                 <p>{selectedEnemy.description}</p>
               </div>
+
+              {selectedEnemy.presence && typeof selectedEnemy.presence === 'object' && (
+                <div className="enemy-presence">
+                  <h2>Presence</h2>
+                  <div className="presence-list">
+                    {Object.entries(selectedEnemy.presence).map(([sense, description]) => (
+                      <div key={sense} className="presence-item">
+                        <strong>{sense}:</strong> {description}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {selectedEnemy.aspects && selectedEnemy.aspects.length > 0 && (
                 <div className="enemy-aspects">
@@ -231,8 +245,9 @@ const EnemiesTab = () => {
                     <div key={index} className="enemy-aspect">
                       <div className="aspect-header">
                         <span className="aspect-name">{aspect.name}</span>
+                        <span className="aspect-track">{renderTrackLength(aspect.trackLength)}</span>
                       </div>
-                      <p className="aspect-details">{aspect.description}</p>
+                      {aspect.ability && <p className="aspect-ability">{aspect.ability}</p>}
                     </div>
                   ))}
                 </div>
@@ -241,42 +256,32 @@ const EnemiesTab = () => {
               {selectedEnemy.drives && selectedEnemy.drives.length > 0 && (
                 <div className="enemy-drives">
                   <h2>Drives</h2>
-                  {selectedEnemy.drives.map((drive, index) => (
-                    <div key={index} className="enemy-drive">
-                      <div className="drive-header">
-                        <span className="drive-name">{drive.name}</span>
-                      </div>
-                      <p className="drive-details">{drive.description}</p>
-                    </div>
-                  ))}
+                  <ul>
+                    {selectedEnemy.drives.map((drive, index) => (
+                      <li key={index}>
+                        <strong>{typeof drive === 'object' ? drive.name : drive}</strong>
+                        {typeof drive === 'object' && drive.description && (
+                          <div>{drive.description}</div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
               {selectedEnemy.quirks && selectedEnemy.quirks.length > 0 && (
                 <div className="enemy-quirks">
                   <h2>Quirks</h2>
-                  {selectedEnemy.quirks.map((quirk, index) => (
-                    <div key={index} className="enemy-quirk">
-                      <div className="quirk-header">
-                        <span className="quirk-name">{quirk.name}</span>
-                      </div>
-                      <p className="quirk-details">{quirk.description}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {selectedEnemy.presence && Object.keys(selectedEnemy.presence).length > 0 && (
-                <div className="enemy-presence">
-                  <h2>Presence</h2>
-                  <div className="presence-grid">
-                    {Object.entries(selectedEnemy.presence).map(([sense, description]) => (
-                      <div key={sense} className="presence-sense">
-                        <h3>{sense}</h3>
-                        <p>{description}</p>
-                      </div>
+                  <ul>
+                    {selectedEnemy.quirks.map((quirk, index) => (
+                      <li key={index}>
+                        <strong>{typeof quirk === 'object' ? quirk.name : quirk}</strong>
+                        {typeof quirk === 'object' && quirk.description && (
+                          <div>{quirk.description}</div>
+                        )}
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
               )}
             </div>

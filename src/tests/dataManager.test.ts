@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { calculateEnemyTrackLength, calculatePartyStats, calculateEncounterStats } from '../utils/dataManager.js'
+import { calculateEnemyTrackLength, calculatePartyStats, calculateEncounterStats } from '../utils/dataManager'
+import type { Enemy, Character, EnemyAspect, Aspect } from '../types'
 
 describe('Data Manager', () => {
   describe('calculateEnemyTrackLength', () => {
@@ -9,12 +10,12 @@ describe('Data Manager', () => {
     })
 
     it('should return 0 for enemy without aspects', () => {
-      const enemy = { name: 'Test Enemy' }
+      const enemy: Partial<Enemy> = { name: 'Test Enemy' }
       expect(calculateEnemyTrackLength(enemy)).toBe(0)
     })
 
     it('should sum aspect trackLengths', () => {
-      const enemy = {
+      const enemy: Enemy = {
         name: 'Test Enemy',
         aspects: [
           { name: 'Aspect 1', trackLength: 3 },
@@ -26,19 +27,19 @@ describe('Data Manager', () => {
     })
 
     it('should handle aspects without trackLength (default to 0)', () => {
-      const enemy = {
+      const enemy: Enemy = {
         name: 'Test Enemy',
         aspects: [
           { name: 'Aspect 1', trackLength: 3 },
-          { name: 'Aspect 2' }, // no trackLength
+          { name: 'Aspect 2', trackLength: 0 }, // explicit 0
           { name: 'Aspect 3', trackLength: 4 }
         ]
       }
       expect(calculateEnemyTrackLength(enemy)).toBe(7)
     })
 
-    it('should return 1 for empty aspects array', () => {
-      const enemy = {
+    it('should return 0 for empty aspects array', () => {
+      const enemy: Enemy = {
         name: 'Test Enemy',
         aspects: []
       }
@@ -47,13 +48,24 @@ describe('Data Manager', () => {
   })
 
   describe('calculatePartyStats', () => {
-    const mockParty = [
+    interface MockCharacter extends Partial<Character> {
+      name: string
+      hitPoints: number
+      aspects: Aspect[]
+      attackScore: number
+      attackSkill: string
+      defenseScore: number
+      defenseSkill: string
+      currentHP?: number
+    }
+
+    const mockParty: MockCharacter[] = [
       {
         name: 'Character 1',
         hitPoints: 10,
         aspects: [
-          { name: 'Skill 1', value: [0, 0, 0] },
-          { name: 'Skill 2', value: [0, 0, 0, 0] }
+          { type: 'trait', name: 'Skill 1', value: [0, 0, 0] },
+          { type: 'trait', name: 'Skill 2', value: [0, 0, 0, 0] }
         ],
         attackScore: 3,
         attackSkill: 'BREAK',
@@ -64,8 +76,8 @@ describe('Data Manager', () => {
         name: 'Character 2',
         hitPoints: 8,
         aspects: [
-          { name: 'Skill 1', value: [0, 0] },
-          { name: 'Skill 2', value: [0, 0, 0, 0, 0] }
+          { type: 'trait', name: 'Skill 1', value: [0, 0] },
+          { type: 'trait', name: 'Skill 2', value: [0, 0, 0, 0, 0] }
         ],
         attackScore: 2,
         attackSkill: 'DELVE',
@@ -97,7 +109,7 @@ describe('Data Manager', () => {
     })
 
     it('should handle characters with currentHP', () => {
-      const partyWithCurrentHP = [
+      const partyWithCurrentHP: MockCharacter[] = [
         { ...mockParty[0], currentHP: 5 },
         { ...mockParty[1], currentHP: 3 }
       ]
@@ -107,7 +119,13 @@ describe('Data Manager', () => {
   })
 
   describe('calculateEncounterStats', () => {
-    const mockEnemies = [
+    interface MockEnemy extends Partial<Enemy> {
+      name: string
+      aspects: EnemyAspect[]
+      currentHP?: number
+    }
+
+    const mockEnemies: MockEnemy[] = [
       {
         name: 'Enemy 1',
         aspects: [
@@ -130,7 +148,7 @@ describe('Data Manager', () => {
     })
 
     it('should use currentHP when available', () => {
-      const enemiesWithCurrentHP = [
+      const enemiesWithCurrentHP: MockEnemy[] = [
         { ...mockEnemies[0], currentHP: 5 },
         { ...mockEnemies[1], currentHP: 3 }
       ]
@@ -144,9 +162,9 @@ describe('Data Manager', () => {
     })
 
     it('should handle enemies without aspects', () => {
-      const enemiesWithoutAspects = [
-        { name: 'Enemy 1' },
-        { name: 'Enemy 2' }
+      const enemiesWithoutAspects: Array<Partial<Enemy>> = [
+        { name: 'Enemy 1', aspects: [] },
+        { name: 'Enemy 2', aspects: [] }
       ]
       const stats = calculateEncounterStats(enemiesWithoutAspects)
       expect(stats.totalHP).toBe(0)

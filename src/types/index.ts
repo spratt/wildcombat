@@ -2,14 +2,14 @@
 export interface Character {
   name: string;
   portrait?: string;
-  background: string;
-  bloodline: string;
-  origin: string;
-  post: string;
-  edges: string[];
-  skills: string[];
-  languages: string[];
-  drives: Drive[];
+  background: string | { bloodline?: string; origin?: string; post?: string; notes?: string };
+  bloodline?: string;
+  origin?: string;
+  post?: string;
+  edges: string[] | Record<string, boolean>;
+  skills: Record<string, number[]>;
+  languages: Record<string, number[]>;
+  drives: string | Drive[];
   mires: Mire[];
   charts?: string[];
   cargo?: string[];
@@ -60,9 +60,9 @@ export interface Enemy {
   name: string;
   description?: string;
   aspects: EnemyAspect[];
-  drives?: string[];
-  quirks?: string[];
-  presence?: number;
+  drives?: (string | { name: string; description?: string })[];
+  quirks?: (string | { name: string; description?: string })[];
+  presence?: number | Record<string, string>;
 }
 
 export interface EnemyAspect {

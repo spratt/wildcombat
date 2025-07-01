@@ -87,7 +87,7 @@ const calculateAttackStats = (character: Character): { skill: string; score: num
   let maxFilledBubbles = 0;
   
   attackSkills.forEach(skillName => {
-    const skill = (character.skills as any)[skillName];
+    const skill = character.skills[skillName];
     if (skill && Array.isArray(skill)) {
       const filledBubbles = skill.filter((bubble: number) => bubble === 1).length;
       if (filledBubbles > maxFilledBubbles) {
@@ -114,7 +114,7 @@ const calculateDefenseStats = (character: Character): { skill: string; score: nu
   let maxFilledBubbles = 0;
   
   defenseSkills.forEach(skillName => {
-    const skill = (character.skills as any)[skillName];
+    const skill = character.skills[skillName];
     if (skill && Array.isArray(skill)) {
       const filledBubbles = skill.filter((bubble: number) => bubble === 1).length;
       if (filledBubbles > maxFilledBubbles) {
