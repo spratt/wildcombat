@@ -69,7 +69,7 @@ export interface EnemyAspect {
   name: string;
   trackLength: number;
   ability?: string;
-  abilityCode?: 'Incapacitate';
+  abilityCode?: 'Incapacitate' | 'dualWieldBarrage' | 'highNoonDuel' | 'desertMirage';
 }
 
 // Combat types

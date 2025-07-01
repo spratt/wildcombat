@@ -1,0 +1,62 @@
+{
+  "name": "Zitera",
+  "blurb": "A legendary ektus gunslinger with twin revolvers and an unmatched quick draw.",
+  "description": "Zitera cuts an unmistakable figure across the Wildsea - a towering cactus humanoid draped in weathered leather, twin gun belts crossing his barrel chest. His massive ten-gallon hat casts shadows over glowing amber eyes that miss nothing. Each of his four arms ends in lightning-fast hands that can draw and fire his custom revolvers before most enemies can blink. Spines bristle along his green hide, and his boots are worn from decades of wandering the endless canopy. As the last of the old gunslingers, Zitera follows an ancient code of honor, but his patience for those who break the peace grows thinner with each passing year.",
+  "size": "large",
+  "aspects": [
+    {
+      "name": "Dual Wield Barrage",
+      "description": "Spins both revolvers and unleashes a devastating hail of gunfire in all directions. All enemies must defend with advantage, but none can escape the storm of lead.",
+      "abilityCode": "dualWieldBarrage",
+      "trackLength": 4
+    },
+    {
+      "name": "High Noon Duel",
+      "description": "Challenges a single opponent to an honorable showdown. Time seems to stop as the two gunslingers face off, locked in mortal combat while the world holds its breath.",
+      "abilityCode": "highNoonDuel",
+      "trackLength": 3
+    },
+    {
+      "name": "Desert Mirage",
+      "description": "Channels the heat of distant deserts to create shimmering distortions that confuse and disorient attackers. Reality bends as illusions dance in the air.",
+      "abilityCode": "desertMirage",
+      "trackLength": 3
+    },
+    {
+      "name": "Quick Draw Mastery",
+      "description": "Lightning reflexes honed by decades of practice. Can draw and fire faster than the eye can follow.",
+      "trackLength": 4
+    },
+    {
+      "name": "Cactus Hide",
+      "description": "Thick, spiny exterior provides natural armor and deters close combat. Thorns can pierce even the toughest leather.",
+      "trackLength": 6
+    }
+  ],
+  "drives": [
+    {
+      "name": "Code of Honor",
+      "description": "Follows the ancient gunslinger's code - fair fights, no shooting in the back, and always give them a chance to draw first."
+    },
+    {
+      "name": "Last of His Kind",
+      "description": "Carries the weight of being the final practitioner of the old gunslinger ways, determined to prove their worth one last time."
+    }
+  ],
+  "quirks": [
+    {
+      "name": "Ceremonial Ritual",
+      "description": "Always tips his hat before drawing, giving opponents a split-second warning - it's only sporting."
+    },
+    {
+      "name": "Desert Wanderer",
+      "description": "Occasionally stares off into the distance as if seeing mirages from long-lost wastelands that no longer exist."
+    }
+  ],
+  "presence": {
+    "Sight": "A towering cactus gunslinger in weathered leather, twin revolvers gleaming at his sides beneath an enormous hat.",
+    "Sound": "The soft creak of leather holsters, the gentle clink of spurs, and the whisper of wind through thorny spines.",
+    "Smell": "Sun-baked leather, gun oil, and the dry, green scent of desert sage mixed with cactus blooms.",
+    "Taste": "The air carries a metallic tang of gunpowder and the bitter taste of alkali dust from forgotten wastelands."
+  }
+}

@@ -52,7 +52,7 @@
           },
           "abilityCode": {
             "type": "string",
-            "enum": ["incapacitate"],
+            "enum": ["incapacitate", "dualWieldBarrage", "highNoonDuel", "desertMirage"],
             "description": "Special ability code for combat mechanics"
           }
         },
