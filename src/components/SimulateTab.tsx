@@ -384,7 +384,13 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                         <span className="character-name">{character.name}</span>
                         <div className="character-stats">
                           <Tooltip content="Hit Points: Number of unmarked aspect bubbles">
-                            <span className="character-hp">HP: {character.hp !== undefined ? character.hp : character.maxHp}/{character.maxHp}</span>
+                            <span className="character-hp">HP: {character.currentHP !== undefined ? character.currentHP : character.hitPoints}/{character.hitPoints}</span>
+                          </Tooltip>
+                          <Tooltip content="Attack Score: Highest skill from BREAK, HACK, HUNT">
+                            <span className="character-attack">ATK: {character.attackScore} ({character.attackSkill})</span>
+                          </Tooltip>
+                          <Tooltip content="Defense Score: Highest skill from BRACE, FLOURISH, VAULT">
+                            <span className="character-defense">DEF: {character.defenseScore} ({character.defenseSkill})</span>
                           </Tooltip>
                         </div>
                       </div>
