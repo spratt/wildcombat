@@ -347,6 +347,20 @@
   min-height: 120px;
 }
 
+/* Use Abilities Checkbox */
+.use-abilities-checkbox {
+  margin-right: 0.5rem;
+  transform: scale(1.2);
+}
+
+.option-group label {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+  color: #d1d1d1;
+  cursor: pointer;
+}
+
 .damage-model-details:focus {
   outline: 2px solid #61dafb;
   outline-offset: 2px;

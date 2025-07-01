@@ -68,7 +68,7 @@ export const simulatePlayerAttackPhase = (party, enemies) => {
   return { updatedEnemies, log };
 };
 
-export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,counter', enemyAttacksPerRound = 1) => {
+export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,counter', enemyAttacksPerRound = 1, useAbilities = true) => {
   const log = [];
   let updatedParty = [...party];
   let updatedEnemies = [...enemies];
@@ -108,7 +108,7 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
       ) || [];
       
       
-      const useAbility = availableAbilities.length > 0; // Always use available abilities
+      const useAbility = useAbilities && availableAbilities.length > 0; // Use abilities only if enabled and available
       
       if (useAbility) {
         // Use random available ability
@@ -327,7 +327,7 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
   return { updatedParty, updatedEnemies, log };
 };
 
-export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,1,2,counter', enemyAttacksPerRound = 1) => {
+export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,1,2,counter', enemyAttacksPerRound = 1, useAbilities = true) => {
   if (party.length === 0 || enemies.length === 0) {
     return {
       updatedParty: party,
@@ -361,7 +361,7 @@ export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,
   roundLog.push(...playerPhase.log);
   
   // Enemy attack phase
-  const enemyPhase = simulateEnemyAttackPhase(playerPhase.updatedEnemies, updatedParty, damageModel, enemyAttacksPerRound);
+  const enemyPhase = simulateEnemyAttackPhase(playerPhase.updatedEnemies, updatedParty, damageModel, enemyAttacksPerRound, useAbilities);
   roundLog.push(...enemyPhase.log);
   
   // Check win/lose conditions

@@ -55,6 +55,14 @@ const SimulateTab = () => {
     totalPlayerHPOnWin: 0,
     totalEnemyHPOnLoss: 0
   });
+  const [useAbilities, setUseAbilities] = useState(() => {
+    try {
+      return localStorage.getItem('wildcombat-use-abilities') === 'true';
+    } catch (error) {
+      console.warn('Failed to load use abilities from localStorage:', error);
+      return true; // Default to true (abilities enabled)
+    }
+  });
 
   useEffect(() => {
     loadParty();
@@ -121,6 +129,15 @@ const SimulateTab = () => {
     }
   }, [sessionsToSimulate]);
 
+  // Save use abilities to localStorage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('wildcombat-use-abilities', useAbilities.toString());
+    } catch (error) {
+      console.warn('Failed to save use abilities to localStorage:', error);
+    }
+  }, [useAbilities]);
+
   // Get damage model explanation
   const getDamageModelExplanation = (model) => {
     switch (model) {
@@ -158,7 +175,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
 
 
   const handleSimulateOneRound = () => {
-    const result = simulateOneRound(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound);
+    const result = simulateOneRound(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound, useAbilities);
     
     // Update state with results
     setUniqueEnemies(result.updatedEnemies);
@@ -193,7 +210,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
   };
 
   const handleSimulateOneSession = () => {
-    const sessionResult = simulateFullSession(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound);
+    const sessionResult = simulateFullSession(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound, useAbilities);
     
     // Update state with final session results
     setUniqueEnemies(sessionResult.finalEnemies);
@@ -224,7 +241,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
       const sessionEnemies = initialEnemies.map(enemy => ({ ...enemy }));
       
       // Simulate one complete session
-      const sessionResult = simulateFullSession(sessionParty, sessionEnemies, 1, damageModel, enemyAttacksPerRound);
+      const sessionResult = simulateFullSession(sessionParty, sessionEnemies, 1, damageModel, enemyAttacksPerRound, useAbilities);
       
       totalSessions++;
       totalRounds += sessionResult.finalRound - 1; // finalRound is 1 more than rounds completed
@@ -504,6 +521,18 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                 +
               </button>
             </div>
+          </div>
+          <div className="option-group">
+            <label htmlFor="use-abilities">
+              <input
+                type="checkbox"
+                id="use-abilities"
+                checked={useAbilities}
+                onChange={(e) => setUseAbilities(e.target.checked)}
+                className="use-abilities-checkbox"
+              />
+              Use Abilities
+            </label>
           </div>
           <div className="damage-model-explanation">
             <label htmlFor="damage-model-details">Details:</label>
