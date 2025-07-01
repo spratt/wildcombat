@@ -111,7 +111,7 @@ const SimulateTab = () => {
 
   // Calculate party stats
   const totalPartyHitPoints = partyCharacters.reduce((total, character) => {
-    return total + (character.hitPoints || 0);
+    return total + (character.currentHP !== undefined ? character.currentHP : character.hitPoints || 0);
   }, 0);
   
   const totalPartyAttackScore = partyCharacters.reduce((total, character) => {
@@ -159,6 +159,28 @@ const SimulateTab = () => {
     return damage;
   };
 
+  const calculateDefenseDamage = (rolls) => {
+    if (rolls.length === 0) return { damage: 0, hasDoubles: false };
+    
+    const highest = Math.max(...rolls);
+    let damage = 0;
+    
+    // Defense damage calculation (opposite of attack)
+    if (highest === 6) damage = 0; // No damage on 6
+    else if (highest >= 4) damage = 1; // 1 damage on 4-5
+    else damage = 2; // 2 damage on 1-3
+    
+    // Check for doubles (any two dice with same value)
+    const counts = {};
+    rolls.forEach(roll => {
+      counts[roll] = (counts[roll] || 0) + 1;
+    });
+    
+    const hasDoubles = Object.values(counts).some(count => count >= 2);
+    
+    return { damage, hasDoubles };
+  };
+
   const simulateOneRound = () => {
     if (partyCharacters.length === 0 || uniqueEnemies.length === 0) {
       setCombatLog(prev => [...prev, "Cannot simulate: missing party or encounter"]);
@@ -166,7 +188,7 @@ const SimulateTab = () => {
     }
 
     // Filter out defeated enemies (HP <= 0)
-    const aliveEnemies = uniqueEnemies.filter(enemy => (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0);
+    let aliveEnemies = uniqueEnemies.filter(enemy => (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0);
     
     if (aliveEnemies.length === 0) {
       setCombatLog(prev => [...prev, "Combat over: All enemies defeated!"]);
@@ -175,8 +197,10 @@ const SimulateTab = () => {
 
     const newLog = [];
     let updatedEnemies = [...uniqueEnemies];
+    let updatedParty = [...partyCharacters];
 
-    partyCharacters.forEach(character => {
+    // PLAYER ATTACK PHASE
+    updatedParty.forEach(character => {
       const stillAlive = updatedEnemies.filter(enemy => (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0);
       if (stillAlive.length === 0) return; // No more targets
       
@@ -210,7 +234,83 @@ const SimulateTab = () => {
       }
     });
 
+    // Update alive enemies list after player attacks
+    aliveEnemies = updatedEnemies.filter(enemy => (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0);
+    const aliveParty = updatedParty.filter(char => (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0);
+
+    // ENEMY ATTACK PHASE
+    if (aliveEnemies.length > 0 && aliveParty.length > 0) {
+      aliveEnemies.forEach(enemy => {
+        if (aliveParty.length === 0) return; // No more targets
+        
+        // Choose random player to attack
+        const targetIndex = Math.floor(Math.random() * aliveParty.length);
+        const target = aliveParty[targetIndex];
+        
+        // Target defends with their defense skill
+        const defenseScore = target.defenseScore || 1;
+        const defenseSkill = target.defenseSkill || 'BRACE';
+        const defenseRolls = rollDice(defenseScore);
+        const defenseResult = calculateDefenseDamage(defenseRolls);
+        
+        // Log enemy attack and defense
+        newLog.push(`${enemy.uniqueName} attacks ${target.name}`);
+        newLog.push(`${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`);
+        
+        if (defenseResult.damage > 0) {
+          // Find character in updatedParty array and apply damage
+          const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
+          if (charIndex !== -1) {
+            const currentHP = updatedParty[charIndex].currentHP !== undefined ? updatedParty[charIndex].currentHP : updatedParty[charIndex].hitPoints;
+            updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
+            
+            newLog.push(`${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name}`);
+            
+            // Check if character is defeated
+            if (updatedParty[charIndex].currentHP <= 0) {
+              newLog.push(`${target.name} was defeated!`);
+              // Remove from alive party
+              const aliveIndex = aliveParty.findIndex(c => c.partyId === target.partyId);
+              if (aliveIndex !== -1) {
+                aliveParty.splice(aliveIndex, 1);
+              }
+            }
+          }
+        }
+        
+        // Check for doubles - free counter attack
+        if (defenseResult.hasDoubles) {
+          newLog.push(`${target.name} rolled doubles and gets a free counter-attack!`);
+          
+          // Counter attack
+          const counterAttackScore = target.attackScore || 1;
+          const counterAttackSkill = target.attackSkill || 'BREAK';
+          const counterRolls = rollDice(counterAttackScore);
+          const counterDamage = calculateDamage(counterRolls);
+          
+          newLog.push(`${target.name} counter-attacks ${enemy.uniqueName} with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`);
+          
+          if (counterDamage > 0) {
+            // Apply counter damage to enemy
+            const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
+            if (enemyIndex !== -1) {
+              const currentHP = updatedEnemies[enemyIndex].currentHP !== undefined ? updatedEnemies[enemyIndex].currentHP : updatedEnemies[enemyIndex].trackLength;
+              updatedEnemies[enemyIndex].currentHP = Math.max(0, currentHP - counterDamage);
+              
+              newLog.push(`${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`);
+              
+              // Check if enemy is defeated by counter
+              if (updatedEnemies[enemyIndex].currentHP <= 0) {
+                newLog.push(`${enemy.uniqueName} was defeated by the counter-attack!`);
+              }
+            }
+          }
+        }
+      });
+    }
+
     setUniqueEnemies(updatedEnemies);
+    setPartyCharacters(updatedParty);
     setCombatLog(prev => [...prev, ...newLog]);
   };
 
@@ -221,6 +321,13 @@ const SimulateTab = () => {
       currentHP: enemy.trackLength
     }));
     setUniqueEnemies(resetEnemies);
+    
+    // Reset all party characters to full HP
+    const resetParty = partyCharacters.map(character => ({
+      ...character,
+      currentHP: character.hitPoints
+    }));
+    setPartyCharacters(resetParty);
     
     // Clear combat log
     setCombatLog([]);
@@ -269,7 +376,7 @@ const SimulateTab = () => {
                       <div className="character-info">
                         <span className="character-name">{character.name}</span>
                         <div className="character-stats">
-                          <span className="character-hp">HP: {character.hitPoints}</span>
+                          <span className="character-hp">HP: {character.currentHP !== undefined ? character.currentHP : character.hitPoints}/{character.hitPoints}</span>
                           <span className="character-attack">ATK: {character.attackScore} ({character.attackSkill})</span>
                           <span className="character-defense">DEF: {character.defenseScore} ({character.defenseSkill})</span>
                         </div>
