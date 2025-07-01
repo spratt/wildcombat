@@ -5,20 +5,20 @@ import type { CombatCharacter, CombatEnemy, DiceRoll } from '../types'
 // Mock the combat engine functions
 vi.mock('../utils/combatEngine', () => ({
   rollDice: vi.fn((count: number): DiceRoll => Array(count).fill(4)), // Always roll 4s
-  calculateDamage: vi.fn((rolls: DiceRoll): number => rolls.includes(6) ? 2 : rolls.includes(4) ? 1 : 0),
-  calculateDefenseDamage: vi.fn((rolls: DiceRoll, damageModel: string) => ({ damage: 1, hasDoubles: false })),
-  calculateIncapacitateDefense: vi.fn((rolls: DiceRoll) => ({ 
+  calculateDamage: vi.fn(() => 1),
+  calculateDefenseDamage: vi.fn(() => ({ damage: 1, hasDoubles: false })),
+  calculateIncapacitateDefense: vi.fn(() => ({ 
     damage: 0, 
     incapacitated: true, 
     fullyIncapacitated: false, 
     hasDoubles: false 
   })),
-  checkWinConditions: vi.fn((enemies: any[], party: any[]) => ({ isOver: false, result: null, aliveEnemies: enemies, aliveParty: party }))
+  checkWinConditions: vi.fn((enemies: unknown[], party: unknown[]) => ({ isOver: false, result: null, aliveEnemies: enemies, aliveParty: party }))
 }))
 
 // Mock the data manager
 vi.mock('../utils/dataManager', () => ({
-  calculateEnemyTrackLength: vi.fn((enemy: any) => enemy.aspects?.reduce((sum: number, aspect: any) => sum + (aspect.trackLength || 0), 0) || enemy.trackLength || 10)
+  calculateEnemyTrackLength: vi.fn((enemy: { aspects?: { trackLength?: number }[]; trackLength?: number }) => enemy.aspects?.reduce((sum: number, aspect: { trackLength?: number }) => sum + (aspect.trackLength || 0), 0) || enemy.trackLength || 10)
 }))
 
 interface MockCombatCharacter extends Partial<CombatCharacter> {

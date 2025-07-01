@@ -73,7 +73,7 @@ const CombinedCharacterSelector: React.FC<CombinedCharacterSelectorProps> = ({ o
       const saved = localStorage.getItem('wildcombat-saved-characters');
       if (saved) {
         const characters = JSON.parse(saved);
-        const formattedCharacters: CharacterOption[] = characters.map((char: any) => ({
+        const formattedCharacters: CharacterOption[] = characters.map((char: Character) => ({
           ...char,
           type: 'saved' as const,
           displayName: `${char.name} (saved ${new Date(char.savedAt).toLocaleDateString()})`

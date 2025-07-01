@@ -70,8 +70,8 @@ export const simulateFullSession = (
 
     // Simulate one round using the utility function
     const roundResult = simulateOneRound(
-      currentParty as any, // Type coercion needed for extended combat types
-      currentEnemies as any, 
+      currentParty as CombatCharacter[], // Type coercion needed for extended combat types
+      currentEnemies as CombatEnemy[], 
       currentRoundNum, 
       damageModel, 
       enemyAttacksPerRound, 

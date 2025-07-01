@@ -7,7 +7,6 @@ import {
   loadEncounterFromStorage, 
   loadEnemiesData,
   generateUniqueEnemyNames,
-  renderTrackLength,
   calculatePartyStats,
   calculateEncounterStats,
   resetCombatState,
@@ -32,7 +31,7 @@ interface SessionStats {
 
 const SimulateTab: React.FC = () => {
   const [partyCharacters, setPartyCharacters] = useState<CombatCharacter[]>([]);
-  const [encounter, setEncounter] = useState<any[]>([]);
+  const [encounter, setEncounter] = useState<{ enemyId: string; count: number }[]>([]);
   const [enemies, setEnemies] = useState<Enemy[]>([]);
   const [uniqueEnemies, setUniqueEnemies] = useState<CombatEnemy[]>([]);
   const [combatLog, setCombatLog] = useState<LogEntry[]>([]);
@@ -123,7 +122,7 @@ const SimulateTab: React.FC = () => {
   const { totalHP: totalEncounterHP } = calculateEncounterStats(uniqueEnemies);
 
   // Check if combat is over using utility function
-  const { isOver: combatOver, aliveEnemies, aliveParty } = checkWinConditions(uniqueEnemies, partyCharacters);
+  const { isOver: combatOver } = checkWinConditions(uniqueEnemies, partyCharacters);
   
 
   // Save damage model to localStorage when it changes

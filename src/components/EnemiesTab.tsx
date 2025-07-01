@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Tooltip from './Tooltip';
 import { calculateEnemyTrackLength } from '../utils/dataManager';
 import { Enemy } from '../types';
@@ -26,15 +26,9 @@ const EnemiesTab: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [encounter, setEncounter] = useState<EncounterEnemy[]>([]);
 
-  useEffect(() => {
-    loadEnemies();
-  }, []);
-
-  // Separate effect to load encounter after enemies are loaded
-  useEffect(() => {
-    if (enemies.length > 0) {
-      loadEncounter();
-    }
+  const handleEnemySelect = useCallback((enemyId: string) => {
+    const enemy = enemies.find(e => e.id === enemyId);
+    setSelectedEnemy(enemy || null);
   }, [enemies]);
 
   const loadEnemies = async () => {
@@ -69,29 +63,31 @@ const EnemiesTab: React.FC = () => {
     }
   };
 
-  // Load encounter from localStorage
-  const loadEncounter = () => {
-    try {
-      const savedEncounter = localStorage.getItem('wildcombat-encounter');
-      if (savedEncounter) {
-        const encounterData = JSON.parse(savedEncounter);
-        setEncounter(encounterData);
-        
-        // Auto-select first enemy in encounter if available
-        if (encounterData.length > 0) {
-          const firstEnemyId = encounterData[0].enemyId;
-          handleEnemySelect(firstEnemyId);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading saved encounter:', error);
-    }
-  };
+  useEffect(() => {
+    loadEnemies();
+  }, []);
 
-  const handleEnemySelect = (enemyId: string) => {
-    const enemy = enemies.find(e => e.id === enemyId);
-    setSelectedEnemy(enemy || null);
-  };
+  // Separate effect to load encounter after enemies are loaded
+  useEffect(() => {
+    if (enemies.length > 0) {
+      // Load encounter from localStorage
+      try {
+        const savedEncounter = localStorage.getItem('wildcombat-encounter');
+        if (savedEncounter) {
+          const encounterData = JSON.parse(savedEncounter);
+          setEncounter(encounterData);
+          
+          // Auto-select first enemy in encounter if available
+          if (encounterData.length > 0) {
+            const firstEnemyId = encounterData[0].enemyId;
+            handleEnemySelect(firstEnemyId);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved encounter:', error);
+      }
+    }
+  }, [enemies, handleEnemySelect]);
 
   // Add enemy to encounter
   const addToEncounter = (enemy: EnemyFile) => {

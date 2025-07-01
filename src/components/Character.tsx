@@ -47,7 +47,7 @@ const LANGUAGES = [
 ] as const;
 
 // Helper function to get all skills with defaults
-const getAllSkills = (characterSkills: Record<string, number[]>): Record<string, number[]> => {
+const _getAllSkills = (characterSkills: Record<string, number[]>): Record<string, number[]> => {
   const skills: Record<string, number[]> = {};
   SKILLS.forEach(skill => {
     skills[skill] = characterSkills[skill] || [0, 0, 0];
@@ -56,7 +56,7 @@ const getAllSkills = (characterSkills: Record<string, number[]>): Record<string,
 };
 
 // Helper function to get all languages with defaults
-const getAllLanguages = (characterLanguages: Record<string, number[]>): Record<string, number[]> => {
+const _getAllLanguages = (characterLanguages: Record<string, number[]>): Record<string, number[]> => {
   const languages: Record<string, number[]> = {};
   LANGUAGES.forEach(language => {
     languages[language] = characterLanguages[language] || [0, 0, 0];

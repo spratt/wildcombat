@@ -113,7 +113,7 @@ describe('Session Simulator', () => {
         isOver: true
       })
 
-      const result = simulateFullSession(
+      simulateFullSession(
         mockParty, 
         mockEnemies, 
         1, 
@@ -164,7 +164,7 @@ describe('Session Simulator', () => {
 
       const result = simulateFullSession(mockParty, mockEnemies, 1)
 
-      expect(result.sessionLog.some((entry: any) => 
+      expect(result.sessionLog.some((entry: { message?: string }) => 
         typeof entry === 'object' && entry.message && entry.message.includes('100 rounds')
       )).toBe(true)
     })

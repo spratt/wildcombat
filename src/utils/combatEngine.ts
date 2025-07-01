@@ -111,7 +111,8 @@ const calculateLongestAspectTrack = (character: CombatCharacter | Character | nu
 // Helper function to calculate incapacitate ability defense results
 export const calculateIncapacitateDefense = (
   rolls: DiceRoll, 
-  targetCharacter: CombatCharacter
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _targetCharacter: CombatCharacter
 ): DefenseResult => {
   const highest = Math.max(...rolls);
   let damage = 0;

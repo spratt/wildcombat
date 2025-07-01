@@ -22,7 +22,7 @@ const SaveCharacterButton: React.FC<SaveCharacterButtonProps> = ({ characterData
       const savedCharacters = existingSaved ? JSON.parse(existingSaved) : [];
 
       // Remove any existing character with the same name
-      const filteredCharacters = savedCharacters.filter((char: any) => char.name !== characterData.name);
+      const filteredCharacters = savedCharacters.filter((char: Character) => char.name !== characterData.name);
 
       // Create new save entry
       const saveEntry = {
