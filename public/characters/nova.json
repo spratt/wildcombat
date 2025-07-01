@@ -1,0 +1,140 @@
+{
+  "name": "Nova",
+  "version": "1.8.4",
+  "accessControl": "ALLOW_ALL",
+  "background": {
+    "bloodline": "Cacophony",
+    "origin": "Shankling",
+    "post": "Spit-Lyre",
+    "notes": "Nova is a Cacophony whose crystalline body resonates with musical tones that can shatter glass or soothe savage beasts. Growing up as a Shankling, they learned to harmonize with the forest's natural rhythms before taking to the sea. As a Spit-Lyre, they use their sonic abilities both in performance and combat, their body singing with different frequencies depending on their mood. Their crystalline features catch and refract light, creating beautiful prismatic displays during their performances."
+  },
+  "edges": {
+    "VEILS": true,
+    "TIDES": true,
+    "GRACE": true
+  },
+  "skills": {
+    "SWAY": [1, 1, 1],
+    "FLOURISH": [1, 1, 0],
+    "SENSE": [1, 0, 0],
+    "STUDY": [1, 0, 0],
+    "OUTWIT": [1, 0, 0],
+    "RATTLE": [1, 0, 0]
+  },
+  "languages": {
+    "SIGH": [1, 1, 1],
+    "LOW_SOUR": [1, 0, 0],
+    "HIGHVIN": [1, 1, 0]
+  },
+  "drives": "Perform before a legendary audience\nDiscover a lost song of power\nBring harmony to a discordant situation",
+  "mires": [
+    {
+      "label": "Your emotions create unwanted sound effects",
+      "value": [0, 0]
+    },
+    {
+      "label": "You speak in musical metaphors others don't understand",
+      "value": [0, 0]
+    },
+    {
+      "label": "Silence makes you deeply uncomfortable",
+      "value": [0, 0]
+    }
+  ],
+  "aspects": [
+    {
+      "name": "Sonic Resonance (Traits) - Cacophony",
+      "value": [1, 1, 0, 0],
+      "details": "Your crystalline body can produce devastating sound waves. Mark to deal LR Blast damage or shatter fragile objects.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Harmonic Healing (Traits) - Cacophony",
+      "value": [0, 0, 0],
+      "details": "Your melodic tones can mend wounds and calm minds. Mark to heal aspects or remove negative conditions from allies.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Performance Magic (Traits) - Spit-Lyre",
+      "value": [1, 0, 0],
+      "details": "Your musical performances can influence emotions and actions. Mark to gain advantage on social interactions after a performance.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Forest Harmony (Traits) - Shankling",
+      "value": [0, 0],
+      "details": "Your connection to natural rhythms helps you navigate wild places. Gain advantage when traveling through forests or natural environments.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Crystal Lyre (Gear) - Spit-Lyre",
+      "value": [1, 1, 1, 1, 1, 0],
+      "details": "A musical instrument that amplifies your sonic abilities. Mark to enhance the power of your Cacophony traits or create complex musical effects.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Resonance Crystals (Gear) - Cacophony",
+      "value": [1, 0, 0, 0],
+      "details": "Small crystals that store and replay sounds. Mark to record a sound, voice, or song for later playback.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Totally Normal Sword",
+      "value": [0],
+      "details": "Roll flourish to deal CQ damage (no need to mark). Roll flourish to absorb damage from another sword.",
+      "chosen": false,
+      "selected": false,
+      "id": "sword-004"
+    },
+    {
+      "name": "Totally Normal Flintlock",
+      "value": [0],
+      "details": "Mark and roll flourish to deal LR damage. Reload: spend an action to unmark.",
+      "chosen": false,
+      "selected": false,
+      "id": "flintlock-004"
+    }
+  ],
+  "resources": {
+    "salvage": "Tuning Forks\nShattered Mirror Pieces\nEcho Chamber Shell",
+    "whispers": "The Song of Storms\nLullaby of the Deep\nBattle Hymn of Heroes",
+    "specimens": "Singing Flowers\nResonant Gemstones\nHarmonizing Insects",
+    "charts": "Concert Venues Map\nRoute to the Silent Monastery"
+  },
+  "minorMilestones": [
+    {
+      "label": "Performed for a hostile crowd"
+    },
+    {
+      "label": "Used song to stop a fight"
+    },
+    {
+      "label": "Discovered an ancient melody"
+    },
+    {
+      "label": "Made an enemy cry with music"
+    }
+  ],
+  "notesV2": [
+    {
+      "type": "BASIC",
+      "value": "Constantly humming or making small musical sounds.\n\nBody creates different tones when touched, like a living instrument.\n\nCollects interesting sounds in their resonance crystals like others collect souvenirs."
+    },
+    {
+      "type": "LABELED",
+      "value": []
+    }
+  ],
+  "temporaryTracks": [],
+  "portrait": "",
+  "descriptionHeight": 220,
+  "createdBy": "claude-generated",
+  "_sheetType": "characters",
+  "_CHARSMITH": true
+}
