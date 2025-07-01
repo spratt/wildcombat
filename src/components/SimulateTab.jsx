@@ -415,7 +415,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
             <button 
               className="simulate-many-sessions-button"
               onClick={handleSimulateManySessions}
-              disabled={partyCharacters.length === 0 || uniqueEnemies.length === 0 || sessionStats.totalSessions > 0}
+              disabled={partyCharacters.length === 0 || uniqueEnemies.length === 0 || combatOver || sessionStats.totalSessions > 0}
             >
               Simulate Many Sessions
             </button>
