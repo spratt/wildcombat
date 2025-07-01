@@ -1096,8 +1096,6 @@ h1 {
   background: #1a1a1a;
   border-radius: 8px;
   padding: 1.5rem;
-  position: sticky;
-  top: 2rem;
 }
 
 .encounter-section h3 {
@@ -1377,9 +1375,6 @@ h1 {
     min-width: 0;
   }
   
-  .encounter-section {
-    position: static;
-  }
   
   .simulate-layout {
     flex-direction: column;
