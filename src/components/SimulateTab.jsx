@@ -115,6 +115,15 @@ This model rewards high rolls by dealing less damage, representing skilled defen
 
 This model scales damage based on character capabilities, where poor rolls can deal devastating damage equal to the defender's longest aspect track.`;
       
+      case '1,aspect,2aspect,counter':
+        return `Aspect track damage model:
+• Roll 6: 1 damage
+• Roll 4-5: 1 aspect of damage (= longest aspect track length)
+• Roll 1-3: 2 aspects of damage (= 2x longest aspect track length)
+• Doubles: Counter-attack opportunity
+
+This model uses aspect track lengths as the basis for damage calculations, making poor defensive rolls extremely punishing by dealing multiple aspects worth of damage.`;
+      
       default:
         return 'Unknown damage model selected.';
     }
@@ -315,6 +324,7 @@ This model scales damage based on character capabilities, where poor rolls can d
             >
               <option value="0,1,2,counter">0,1,2,counter</option>
               <option value="1,2,aspect,counter">1,2,aspect,counter</option>
+              <option value="1,aspect,2aspect,counter">1,aspect,2aspect,counter</option>
             </select>
           </div>
           <div className="option-group">

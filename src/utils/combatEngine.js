@@ -43,7 +43,7 @@ export const calculateDefenseDamage = (rolls, damageModel = '0,1,2,counter', tar
     else if (highest >= 4) damage = 1; // 1 damage on 4-5
     else damage = 2; // 2 damage on 1-3
   } else if (damageModel === '1,2,aspect,counter') {
-    // New damage model
+    // Aspect-based damage model
     if (highest === 6) {
       damage = 1; // 1 damage on 6
     } else if (highest >= 4) {
@@ -51,6 +51,17 @@ export const calculateDefenseDamage = (rolls, damageModel = '0,1,2,counter', tar
     } else {
       // On 1-3, damage equals longest aspect track
       damage = calculateLongestAspectTrack(targetCharacter);
+    }
+  } else if (damageModel === '1,aspect,2aspect,counter') {
+    // Aspect track damage model
+    if (highest === 6) {
+      damage = 1; // 1 damage on 6
+    } else if (highest >= 4) {
+      // On 4-5, damage equals longest aspect track (1 aspect of damage)
+      damage = calculateLongestAspectTrack(targetCharacter);
+    } else {
+      // On 1-3, damage equals 2x longest aspect track (2 aspects of damage)
+      damage = calculateLongestAspectTrack(targetCharacter) * 2;
     }
   }
   
