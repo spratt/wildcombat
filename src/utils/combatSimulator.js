@@ -58,7 +58,7 @@ export const simulatePlayerAttackPhase = (party, enemies) => {
   return { updatedEnemies, log };
 };
 
-export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,counter') => {
+export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,counter', enemyAttacksPerRound = 1) => {
   const log = [];
   let updatedParty = [...party];
   let updatedEnemies = [...enemies];
@@ -76,61 +76,69 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
   }
   
   aliveEnemies.forEach(enemy => {
-    if (aliveParty.length === 0) return; // No more targets
+    // Each enemy makes multiple attacks per round
+    for (let attackNum = 1; attackNum <= enemyAttacksPerRound; attackNum++) {
+      // Update alive party for each attack (some might have died)
+      aliveParty = updatedParty.filter(char => 
+        (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0
+      );
+      
+      if (aliveParty.length === 0) return; // No more targets
+      
+      // Target player with lowest HP
+      const target = aliveParty.reduce((lowest, player) => {
+        const playerHP = player.currentHP !== undefined ? player.currentHP : player.hitPoints;
+        const lowestHP = lowest.currentHP !== undefined ? lowest.currentHP : lowest.hitPoints;
+        return playerHP < lowestHP ? player : lowest;
+      });
     
-    // Target player with lowest HP
-    const target = aliveParty.reduce((lowest, player) => {
-      const playerHP = player.currentHP !== undefined ? player.currentHP : player.hitPoints;
-      const lowestHP = lowest.currentHP !== undefined ? lowest.currentHP : lowest.hitPoints;
-      return playerHP < lowestHP ? player : lowest;
-    });
+      // Target defends with their defense skill
+      const defenseScore = target.defenseScore || 1;
+      const defenseSkill = target.defenseSkill || 'BRACE';
+      const defenseRolls = rollDice(defenseScore);
+      const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
+      
+      // Log enemy attack and defense
+      const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
+      log.push({
+        message: `${enemy.uniqueName} attacks ${target.name}${attackLabel}`,
+        type: 'enemy'
+      });
+      log.push({
+        message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
+        type: 'player'
+      });
     
-    // Target defends with their defense skill
-    const defenseScore = target.defenseScore || 1;
-    const defenseSkill = target.defenseSkill || 'BRACE';
-    const defenseRolls = rollDice(defenseScore);
-    const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
-    
-    // Log enemy attack and defense
-    log.push({
-      message: `${enemy.uniqueName} attacks ${target.name}`,
-      type: 'enemy'
-    });
-    log.push({
-      message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
-      type: 'player'
-    });
-    
-    if (defenseResult.damage > 0) {
-      // Find character in updatedParty array and apply damage
-      const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
-      if (charIndex !== -1) {
-        const currentHP = updatedParty[charIndex].currentHP !== undefined 
-          ? updatedParty[charIndex].currentHP 
-          : updatedParty[charIndex].hitPoints;
-        updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
-        
-        log.push({
-          message: `${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name}`,
-          type: 'enemy'
-        });
-        
-        // Check if character is defeated
-        if (updatedParty[charIndex].currentHP <= 0) {
+      if (defenseResult.damage > 0) {
+        // Find character in updatedParty array and apply damage
+        const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
+        if (charIndex !== -1) {
+          const currentHP = updatedParty[charIndex].currentHP !== undefined 
+            ? updatedParty[charIndex].currentHP 
+            : updatedParty[charIndex].hitPoints;
+          updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
+          
           log.push({
-            message: `${target.name} was defeated!`,
-            type: 'neutral'
+            message: `${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name}`,
+            type: 'enemy'
           });
-          // Remove from alive party
-          const aliveIndex = aliveParty.findIndex(c => c.partyId === target.partyId);
-          if (aliveIndex !== -1) {
-            aliveParty.splice(aliveIndex, 1);
+          
+          // Check if character is defeated
+          if (updatedParty[charIndex].currentHP <= 0) {
+            log.push({
+              message: `${target.name} was defeated!`,
+              type: 'neutral'
+            });
+            // Remove from alive party
+            const aliveIndex = aliveParty.findIndex(c => c.partyId === target.partyId);
+            if (aliveIndex !== -1) {
+              aliveParty.splice(aliveIndex, 1);
+            }
           }
         }
       }
-    }
-    
-    // Check for doubles - free counter attack
+      
+      // Check for doubles - free counter attack
     if (defenseResult.hasDoubles) {
       log.push({
         message: `${target.name} rolled doubles and gets a free counter-attack!`,
@@ -172,12 +180,13 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
         }
       }
     }
+    } // End of attack loop
   });
   
   return { updatedParty, updatedEnemies, log };
 };
 
-export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,1,2,counter') => {
+export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,1,2,counter', enemyAttacksPerRound = 1) => {
   if (party.length === 0 || enemies.length === 0) {
     return {
       updatedParty: party,
@@ -205,7 +214,7 @@ export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,
   roundLog.push(...playerPhase.log);
   
   // Enemy attack phase
-  const enemyPhase = simulateEnemyAttackPhase(playerPhase.updatedEnemies, party, damageModel);
+  const enemyPhase = simulateEnemyAttackPhase(playerPhase.updatedEnemies, party, damageModel, enemyAttacksPerRound);
   roundLog.push(...enemyPhase.log);
   
   // Check win/lose conditions

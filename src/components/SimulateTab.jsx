@@ -29,6 +29,14 @@ const SimulateTab = () => {
       return '0,1,2,counter';
     }
   });
+  const [enemyAttacksPerRound, setEnemyAttacksPerRound] = useState(() => {
+    try {
+      return parseInt(localStorage.getItem('wildcombat-enemy-attacks-per-round')) || 1;
+    } catch (error) {
+      console.warn('Failed to load enemy attacks per round from localStorage:', error);
+      return 1;
+    }
+  });
 
   useEffect(() => {
     loadParty();
@@ -77,6 +85,15 @@ const SimulateTab = () => {
     }
   }, [damageModel]);
 
+  // Save enemy attacks per round to localStorage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('wildcombat-enemy-attacks-per-round', enemyAttacksPerRound.toString());
+    } catch (error) {
+      console.warn('Failed to save enemy attacks per round to localStorage:', error);
+    }
+  }, [enemyAttacksPerRound]);
+
   // Get damage model explanation
   const getDamageModelExplanation = (model) => {
     switch (model) {
@@ -105,7 +122,7 @@ This model scales damage based on character capabilities, where poor rolls can d
 
 
   const handleSimulateOneRound = () => {
-    const result = simulateOneRound(partyCharacters, uniqueEnemies, currentRound, damageModel);
+    const result = simulateOneRound(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound);
     
     // Update state with results
     setUniqueEnemies(result.updatedEnemies);
@@ -132,7 +149,7 @@ This model scales damage based on character capabilities, where poor rolls can d
   };
 
   const handleSimulateOneSession = () => {
-    const sessionResult = simulateFullSession(partyCharacters, uniqueEnemies, currentRound, damageModel);
+    const sessionResult = simulateFullSession(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound);
     
     // Update state with final session results
     setUniqueEnemies(sessionResult.finalEnemies);
@@ -299,6 +316,26 @@ This model scales damage based on character capabilities, where poor rolls can d
               <option value="0,1,2,counter">0,1,2,counter</option>
               <option value="1,2,aspect,counter">1,2,aspect,counter</option>
             </select>
+          </div>
+          <div className="option-group">
+            <label htmlFor="enemy-attacks">Enemy Attacks per Round:</label>
+            <div className="counter-control">
+              <button 
+                className="counter-button"
+                onClick={() => setEnemyAttacksPerRound(Math.max(1, enemyAttacksPerRound - 1))}
+                disabled={enemyAttacksPerRound <= 1}
+              >
+                -
+              </button>
+              <span className="counter-value">{enemyAttacksPerRound}</span>
+              <button 
+                className="counter-button"
+                onClick={() => setEnemyAttacksPerRound(Math.min(5, enemyAttacksPerRound + 1))}
+                disabled={enemyAttacksPerRound >= 5}
+              >
+                +
+              </button>
+            </div>
           </div>
           <div className="damage-model-explanation">
             <label htmlFor="damage-model-details">Details:</label>
