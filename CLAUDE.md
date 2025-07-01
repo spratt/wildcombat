@@ -162,6 +162,7 @@ Modular CSS structure in `src/styles/`:
 - `npm test` - Run unit tests (Vitest)
 - `npm run test:run` - Run tests once and exit
 - `npm run validate:characters` - Validate all character JSON files
+- `npm run validate:enemies` - Validate all enemy JSON files
 
 ## Important Notes
 
@@ -172,9 +173,12 @@ Modular CSS structure in `src/styles/`:
 
 ### Data Integrity
 - All character and enemy data is validated against JSON schemas
+- **Character Schema**: `src/character-schema.json` validates character structure
+- **Enemy Schema**: `src/enemy-schema.json` validates enemy structure and aspect trackLengths
 - Missing aspect values automatically default to `[0]`
 - HP calculations include all aspects (including defaults)
 - Combat state is preserved across page reloads
+- Pre-commit hooks validate all data before allowing commits
 
 ### Performance Considerations
 - Session simulation has 1-second timeout protection
