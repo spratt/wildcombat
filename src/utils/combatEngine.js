@@ -71,8 +71,10 @@ const calculateLongestAspectTrack = (character) => {
   
   let longestTrack = 0;
   character.aspects.forEach(aspect => {
-    if (aspect.track && Array.isArray(aspect.track)) {
-      const trackLength = aspect.track.length;
+    // Use aspect.value (from character sheet) or default to [0] if missing
+    const track = aspect.value || [0];
+    if (Array.isArray(track)) {
+      const trackLength = track.length;
       if (trackLength > longestTrack) {
         longestTrack = trackLength;
       }

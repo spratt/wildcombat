@@ -218,7 +218,7 @@ const Character = ({ characterData }) => {
           <div key={index} className="aspect">
             <div className="aspect-header">
               <span className="aspect-name">{aspect.name}</span>
-              {aspect.value && <span className="aspect-value">{renderTrack(aspect.value)}</span>}
+              <span className="aspect-value">{renderTrack(aspect.value || [0])}</span>
             </div>
             {aspect.details && <p className="aspect-details">{aspect.details}</p>}
           </div>
