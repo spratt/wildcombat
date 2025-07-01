@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { simulateOneRound } from '../utils/combatSimulator.js';
-import { simulateFullSession } from '../utils/sessionSimulator.js';
-import { checkWinConditions } from '../utils/combatEngine.js';
+import { simulateOneRound } from '../utils/combatSimulator';
+import { simulateFullSession } from '../utils/sessionSimulator';
+import { checkWinConditions } from '../utils/combatEngine';
 import { 
   loadPartyFromStorage, 
   loadEncounterFromStorage, 
@@ -12,7 +12,7 @@ import {
   calculateEncounterStats,
   resetCombatState,
   calculateEnemyTrackLength
-} from '../utils/dataManager.js';
+} from '../utils/dataManager';
 import Tooltip from './Tooltip.jsx';
 
 const SimulateTab = () => {
@@ -65,6 +65,7 @@ const SimulateTab = () => {
   });
 
   useEffect(() => {
+    console.log('SimulateTab mounting, loading data...');
     loadParty();
     loadEncounter();
     loadEnemies();
@@ -72,8 +73,10 @@ const SimulateTab = () => {
 
   // Generate unique enemy names when encounter or enemies change
   useEffect(() => {
+    console.log('Encounter/enemies changed:', { encounter, enemies });
     if (encounter.length > 0 && enemies.length > 0) {
       const uniqueEnemyList = generateUniqueEnemyNames(encounter, enemies);
+      console.log('Generated unique enemies:', uniqueEnemyList);
       setUniqueEnemies(uniqueEnemyList);
     } else {
       setUniqueEnemies([]);
@@ -82,11 +85,13 @@ const SimulateTab = () => {
 
   const loadParty = () => {
     const partyData = loadPartyFromStorage();
+    console.log('Loaded party data:', partyData);
     setPartyCharacters(partyData);
   };
 
   const loadEncounter = () => {
     const encounterData = loadEncounterFromStorage();
+    console.log('Loaded encounter data:', encounterData);
     setEncounter(encounterData);
   };
 
@@ -101,6 +106,16 @@ const SimulateTab = () => {
 
   // Check if combat is over using utility function
   const { isOver: combatOver, aliveEnemies, aliveParty } = checkWinConditions(uniqueEnemies, partyCharacters);
+  
+  // Debug button state
+  const buttonDisabled = partyCharacters.length === 0 || uniqueEnemies.length === 0 || combatOver || sessionStats.totalSessions > 0;
+  console.log('Button state:', {
+    partyCharactersLength: partyCharacters.length,
+    uniqueEnemiesLength: uniqueEnemies.length,
+    combatOver,
+    sessionStatsTotal: sessionStats.totalSessions,
+    buttonDisabled
+  });
 
   // Save damage model to localStorage when it changes
   useEffect(() => {

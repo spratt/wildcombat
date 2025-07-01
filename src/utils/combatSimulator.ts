@@ -1,9 +1,65 @@
 // Combat simulator - orchestrates combat rounds and sessions
-import { rollDice, calculateDamage, calculateDefenseDamage, calculateIncapacitateDefense, checkWinConditions } from './combatEngine.js';
-import { calculateEnemyTrackLength } from './dataManager.js';
+import { 
+  rollDice, 
+  calculateDamage, 
+  calculateDefenseDamage, 
+  calculateIncapacitateDefense, 
+  checkWinConditions 
+} from './combatEngine';
+import { calculateEnemyTrackLength } from './dataManager';
+import type { 
+  CombatCharacter, 
+  CombatEnemy,
+  DiceRoll,
+  DefenseResult
+} from '../types';
 
-export const simulatePlayerAttackPhase = (party, enemies) => {
-  const log = [];
+interface CombatLogEntry {
+  message: string;
+  type: 'player' | 'enemy' | 'neutral';
+}
+
+interface PlayerAttackPhaseResult {
+  updatedEnemies: CombatEnemy[];
+  log: CombatLogEntry[];
+}
+
+interface EnemyAttackPhaseResult {
+  updatedParty: CombatCharacter[];
+  updatedEnemies: CombatEnemy[];
+  log: CombatLogEntry[];
+}
+
+interface SimulateRoundResult {
+  updatedParty: CombatCharacter[];
+  updatedEnemies: CombatEnemy[];
+  log: CombatLogEntry[];
+  combatResult: string | null;
+  isOver: boolean;
+}
+
+// Extended types for combat instances
+interface CombatCharacterInstance extends CombatCharacter {
+  partyId?: string;
+  currentHP?: number;
+  hitPoints?: number;
+  attackScore?: number;
+  attackSkill?: string;
+  defenseScore?: number;
+  defenseSkill?: string;
+}
+
+interface CombatEnemyInstance extends CombatEnemy {
+  instanceId: string;
+  uniqueName: string;
+  currentHP?: number;
+}
+
+export const simulatePlayerAttackPhase = (
+  party: CombatCharacterInstance[], 
+  enemies: CombatEnemyInstance[]
+): PlayerAttackPhaseResult => {
+  const log: CombatLogEntry[] = [];
   let updatedEnemies = [...enemies];
   
   party.forEach(character => {
@@ -68,8 +124,14 @@ export const simulatePlayerAttackPhase = (party, enemies) => {
   return { updatedEnemies, log };
 };
 
-export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,counter', enemyAttacksPerRound = 1, useAbilities = true) => {
-  const log = [];
+export const simulateEnemyAttackPhase = (
+  enemies: CombatEnemyInstance[], 
+  party: CombatCharacterInstance[], 
+  damageModel: string = '0,1,2,counter', 
+  enemyAttacksPerRound: number = 1, 
+  useAbilities: boolean = true
+): EnemyAttackPhaseResult => {
+  const log: CombatLogEntry[] = [];
   let updatedParty = [...party];
   let updatedEnemies = [...enemies];
   
@@ -104,9 +166,8 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
     
       // Check if enemy should use ability instead of attack (once per session)
       const availableAbilities = enemy.aspects?.filter(aspect => 
-        aspect.abilityCode && !enemy.usedAbilities?.includes(aspect.name)
+        aspect.abilityCode && !enemy.usedAbilities?.has(aspect.name)
       ) || [];
-      
       
       const useAbility = useAbilities && availableAbilities.length > 0; // Use abilities only if enabled and available
       
@@ -114,19 +175,18 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
         // Use random available ability
         const ability = availableAbilities[Math.floor(Math.random() * availableAbilities.length)];
         
-        
         // Mark ability as used
         if (!enemy.usedAbilities) {
-          enemy.usedAbilities = [];
+          enemy.usedAbilities = new Set<string>();
         }
-        enemy.usedAbilities.push(ability.name);
+        enemy.usedAbilities.add(ability.name);
         
         // Target defends against ability
         const defenseScore = target.defenseScore || 1;
         const defenseSkill = target.defenseSkill || 'BRACE';
         const defenseRolls = rollDice(defenseScore);
         
-        if (ability.abilityCode === 'incapacitate') {
+        if (ability.abilityCode === 'Incapacitate') {
           const abilityResult = calculateIncapacitateDefense(defenseRolls, target);
           
           // Log ability use and defense
@@ -141,7 +201,7 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
           });
           
           // Apply ability effects
-          if (abilityResult.fullyIncapacitated) {
+          if (abilityResult.fullIncapacitation) {
             // Remove all HP
             const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
             if (charIndex !== -1) {
@@ -171,7 +231,7 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
             if (charIndex !== -1) {
               const currentHP = updatedParty[charIndex].currentHP !== undefined 
                 ? updatedParty[charIndex].currentHP 
-                : updatedParty[charIndex].hitPoints;
+                : updatedParty[charIndex].hitPoints || 0;
               updatedParty[charIndex].currentHP = Math.max(0, currentHP - abilityResult.damage);
               
               log.push({
@@ -190,7 +250,7 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
           }
           
           // Handle counter-attack on doubles
-          if (abilityResult.hasDoubles) {
+          if (abilityResult.counter) {
             log.push({
               message: `${target.name} rolled doubles and gets a free counter-attack!`,
               type: 'player'
@@ -234,92 +294,92 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
         
         // Target defends with their defense skill
         const defenseScore = target.defenseScore || 1;
-      const defenseSkill = target.defenseSkill || 'BRACE';
-      const defenseRolls = rollDice(defenseScore);
-      const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
+        const defenseSkill = target.defenseSkill || 'BRACE';
+        const defenseRolls = rollDice(defenseScore);
+        const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
+        
+        // Log enemy attack and defense
+        const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
+        log.push({
+          message: `${enemy.uniqueName} attacks ${target.name}${attackLabel}`,
+          type: 'enemy'
+        });
+        log.push({
+          message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
+          type: 'player'
+        });
       
-      // Log enemy attack and defense
-      const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
-      log.push({
-        message: `${enemy.uniqueName} attacks ${target.name}${attackLabel}`,
-        type: 'enemy'
-      });
-      log.push({
-        message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
-        type: 'player'
-      });
-    
-      if (defenseResult.damage > 0) {
-        // Find character in updatedParty array and apply damage
-        const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
-        if (charIndex !== -1) {
-          const currentHP = updatedParty[charIndex].currentHP !== undefined 
-            ? updatedParty[charIndex].currentHP 
-            : updatedParty[charIndex].hitPoints;
-          updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
-          
-          log.push({
-            message: `${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name}`,
-            type: 'enemy'
-          });
-          
-          // Check if character is defeated
-          if (updatedParty[charIndex].currentHP <= 0) {
+        if (defenseResult.damage > 0) {
+          // Find character in updatedParty array and apply damage
+          const charIndex = updatedParty.findIndex(c => c.partyId === target.partyId);
+          if (charIndex !== -1) {
+            const currentHP = updatedParty[charIndex].currentHP !== undefined 
+              ? updatedParty[charIndex].currentHP 
+              : updatedParty[charIndex].hitPoints || 0;
+            updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
+            
             log.push({
-              message: `${target.name} was defeated!`,
-              type: 'neutral'
+              message: `${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name}`,
+              type: 'enemy'
             });
-            // Remove from alive party
-            const aliveIndex = aliveParty.findIndex(c => c.partyId === target.partyId);
-            if (aliveIndex !== -1) {
-              aliveParty.splice(aliveIndex, 1);
+            
+            // Check if character is defeated
+            if (updatedParty[charIndex].currentHP <= 0) {
+              log.push({
+                message: `${target.name} was defeated!`,
+                type: 'neutral'
+              });
+              // Remove from alive party
+              const aliveIndex = aliveParty.findIndex(c => c.partyId === target.partyId);
+              if (aliveIndex !== -1) {
+                aliveParty.splice(aliveIndex, 1);
+              }
             }
           }
         }
-      }
-      
-      // Check for doubles - free counter attack
-    if (defenseResult.hasDoubles) {
-      log.push({
-        message: `${target.name} rolled doubles and gets a free counter-attack!`,
-        type: 'player'
-      });
-      
-      // Counter attack
-      const counterAttackScore = target.attackScore || 1;
-      const counterAttackSkill = target.attackSkill || 'BREAK';
-      const counterRolls = rollDice(counterAttackScore);
-      const counterDamage = calculateDamage(counterRolls);
-      
-      log.push({
-        message: `${target.name} counter-attacks ${enemy.uniqueName} with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
-        type: 'player'
-      });
-      
-      if (counterDamage > 0) {
-        // Apply counter damage to enemy
-        const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
-        if (enemyIndex !== -1) {
-          const currentHP = updatedEnemies[enemyIndex].currentHP !== undefined 
-            ? updatedEnemies[enemyIndex].currentHP 
-            : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
-          updatedEnemies[enemyIndex].currentHP = Math.max(0, currentHP - counterDamage);
-          
+        
+        // Check for doubles - free counter attack
+        if (defenseResult.counter) {
           log.push({
-            message: `${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
+            message: `${target.name} rolled doubles and gets a free counter-attack!`,
             type: 'player'
           });
           
-          // Check if enemy is defeated by counter
-          if (updatedEnemies[enemyIndex].currentHP <= 0) {
-            log.push({
-              message: `${enemy.uniqueName} was defeated by the counter-attack!`,
-              type: 'neutral'
-            });
+          // Counter attack
+          const counterAttackScore = target.attackScore || 1;
+          const counterAttackSkill = target.attackSkill || 'BREAK';
+          const counterRolls = rollDice(counterAttackScore);
+          const counterDamage = calculateDamage(counterRolls);
+          
+          log.push({
+            message: `${target.name} counter-attacks ${enemy.uniqueName} with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
+            type: 'player'
+          });
+          
+          if (counterDamage > 0) {
+            // Apply counter damage to enemy
+            const enemyIndex = updatedEnemies.findIndex(e => e.instanceId === enemy.instanceId);
+            if (enemyIndex !== -1) {
+              const currentHP = updatedEnemies[enemyIndex].currentHP !== undefined 
+                ? updatedEnemies[enemyIndex].currentHP 
+                : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
+              updatedEnemies[enemyIndex].currentHP = Math.max(0, currentHP - counterDamage);
+              
+              log.push({
+                message: `${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
+                type: 'player'
+              });
+              
+              // Check if enemy is defeated by counter
+              if (updatedEnemies[enemyIndex].currentHP <= 0) {
+                log.push({
+                  message: `${enemy.uniqueName} was defeated by the counter-attack!`,
+                  type: 'neutral'
+                });
+              }
+            }
           }
         }
-      }
-    }
       } // End of else (regular attack)
     } // End of attack loop
   });
@@ -327,28 +387,37 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
   return { updatedParty, updatedEnemies, log };
 };
 
-export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,1,2,counter', enemyAttacksPerRound = 1, useAbilities = true) => {
+export const simulateOneRound = (
+  party: CombatCharacterInstance[], 
+  enemies: CombatEnemyInstance[], 
+  currentRound: number, 
+  damageModel: string = '0,1,2,counter', 
+  enemyAttacksPerRound: number = 1, 
+  useAbilities: boolean = true
+): SimulateRoundResult => {
   if (party.length === 0 || enemies.length === 0) {
     return {
       updatedParty: party,
       updatedEnemies: enemies,
       log: [{ message: "Cannot simulate: missing party or encounter", type: 'neutral' }],
-      combatResult: null
+      combatResult: null,
+      isOver: false
     };
   }
 
   // Check if combat is already over
-  const { isOver } = checkWinConditions(enemies, party);
+  const { isOver } = checkWinConditions(enemies as CombatEnemy[], party as CombatCharacter[]);
   if (isOver) {
     return {
       updatedParty: party,
       updatedEnemies: enemies,
       log: [{ message: "Combat over: All enemies defeated!", type: 'neutral' }],
-      combatResult: null
+      combatResult: null,
+      isOver: true
     };
   }
 
-  const roundLog = [{ message: `--- Round ${currentRound} ---`, type: 'neutral' }];
+  const roundLog: CombatLogEntry[] = [{ message: `--- Round ${currentRound} ---`, type: 'neutral' }];
   
   // Clear incapacitation status at start of round
   let updatedParty = party.map(char => ({
@@ -365,8 +434,8 @@ export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,
   roundLog.push(...enemyPhase.log);
   
   // Check win/lose conditions
-  const winCheck = checkWinConditions(enemyPhase.updatedEnemies, enemyPhase.updatedParty);
-  let combatResult = null;
+  const winCheck = checkWinConditions(enemyPhase.updatedEnemies as CombatEnemy[], enemyPhase.updatedParty as CombatCharacter[]);
+  let combatResult: string | null = null;
   
   if (winCheck.isOver) {
     if (winCheck.result === 'win') {

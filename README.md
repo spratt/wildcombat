@@ -158,10 +158,10 @@ The project includes comprehensive unit tests covering all combat simulation log
 
 The project includes 4 example characters showcasing different Wildsea bloodlines and roles:
 
-- **Cap**: Ironbound Screw (metal-controlling character with magnetic abilities)
-- **Cosmia**: Mothryn Augur (fortune-telling moth person with astral abilities)
-- **Kari**: Itzenko Tempest (lightning-wielding insectoid stowaway)
-- **Phil**: Gau Char (mushroom person chef with psychotropic spores)
+- **Zara**: Ardent Dredger Sawbones (medical specialist)
+- **Thresh**: Ketra Rootless Navigator (weather prediction)
+- **Felix**: Tzelicrae Spit Corsair (acrobatic fighter)
+- **Nova**: Cacophony Shankling Spit-Lyre (sonic musician)
 
 ## 🤝 Contributing
 

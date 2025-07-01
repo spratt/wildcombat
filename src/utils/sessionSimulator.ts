@@ -1,8 +1,30 @@
 // Session simulator - handles full session simulation with timeout protection
-import { simulateOneRound } from './combatSimulator.js';
-import { checkWinConditions } from './combatEngine.js';
+import { simulateOneRound } from './combatSimulator';
+import { checkWinConditions } from './combatEngine';
+import type { CombatCharacter, CombatEnemy } from '../types';
 
-export const simulateFullSession = (party, enemies, startingRound = 1, damageModel = '0,1,2,counter', enemyAttacksPerRound = 1, useAbilities = true) => {
+interface CombatLogEntry {
+  message: string;
+  type: 'player' | 'enemy' | 'neutral';
+}
+
+interface FullSessionResult {
+  finalParty: CombatCharacter[];
+  finalEnemies: CombatEnemy[];
+  finalRound: number;
+  sessionLog: CombatLogEntry[];
+  combatResult: string | null;
+  timeoutOccurred: boolean;
+}
+
+export const simulateFullSession = (
+  party: CombatCharacter[], 
+  enemies: CombatEnemy[], 
+  startingRound: number = 1, 
+  damageModel: string = '0,1,2,counter', 
+  enemyAttacksPerRound: number = 1, 
+  useAbilities: boolean = true
+): FullSessionResult => {
   const startTime = Date.now();
   const timeout = 1000; // 1 second timeout
   const maxRounds = 100; // Additional safeguard
@@ -10,8 +32,8 @@ export const simulateFullSession = (party, enemies, startingRound = 1, damageMod
   let currentParty = [...party];
   let currentEnemies = [...enemies];
   let currentRoundNum = startingRound;
-  let sessionLog = [];
-  let combatResult = null;
+  let sessionLog: CombatLogEntry[] = [];
+  let combatResult: string | null = null;
   let timeoutOccurred = false;
 
   while (true) {
@@ -46,14 +68,21 @@ export const simulateFullSession = (party, enemies, startingRound = 1, damageMod
     }
 
     // Simulate one round using the utility function
-    const roundResult = simulateOneRound(currentParty, currentEnemies, currentRoundNum, damageModel, enemyAttacksPerRound, useAbilities);
+    const roundResult = simulateOneRound(
+      currentParty as any, // Type coercion needed for extended combat types
+      currentEnemies as any, 
+      currentRoundNum, 
+      damageModel, 
+      enemyAttacksPerRound, 
+      useAbilities
+    );
     
     // Add round log to session log
     sessionLog.push(...roundResult.log);
     
     // Update state
-    currentParty = roundResult.updatedParty;
-    currentEnemies = roundResult.updatedEnemies;
+    currentParty = roundResult.updatedParty as CombatCharacter[];
+    currentEnemies = roundResult.updatedEnemies as CombatEnemy[];
     
     // Check if combat ended this round
     if (roundResult.isOver) {

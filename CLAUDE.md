@@ -37,10 +37,10 @@ Wildcombat is a Vite React application for managing Wildsea RPG character sheets
 
 ## Character System
 The project contains character data for a Wildsea RPG campaign with four characters:
-- **Cap** (Ironbound Screw) - Metal-controlling character with magnetic abilities
-- **Cosmia** (Mothryn Augur) - Fortune-telling moth person with astral abilities  
-- **Kari** (Itzenko Tempest) - Lightning-wielding insectoid stowaway
-- **Phil** (Gau Char) - Mushroom person chef with psychotropic spores
+- **Zara** (Ardent Dredger) - Medical specialist with healing abilities
+- **Thresh** (Ketra Rootless) - Navigator with weather prediction abilities
+- **Felix** (Tzelicrae Spit) - Acrobatic fighter with mobility skills
+- **Nova** (Cacophony Shankling) - Sonic musician with sound-based abilities
 
 ### Character Schema
 Characters are validated against a JSON Schema (draft-07) located at `src/character-schema.json`. The schema defines:

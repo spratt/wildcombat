@@ -1,15 +1,23 @@
 // Combat simulation engine - handles all combat logic
-import { calculateEnemyTrackLength } from './dataManager.js';
+import { calculateEnemyTrackLength } from './dataManager';
+import type { 
+  DiceRoll, 
+  DefenseResult, 
+  CombatCharacter, 
+  CombatEnemy,
+  Character,
+  Enemy
+} from '../types';
 
-export const rollDice = (count) => {
-  const rolls = [];
+export const rollDice = (count: number): DiceRoll => {
+  const rolls: number[] = [];
   for (let i = 0; i < count; i++) {
     rolls.push(Math.floor(Math.random() * 6) + 1);
   }
   return rolls;
 };
 
-export const calculateDamage = (rolls) => {
+export const calculateDamage = (rolls: DiceRoll): number => {
   if (rolls.length === 0) return 0;
   
   const highest = Math.max(...rolls);
@@ -21,7 +29,7 @@ export const calculateDamage = (rolls) => {
   else damage = 0;
   
   // Check for doubles (any two dice with same value)
-  const counts = {};
+  const counts: Record<number, number> = {};
   rolls.forEach(roll => {
     counts[roll] = (counts[roll] || 0) + 1;
   });
@@ -32,8 +40,12 @@ export const calculateDamage = (rolls) => {
   return damage;
 };
 
-export const calculateDefenseDamage = (rolls, damageModel = '0,1,2,counter', targetCharacter = null) => {
-  if (rolls.length === 0) return { damage: 0, hasDoubles: false };
+export const calculateDefenseDamage = (
+  rolls: DiceRoll, 
+  damageModel: string = '0,1,2,counter', 
+  targetCharacter: CombatCharacter | null = null
+): DefenseResult => {
+  if (rolls.length === 0) return { damage: 0, counter: false };
   
   const highest = Math.max(...rolls);
   let damage = 0;
@@ -67,18 +79,18 @@ export const calculateDefenseDamage = (rolls, damageModel = '0,1,2,counter', tar
   }
   
   // Check for doubles (any two dice with same value)
-  const counts = {};
+  const counts: Record<number, number> = {};
   rolls.forEach(roll => {
     counts[roll] = (counts[roll] || 0) + 1;
   });
   
   const hasDoubles = Object.values(counts).some(count => count >= 2);
   
-  return { damage, hasDoubles };
+  return { damage, counter: hasDoubles };
 };
 
 // Helper function to calculate the length of the longest aspect track
-const calculateLongestAspectTrack = (character) => {
+const calculateLongestAspectTrack = (character: CombatCharacter | Character | null): number => {
   if (!character || !character.aspects) return 1; // Default to 1 if no aspects
   
   let longestTrack = 0;
@@ -97,7 +109,10 @@ const calculateLongestAspectTrack = (character) => {
 };
 
 // Helper function to calculate incapacitate ability defense results
-export const calculateIncapacitateDefense = (rolls, targetCharacter) => {
+export const calculateIncapacitateDefense = (
+  rolls: DiceRoll, 
+  targetCharacter: CombatCharacter
+): DefenseResult => {
   const highest = Math.max(...rolls);
   let damage = 0;
   let incapacitated = false;
@@ -112,29 +127,46 @@ export const calculateIncapacitateDefense = (rolls, targetCharacter) => {
   }
   
   // Check for doubles (any two dice with same value)
-  const counts = {};
+  const counts: Record<number, number> = {};
   rolls.forEach(roll => {
     counts[roll] = (counts[roll] || 0) + 1;
   });
   
   const hasDoubles = Object.values(counts).some(count => count >= 2);
   
-  return { damage, incapacitated, fullyIncapacitated, hasDoubles };
+  return { 
+    damage, 
+    counter: hasDoubles,
+    incapacitated: incapacitated ? true : undefined,
+    fullIncapacitation: fullyIncapacitated ? true : undefined
+  };
 };
 
-export const checkWinConditions = (enemies, party) => {
+export interface WinConditionResult {
+  isOver: boolean;
+  result: 'win' | 'lose' | null;
+  aliveEnemies: CombatEnemy[];
+  aliveParty: CombatCharacter[];
+}
+
+export const checkWinConditions = (
+  enemies: CombatEnemy[], 
+  party: CombatCharacter[]
+): WinConditionResult => {
   const aliveEnemies = enemies.filter(enemy => {
-    if (enemy.currentHP !== undefined) {
-      return enemy.currentHP > 0;
-    }
-    // Try aspects-based calculation first, then fall back to trackLength
-    const aspectsHP = calculateEnemyTrackLength(enemy);
-    const hp = aspectsHP > 0 ? aspectsHP : (enemy.trackLength || 0);
+    // Check for hp first (during combat), then currentHP, then calculate from aspects
+    const hp = enemy.hp !== undefined ? enemy.hp :
+               enemy.currentHP !== undefined ? enemy.currentHP :
+               calculateEnemyTrackLength(enemy);
     return hp > 0;
   });
-  const aliveParty = party.filter(char => 
-    (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0
-  );
+  const aliveParty = party.filter(char => {
+    // Check for hp first (during combat), then currentHP, then hitPoints (initial load)
+    const hp = char.hp !== undefined ? char.hp : 
+               char.currentHP !== undefined ? char.currentHP : 
+               char.hitPoints || 0;
+    return hp > 0;
+  });
   
   if (aliveEnemies.length === 0) {
     return { isOver: true, result: 'win', aliveEnemies, aliveParty };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Tooltip from './Tooltip';
-import { calculateEnemyTrackLength } from '../utils/dataManager.js';
+import { calculateEnemyTrackLength } from '../utils/dataManager';
 
 // Helper function to render trackLength as empty bubbles
 const renderTrackLength = (length) => {
