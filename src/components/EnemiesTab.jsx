@@ -26,13 +26,17 @@ const EnemiesTab = () => {
 
   const loadEnemies = async () => {
     try {
-      // For now, we'll hardcode the test enemy
-      const enemyFiles = ['shadowclaw-spider.json'];
+      // Load all enemy files
+      const enemyFiles = [
+        'shadowclaw-spider.json',
+        'thornback-beetle.json', 
+        'dire-squirrel.json'
+      ];
       
       const enemyData = await Promise.all(
         enemyFiles.map(async (filename) => {
           try {
-            const response = await fetch(`/enemies/${filename}`);
+            const response = await fetch(`./enemies/${filename}`);
             if (!response.ok) throw new Error(`Failed to load ${filename}`);
             const data = await response.json();
             return { id: filename, ...data };
