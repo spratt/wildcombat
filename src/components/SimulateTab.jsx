@@ -21,6 +21,7 @@ const SimulateTab = () => {
   const [combatLog, setCombatLog] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [combatResult, setCombatResult] = useState(null);
+  const [damageModel, setDamageModel] = useState('0,1,2,counter');
 
   useEffect(() => {
     loadParty();
@@ -62,7 +63,7 @@ const SimulateTab = () => {
 
 
   const handleSimulateOneRound = () => {
-    const result = simulateOneRound(partyCharacters, uniqueEnemies, currentRound);
+    const result = simulateOneRound(partyCharacters, uniqueEnemies, currentRound, damageModel);
     
     // Update state with results
     setUniqueEnemies(result.updatedEnemies);
@@ -89,7 +90,7 @@ const SimulateTab = () => {
   };
 
   const handleSimulateOneSession = () => {
-    const sessionResult = simulateFullSession(partyCharacters, uniqueEnemies, currentRound);
+    const sessionResult = simulateFullSession(partyCharacters, uniqueEnemies, currentRound, damageModel);
     
     // Update state with final session results
     setUniqueEnemies(sessionResult.finalEnemies);
@@ -238,6 +239,25 @@ const SimulateTab = () => {
           >
             Clear
           </button>
+        </div>
+      </div>
+
+      {/* Simulation Options */}
+      <div className="simulation-options-section">
+        <h3>Simulation Options</h3>
+        <div className="simulation-options">
+          <div className="option-group">
+            <label htmlFor="damage-model">Damage Model:</label>
+            <select 
+              id="damage-model"
+              value={damageModel}
+              onChange={(e) => setDamageModel(e.target.value)}
+              className="damage-model-select"
+            >
+              <option value="0,1,2,counter">0,1,2,counter</option>
+              <option value="1,2,aspect,counter">1,2,aspect,counter</option>
+            </select>
+          </div>
         </div>
       </div>
 

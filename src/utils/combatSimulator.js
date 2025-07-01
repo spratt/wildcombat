@@ -49,7 +49,7 @@ export const simulatePlayerAttackPhase = (party, enemies) => {
   return { updatedEnemies, log };
 };
 
-export const simulateEnemyAttackPhase = (enemies, party) => {
+export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,counter') => {
   const log = [];
   let updatedParty = [...party];
   let updatedEnemies = [...enemies];
@@ -80,7 +80,7 @@ export const simulateEnemyAttackPhase = (enemies, party) => {
     const defenseScore = target.defenseScore || 1;
     const defenseSkill = target.defenseSkill || 'BRACE';
     const defenseRolls = rollDice(defenseScore);
-    const defenseResult = calculateDefenseDamage(defenseRolls);
+    const defenseResult = calculateDefenseDamage(defenseRolls, damageModel, target);
     
     // Log enemy attack and defense
     log.push(`${enemy.uniqueName} attacks ${target.name}`);
@@ -144,7 +144,7 @@ export const simulateEnemyAttackPhase = (enemies, party) => {
   return { updatedParty, updatedEnemies, log };
 };
 
-export const simulateOneRound = (party, enemies, currentRound) => {
+export const simulateOneRound = (party, enemies, currentRound, damageModel = '0,1,2,counter') => {
   if (party.length === 0 || enemies.length === 0) {
     return {
       updatedParty: party,
@@ -172,7 +172,7 @@ export const simulateOneRound = (party, enemies, currentRound) => {
   roundLog.push(...playerPhase.log);
   
   // Enemy attack phase
-  const enemyPhase = simulateEnemyAttackPhase(playerPhase.updatedEnemies, party);
+  const enemyPhase = simulateEnemyAttackPhase(playerPhase.updatedEnemies, party, damageModel);
   roundLog.push(...enemyPhase.log);
   
   // Check win/lose conditions

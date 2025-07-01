@@ -2,7 +2,7 @@
 import { simulateOneRound } from './combatSimulator.js';
 import { checkWinConditions } from './combatEngine.js';
 
-export const simulateFullSession = (party, enemies, startingRound = 1) => {
+export const simulateFullSession = (party, enemies, startingRound = 1, damageModel = '0,1,2,counter') => {
   const startTime = Date.now();
   const timeout = 1000; // 1 second timeout
   const maxRounds = 100; // Additional safeguard
@@ -40,7 +40,7 @@ export const simulateFullSession = (party, enemies, startingRound = 1) => {
     }
 
     // Simulate one round using the utility function
-    const roundResult = simulateOneRound(currentParty, currentEnemies, currentRoundNum);
+    const roundResult = simulateOneRound(currentParty, currentEnemies, currentRoundNum, damageModel);
     
     // Add round log to session log
     sessionLog.push(...roundResult.log);
