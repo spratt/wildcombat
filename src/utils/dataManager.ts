@@ -173,13 +173,11 @@ export const loadEncounterFromStorage = (): EncounterEnemy[] => {
 
 export const loadEnemiesData = async (): Promise<EnemyInstance[]> => {
   try {
-    // Load all enemy files using relative paths
-    const enemyFiles = [
-      'shadowclaw-spider.json',
-      'thornback-beetle.json', 
-      'dire-squirrel.json',
-      'zitera.json'
-    ];
+    // Load enemy file list from config
+    const configResponse = await fetch('./config.json');
+    if (!configResponse.ok) throw new Error('Failed to load config.json');
+    const config = await configResponse.json();
+    const enemyFiles = config.enemyJsons || [];
     
     const enemyData = await Promise.all(
       enemyFiles.map(async (filename) => {
