@@ -76,6 +76,65 @@ describe('Combat Engine', () => {
       const result = rollDice(1, 2) // Try to cut from 1 die
       expect(result).toHaveLength(1) // Should keep the single die
     })
+
+    it('should add advantage dice correctly', () => {
+      const spy = vi.spyOn(Math, 'random')
+        .mockReturnValueOnce(0.83) // 0.83*6=4.98, floor=4, +1=5
+        .mockReturnValueOnce(0.33) // 0.33*6=1.98, floor=1, +1=2
+        .mockReturnValueOnce(0.66) // 0.66*6=3.96, floor=3, +1=4
+
+      const result = rollDice(2, 0, 1) // Roll 2 base dice + 1 advantage = 3 total dice
+      expect(result).toHaveLength(3)
+      expect(result).toContain(5)
+      expect(result).toContain(2)
+      expect(result).toContain(4)
+
+      spy.mockRestore()
+    })
+
+    it('should combine advantage and cut correctly', () => {
+      const spy = vi.spyOn(Math, 'random')
+        .mockReturnValueOnce(0.83) // 0.83*6=4.98, floor=4, +1=5
+        .mockReturnValueOnce(0.33) // 0.33*6=1.98, floor=1, +1=2
+        .mockReturnValueOnce(0.66) // 0.66*6=3.96, floor=3, +1=4
+        .mockReturnValueOnce(0.16) // 0.16*6=0.96, floor=0, +1=1
+
+      const result = rollDice(2, 1, 2) // Roll 2 base + 2 advantage = 4 total, cut 1 highest
+      // Total rolls: [5, 2, 4, 1], after cutting 1 highest: [2, 4, 1]
+      expect(result).toHaveLength(3)
+      expect(result).toContain(2)
+      expect(result).toContain(4)
+      expect(result).toContain(1)
+      expect(result).not.toContain(5)
+
+      spy.mockRestore()
+    })
+
+    it('should work with zero advantage (default behavior)', () => {
+      const spy = vi.spyOn(Math, 'random')
+        .mockReturnValueOnce(0.83) // 0.83*6=4.98, floor=4, +1=5
+        .mockReturnValueOnce(0.33) // 0.33*6=1.98, floor=1, +1=2
+
+      const result = rollDice(2, 0, 0) // Explicit 0 advantage
+      expect(result).toHaveLength(2)
+      expect(result).toContain(5)
+      expect(result).toContain(2)
+
+      spy.mockRestore()
+    })
+
+    it('should handle advantage with single base die', () => {
+      const spy = vi.spyOn(Math, 'random')
+        .mockReturnValueOnce(0.83) // 0.83*6=4.98, floor=4, +1=5
+        .mockReturnValueOnce(0.33) // 0.33*6=1.98, floor=1, +1=2
+
+      const result = rollDice(1, 0, 1) // 1 base die + 1 advantage = 2 total
+      expect(result).toHaveLength(2)
+      expect(result).toContain(5)
+      expect(result).toContain(2)
+
+      spy.mockRestore()
+    })
   })
 
   describe('calculateDamage', () => {

@@ -9,9 +9,11 @@ import type {
   Enemy
 } from '../types';
 
-export const rollDice = (count: number, cut: number = 0): DiceRoll => {
+export const rollDice = (count: number, cut: number = 0, advantage: number = 0): DiceRoll => {
+  // Roll base dice plus advantage dice
+  const totalDice = count + advantage;
   const rolls: number[] = [];
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < totalDice; i++) {
     rolls.push(Math.floor(Math.random() * 6) + 1);
   }
   
