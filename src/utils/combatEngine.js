@@ -1,4 +1,5 @@
 // Combat simulation engine - handles all combat logic
+import { calculateEnemyTrackLength } from './dataManager.js';
 
 export const rollDice = (count) => {
   const rolls = [];
@@ -123,7 +124,7 @@ export const calculateIncapacitateDefense = (rolls, targetCharacter) => {
 
 export const checkWinConditions = (enemies, party) => {
   const aliveEnemies = enemies.filter(enemy => 
-    (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0
+    (enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy)) > 0
   );
   const aliveParty = party.filter(char => 
     (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0

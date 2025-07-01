@@ -2,20 +2,22 @@
   "name": "Dire Squirrel",
   "blurb": "An oversized and aggressive squirrel with razor-sharp claws and an insatiable appetite for nuts and flesh.",
   "description": "What was once a common tree squirrel has grown to enormous proportions in the magical environment of the Wildsea. Standing as tall as a person when reared up, the Dire Squirrel has retained all the agility and cunning of its smaller cousins while gaining fearsome strength. Its bushy tail can knock a grown person off their feet, and its enlarged teeth can crack shells, bones, and skulls with equal ease. These creatures are known to hoard not just nuts, but any shiny objects they find interesting.",
-  "trackLength": 3,
   "size": "medium",
   "aspects": [
     {
       "name": "Acrobatic Leap",
-      "description": "Incredibly agile and capable of impressive jumps. Mark to move to any position and gain advantage on next attack."
+      "description": "Incredibly agile and capable of impressive jumps. Mark to move to any position and gain advantage on next attack.",
+      "trackLength": 3
     },
     {
       "name": "Tail Sweep",
-      "description": "Uses its massive fluffy tail as a weapon. Mark to knock down multiple opponents in an area."
+      "description": "Uses its massive fluffy tail as a weapon. Mark to knock down multiple opponents in an area.",
+      "trackLength": 3
     },
     {
       "name": "Frenzied Gnawing",
-      "description": "Enters a biting frenzy when cornered. Mark to make multiple rapid attacks against a single target."
+      "description": "Enters a biting frenzy when cornered. Mark to make multiple rapid attacks against a single target.",
+      "trackLength": 3
     }
   ],
   "drives": [

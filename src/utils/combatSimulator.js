@@ -1,5 +1,6 @@
 // Combat simulator - orchestrates combat rounds and sessions
 import { rollDice, calculateDamage, calculateDefenseDamage, calculateIncapacitateDefense, checkWinConditions } from './combatEngine.js';
+import { calculateEnemyTrackLength } from './dataManager.js';
 
 export const simulatePlayerAttackPhase = (party, enemies) => {
   const log = [];
@@ -16,14 +17,14 @@ export const simulatePlayerAttackPhase = (party, enemies) => {
     }
     
     const stillAlive = updatedEnemies.filter(enemy => 
-      (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0
+      (enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy)) > 0
     );
     if (stillAlive.length === 0) return; // No more targets
     
     // Target enemy with lowest HP
     const target = stillAlive.reduce((lowest, enemy) => {
-      const enemyHP = enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength;
-      const lowestHP = lowest.currentHP !== undefined ? lowest.currentHP : lowest.trackLength;
+      const enemyHP = enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy);
+      const lowestHP = lowest.currentHP !== undefined ? lowest.currentHP : calculateEnemyTrackLength(lowest);
       return enemyHP < lowestHP ? enemy : lowest;
     });
     
@@ -45,7 +46,7 @@ export const simulatePlayerAttackPhase = (party, enemies) => {
       if (enemyIndex !== -1) {
         const currentHP = updatedEnemies[enemyIndex].currentHP !== undefined 
           ? updatedEnemies[enemyIndex].currentHP 
-          : updatedEnemies[enemyIndex].trackLength;
+          : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
         updatedEnemies[enemyIndex].currentHP = Math.max(0, currentHP - damage);
         
         log.push({
@@ -74,7 +75,7 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
   
   // Filter alive enemies and party at start of phase
   const aliveEnemies = enemies.filter(enemy => 
-    (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength) > 0
+    (enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy)) > 0
   );
   let aliveParty = party.filter(char => 
     (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0
@@ -210,7 +211,7 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
               if (enemyIndex !== -1) {
                 const currentEnemyHP = updatedEnemies[enemyIndex].currentHP !== undefined 
                   ? updatedEnemies[enemyIndex].currentHP 
-                  : updatedEnemies[enemyIndex].trackLength;
+                  : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
                 updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
                 
                 log.push({
@@ -301,7 +302,7 @@ export const simulateEnemyAttackPhase = (enemies, party, damageModel = '0,1,2,co
         if (enemyIndex !== -1) {
           const currentHP = updatedEnemies[enemyIndex].currentHP !== undefined 
             ? updatedEnemies[enemyIndex].currentHP 
-            : updatedEnemies[enemyIndex].trackLength;
+            : calculateEnemyTrackLength(updatedEnemies[enemyIndex]);
           updatedEnemies[enemyIndex].currentHP = Math.max(0, currentHP - counterDamage);
           
           log.push({

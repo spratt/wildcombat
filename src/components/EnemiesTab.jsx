@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Tooltip from './Tooltip';
+import { calculateEnemyTrackLength } from '../utils/dataManager.js';
 
 // Helper function to render trackLength as empty bubbles
 const renderTrackLength = (length) => {
@@ -199,7 +200,7 @@ const EnemiesTab = () => {
                     </div>
                     <div className="enemy-stat">
                       <span className="stat-label">Track:</span>
-                      <span className="stat-value">{renderTrackLength(selectedEnemy.trackLength)}</span>
+                      <span className="stat-value">{renderTrackLength(calculateEnemyTrackLength(selectedEnemy))}</span>
                     </div>
                   </div>
                   <div className="enemy-actions">
@@ -301,7 +302,7 @@ const EnemiesTab = () => {
                     <span className="stat-value">
                       {encounter.reduce((total, encounterEnemy) => {
                         const enemy = enemies.find(e => e.id === encounterEnemy.enemyId);
-                        return total + (enemy ? enemy.trackLength * encounterEnemy.count : 0);
+                        return total + (enemy ? calculateEnemyTrackLength(enemy) * encounterEnemy.count : 0);
                       }, 0)}
                     </span>
                   </Tooltip>

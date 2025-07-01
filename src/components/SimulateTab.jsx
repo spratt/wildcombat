@@ -10,7 +10,8 @@ import {
   renderTrackLength,
   calculatePartyStats,
   calculateEncounterStats,
-  resetCombatState
+  resetCombatState,
+  calculateEnemyTrackLength
 } from '../utils/dataManager.js';
 import Tooltip from './Tooltip.jsx';
 
@@ -268,8 +269,8 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                 {/* Encounter Enemies */}
                 <div className="encounter-enemies">
                   {uniqueEnemies.map(enemy => {
-                    const currentHP = enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength;
-                    const maxHP = enemy.trackLength;
+                    const currentHP = enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy);
+                    const maxHP = calculateEnemyTrackLength(enemy);
                     const damageTaken = maxHP - currentHP;
                     
                     // Create track with damage marked

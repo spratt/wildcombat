@@ -1,5 +1,13 @@
 // Data management utilities for party and encounter operations
 
+// Helper function to calculate total enemy trackLength from aspects
+export const calculateEnemyTrackLength = (enemy) => {
+  if (!enemy || !enemy.aspects) return 0;
+  return enemy.aspects.reduce((total, aspect) => {
+    return total + (aspect.trackLength || 0);
+  }, 0);
+};
+
 export const loadPartyFromStorage = () => {
   try {
     const savedParty = localStorage.getItem('wildcombat-party');
@@ -116,7 +124,7 @@ export const calculatePartyStats = (partyCharacters) => {
 // Calculate encounter statistics
 export const calculateEncounterStats = (uniqueEnemies) => {
   const totalHP = uniqueEnemies.reduce((total, enemy) => {
-    return total + (enemy.currentHP !== undefined ? enemy.currentHP : enemy.trackLength || 0);
+    return total + (enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy));
   }, 0);
 
   return {
@@ -129,7 +137,7 @@ export const calculateEncounterStats = (uniqueEnemies) => {
 export const resetCombatState = (uniqueEnemies, partyCharacters) => {
   const resetEnemies = uniqueEnemies.map(enemy => ({
     ...enemy,
-    currentHP: enemy.trackLength
+    currentHP: calculateEnemyTrackLength(enemy)
   }));
   
   const resetParty = partyCharacters.map(character => ({
