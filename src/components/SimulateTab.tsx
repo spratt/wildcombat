@@ -256,7 +256,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
   };
 
   const handleSimulateManySessions = () => {
-    const initialParty = partyCharacters.map(char => ({ ...char, currentHP: char.hp }));
+    const initialParty = partyCharacters.map(char => ({ ...char, currentHP: char.hitPoints }));
     const initialEnemies = resetCombatState(uniqueEnemies, partyCharacters).resetEnemies;
     
     let totalSessions = 0;
@@ -283,7 +283,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
         wins++;
         // Calculate total remaining player HP on win
         const remainingPlayerHP = sessionResult.finalParty.reduce((total, char) => {
-          const currentHP = char.hp !== undefined ? char.hp : char.maxHp;
+          const currentHP = char.currentHP !== undefined ? char.currentHP : char.hitPoints;
           return total + currentHP;
         }, 0);
         totalPlayerHPOnWin += remainingPlayerHP;
@@ -291,7 +291,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
         losses++;
         // Calculate total remaining enemy HP on loss
         const remainingEnemyHP = sessionResult.finalEnemies.reduce((total, enemy) => {
-          const currentHP = enemy.hp !== undefined ? enemy.hp : calculateEnemyTrackLength(enemy);
+          const currentHP = enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy);
           return total + currentHP;
         }, 0);
         totalEnemyHPOnLoss += remainingEnemyHP;
@@ -430,7 +430,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                 {/* Encounter Enemies */}
                 <div className="encounter-enemies">
                   {uniqueEnemies.map(enemy => {
-                    const currentHP = enemy.hp !== undefined ? enemy.hp : calculateEnemyTrackLength(enemy);
+                    const currentHP = enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy);
                     const maxHP = calculateEnemyTrackLength(enemy);
                     const damageTaken = maxHP - currentHP;
                     
