@@ -1,0 +1,140 @@
+{
+  "name": "Felix",
+  "version": "1.8.4",
+  "accessControl": "ALLOW_ALL",
+  "background": {
+    "bloodline": "Tzelicrae",
+    "origin": "Spit",
+    "post": "Corsair",
+    "notes": "Felix is a young Tzelicrae whose spider-like features are more pronounced than most of their kin. Born on a reef-spit settlement, they learned to fight dirty and think fast when pirates raided their home. Now they've embraced the corsair life, using their natural climbing abilities and web-spinning to board enemy vessels. Their eight eyes give them excellent peripheral vision, and they're known for their acrobatic fighting style that makes full use of the ship's rigging."
+  },
+  "edges": {
+    "GRACE": true,
+    "SHARPS": true,
+    "INSTINCT": true
+  },
+  "skills": {
+    "FLOURISH": [1, 1, 0],
+    "VAULT": [1, 1, 1],
+    "HUNT": [1, 0, 0],
+    "OUTWIT": [1, 0, 0],
+    "RATTLE": [1, 0, 0],
+    "BRACE": [1, 0, 0]
+  },
+  "languages": {
+    "KNOCK": [1, 1, 0],
+    "LOW_SOUR": [1, 1, 1],
+    "SIGNALLING": [1, 0, 0]
+  },
+  "drives": "Lead a successful boarding action\nOutmaneuver a superior enemy through cunning\nProtect those weaker than yourself from bullies",
+  "mires": [
+    {
+      "label": "You're too quick to resort to violence",
+      "value": [0, 0]
+    },
+    {
+      "label": "Your appearance unnerves peaceful folk",
+      "value": [0, 0]
+    },
+    {
+      "label": "You have trouble trusting authority figures",
+      "value": [0, 0]
+    }
+  ],
+  "aspects": [
+    {
+      "name": "Web Spinner (Traits) - Tzelicrae",
+      "value": [1, 0, 0],
+      "details": "You can produce strong silk webbing from your spinnerets. Mark to create rope, nets, or temporary structures.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Wall Walker (Traits) - Tzelicrae",
+      "value": [0, 0, 0, 0],
+      "details": "Your spider heritage allows you to climb any surface with ease. You can walk on walls and ceilings as if they were floors.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Corsair's Cunning (Traits) - Corsair",
+      "value": [1, 1, 0],
+      "details": "Your experience in naval combat serves you well. Gain advantage when fighting on ships or in rigging.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Reef Fighter (Traits) - Spit",
+      "value": [0, 0],
+      "details": "Growing up on a dangerous spit taught you to fight for survival. You deal extra damage when fighting multiple opponents.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Boarding Axe (Gear) - Corsair",
+      "value": [1, 1, 0, 0],
+      "details": "A weapon designed for ship-to-ship combat. Deals CQ Keen damage and can cut through rigging and light armor.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Grappling Hook (Gear) - Corsair",
+      "value": [1, 0, 0],
+      "details": "Essential tool for boarding actions. Mark to swing between ships or climb seemingly impossible surfaces.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Totally Normal Sword",
+      "value": [0],
+      "details": "Roll flourish to deal CQ damage (no need to mark). Roll flourish to absorb damage from another sword.",
+      "chosen": false,
+      "selected": false,
+      "id": "sword-003"
+    },
+    {
+      "name": "Totally Normal Flintlock",
+      "value": [0],
+      "details": "Mark and roll flourish to deal LR damage. Reload: spend an action to unmark.",
+      "chosen": false,
+      "selected": false,
+      "id": "flintlock-003"
+    }
+  ],
+  "resources": {
+    "salvage": "Ship's Bell\nCutlass Handle\nBrass Spyglass",
+    "whispers": "The Boarding Call\nWind in the Rigging",
+    "specimens": "Rare Pearls\nCoral Fragments\nSea Salt Crystals",
+    "charts": "Pirate Havens\nShipping Routes\nHidden Coves"
+  },
+  "minorMilestones": [
+    {
+      "label": "Led first successful boarding"
+    },
+    {
+      "label": "Defeated three enemies at once"
+    },
+    {
+      "label": "Rescued kidnapped civilians"
+    },
+    {
+      "label": "Swung from ship to ship in combat"
+    }
+  ],
+  "notesV2": [
+    {
+      "type": "BASIC",
+      "value": "Has a habit of hanging upside down when thinking deeply.\n\nMakes their own silk rope, which is stronger than hemp.\n\nCollects small trinkets from defeated enemies as trophies."
+    },
+    {
+      "type": "LABELED",
+      "value": []
+    }
+  ],
+  "temporaryTracks": [],
+  "portrait": "",
+  "descriptionHeight": 220,
+  "createdBy": "claude-generated",
+  "_sheetType": "characters",
+  "_CHARSMITH": true
+}

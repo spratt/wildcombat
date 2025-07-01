@@ -9,12 +9,15 @@ const CharacterSelector = ({ onCharacterSelect }) => {
   useEffect(() => {
     // In a real app, you might have an API endpoint to list characters
     // For now, we'll hardcode the known character files
-    const characterFiles = ['cap.json', 'cosmia.json', 'kari.json', 'phil.json'];
+    const characterFiles = [
+      'cap.json', 'cosmia.json', 'kari.json', 'phil.json',
+      'felix.json', 'nova.json', 'thresh.json', 'zara.json'
+    ];
     
     Promise.all(
       characterFiles.map(async (filename) => {
         try {
-          const response = await fetch(`/characters/${filename}`);
+          const response = await fetch(`./characters/${filename}`);
           if (!response.ok) throw new Error(`Failed to load ${filename}`);
           const data = await response.json();
           return { filename, name: data.name, data };

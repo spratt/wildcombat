@@ -38,7 +38,7 @@ export const loadEnemiesData = async () => {
     const enemyData = await Promise.all(
       enemyFiles.map(async (filename) => {
         try {
-          const response = await fetch(`enemies/${filename}`);
+          const response = await fetch(`./enemies/${filename}`);
           if (!response.ok) throw new Error(`Failed to load ${filename}`);
           const data = await response.json();
           return { id: filename, ...data };

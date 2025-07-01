@@ -1,0 +1,140 @@
+{
+  "name": "Thresh",
+  "version": "1.8.4",
+  "accessControl": "ALLOW_ALL",
+  "background": {
+    "bloodline": "Ketra",
+    "origin": "Rootless",
+    "post": "Navigator",
+    "notes": "Thresh is a weathered Ketra whose bark-like skin bears the scars of countless storms and navigation mishaps. Born without the traditional Ketra connection to any specific grove, they've made the open sea their home. Their cabin is filled with charts, weather instruments, and an impressive collection of bottled storm-essence. Thresh speaks in nautical metaphors and has an uncanny ability to predict weather patterns by taste alone."
+  },
+  "edges": {
+    "TIDES": true,
+    "INSTINCT": true,
+    "VEILS": true
+  },
+  "skills": {
+    "STUDY": [1, 1, 1],
+    "SENSE": [1, 1, 0],
+    "OUTWIT": [1, 0, 0],
+    "VAULT": [1, 0, 0],
+    "RATTLE": [1, 0, 0],
+    "SWAY": [1, 0, 0]
+  },
+  "languages": {
+    "BRASSTONGUE": [1, 1, 0],
+    "SIGNALLING": [1, 1, 1],
+    "LOW_SOUR": [1, 0, 0]
+  },
+  "drives": "Navigate through an impossible storm\nChart a route no one has ever taken\nPredict a disaster and save lives doing so",
+  "mires": [
+    {
+      "label": "You trust your instruments more than your crew",
+      "value": [0, 0]
+    },
+    {
+      "label": "Weather patterns consume your thoughts",
+      "value": [0, 0]
+    },
+    {
+      "label": "You speak in confusing nautical terms",
+      "value": [0, 0]
+    }
+  ],
+  "aspects": [
+    {
+      "name": "Storm Sense (Traits) - Navigator",
+      "value": [1, 1, 0],
+      "details": "You can predict weather patterns with supernatural accuracy. Mark to avoid weather-related hazards or gain advantage on navigation rolls.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Chart Master (Traits) - Navigator",
+      "value": [0, 0, 0],
+      "details": "Your understanding of navigation is unparalleled. When using charts, you can find routes others cannot and avoid known dangers.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Rooted Resilience (Traits) - Ketra",
+      "value": [1, 0, 0, 0],
+      "details": "Your bark-like skin provides natural armor. You have resistance to physical damage and can root yourself to resist being moved.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Wanderer's Wisdom (Traits) - Rootless",
+      "value": [0, 0],
+      "details": "Having no fixed home has taught you adaptability. Gain advantage when dealing with unfamiliar situations or cultures.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Navigator's Compass (Gear) - Navigator",
+      "value": [1, 1, 1, 1, 0],
+      "details": "An enchanted compass that points toward your destination rather than magnetic north. Mark to never become lost.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Weather Glass (Gear) - Navigator",
+      "value": [1, 0, 0],
+      "details": "A delicate instrument that predicts weather changes. Mark to accurately forecast weather up to a week in advance.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Totally Normal Sword",
+      "value": [0],
+      "details": "Roll flourish to deal CQ damage (no need to mark). Roll flourish to absorb damage from another sword.",
+      "chosen": false,
+      "selected": false,
+      "id": "sword-002"
+    },
+    {
+      "name": "Totally Normal Flintlock",
+      "value": [0],
+      "details": "Mark and roll flourish to deal LR damage. Reload: spend an action to unmark.",
+      "chosen": false,
+      "selected": false,
+      "id": "flintlock-002"
+    }
+  ],
+  "resources": {
+    "salvage": "Broken Sextant\nWeather Vane Fragment\nBottled Lightning",
+    "whispers": "Storm's Warning\nThe Calm that Follows\nSecret Currents",
+    "specimens": "Storm Petrel Feathers\nPressure-grown Crystals",
+    "charts": "The Tempest Routes\nHidden Harbors Map\nSafe Passage Charts"
+  },
+  "minorMilestones": [
+    {
+      "label": "Navigated through the Crimson Storm"
+    },
+    {
+      "label": "Predicted the Great Calm"
+    },
+    {
+      "label": "Discovered a new safe route"
+    },
+    {
+      "label": "Saved the ship from hidden reefs"
+    }
+  ],
+  "notesV2": [
+    {
+      "type": "BASIC",
+      "value": "Always checking the weather glass and making cryptic predictions.\n\nHas a collection of storm-essence in small bottles that glow different colors.\n\nKnows shanties from dozens of different crews and cultures."
+    },
+    {
+      "type": "LABELED",
+      "value": []
+    }
+  ],
+  "temporaryTracks": [],
+  "portrait": "",
+  "descriptionHeight": 220,
+  "createdBy": "claude-generated",
+  "_sheetType": "characters",
+  "_CHARSMITH": true
+}

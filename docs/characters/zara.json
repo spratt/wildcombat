@@ -1,0 +1,130 @@
+{
+  "name": "Zara",
+  "version": "1.8.4",
+  "accessControl": "ALLOW_ALL",
+  "background": {
+    "bloodline": "Ardent",
+    "origin": "Dredger",
+    "post": "Sawbones",
+    "notes": "Zara is an Ardent Dredger turned Sawbones, her pale skin marked with the ritual scars of her people. Once a treasure hunter in the deep groves, she discovered her calling in healing when she lost her diving partner to a salvage accident. Her medical kit contains both traditional Ardent remedies and scavenged surgical tools. Despite her serious profession, she maintains the Ardent love of passionate debate and strong opinions about everything from proper suturing techniques to the best way to prepare tea."
+  },
+  "edges": {
+    "IRON": true,
+    "TEETH": true,
+    "SHARPS": true
+  },
+  "skills": {
+    "TEND": [1, 1, 0],
+    "STUDY": [1, 0, 0],
+    "DELVE": [1, 0, 0],
+    "SCAVENGE": [1, 1, 0],
+    "FLOURISH": [1, 0, 0],
+    "SENSE": [1, 0, 0]
+  },
+  "languages": {
+    "HIGHVIN": [1, 0, 0],
+    "LOW_SOUR": [1, 1, 0],
+    "CHTHONIC": [1, 0, 0]
+  },
+  "drives": "Save a life that others have given up on\nDiscover a cure for an incurable condition\nTeach your medical knowledge to a worthy student",
+  "mires": [
+    {
+      "label": "Your hands shake when lives are at stake",
+      "value": [0, 0]
+    },
+    {
+      "label": "The weight of those you couldn't save haunts you",
+      "value": [0, 0]
+    },
+    {
+      "label": "Your bedside manner is bluntly honest",
+      "value": [0, 0]
+    }
+  ],
+  "aspects": [
+    {
+      "name": "Surgical Precision (Traits) - Sawbones",
+      "value": [1, 0, 0],
+      "details": "Your medical training allows you to strike with deadly accuracy. When making attacks with sharp implements, treat conflicts as triumphs.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Field Medicine (Traits) - Sawbones",
+      "value": [0, 0, 0, 0],
+      "details": "Mark to immediately heal all aspects of a nearby character by one box. This can be used during combat.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Ardent Passion (Traits) - Ardent",
+      "value": [1, 1, 0],
+      "details": "Your intense emotions fuel your actions. When you act on a strong emotion, gain a 1d6 advantage on the roll.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Salvage Expertise (Traits) - Dredger",
+      "value": [0, 0],
+      "details": "Your experience diving for treasure serves you well. You can identify valuable salvage at a glance and know the best places to find it.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Medical Kit (Gear) - Sawbones",
+      "value": [1, 1, 1, 0, 0],
+      "details": "A collection of surgical tools, medicines, and bandages. Mark to heal an aspect or provide medical benefits.",
+      "chosen": false,
+      "selected": false
+    },
+    {
+      "name": "Totally Normal Sword",
+      "value": [0],
+      "details": "Roll flourish to deal CQ damage (no need to mark). Roll flourish to absorb damage from another sword.",
+      "chosen": false,
+      "selected": false,
+      "id": "sword-001"
+    },
+    {
+      "name": "Totally Normal Flintlock",
+      "value": [0],
+      "details": "Mark and roll flourish to deal LR damage. Reload: spend an action to unmark.",
+      "chosen": false,
+      "selected": false,
+      "id": "flintlock-001"
+    }
+  ],
+  "resources": {
+    "salvage": "Surgical Tools\nBroken Compass\nSilver Locket",
+    "whispers": "The Last Breath\nPromise of Dawn",
+    "specimens": "Healing Herbs\nPain-numbing Moss\nAntiseptic Lichens",
+    "charts": "Map to the Sunken Clinic\nTreasure Routes"
+  },
+  "minorMilestones": [
+    {
+      "label": "Performed surgery under fire"
+    },
+    {
+      "label": "Saved a rival's life"
+    },
+    {
+      "label": "Found rare medical supplies"
+    }
+  ],
+  "notesV2": [
+    {
+      "type": "BASIC",
+      "value": "Carries a worn medical journal with notes on various treatments and anatomical sketches.\n\nHas a particular dislike for butchers who think they understand medicine.\n\nAlways checks her tools twice before any procedure."
+    },
+    {
+      "type": "LABELED",
+      "value": []
+    }
+  ],
+  "temporaryTracks": [],
+  "portrait": "",
+  "descriptionHeight": 220,
+  "createdBy": "claude-generated",
+  "_sheetType": "characters",
+  "_CHARSMITH": true
+}
