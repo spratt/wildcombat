@@ -12,6 +12,7 @@ import {
   calculateEncounterStats,
   resetCombatState
 } from '../utils/dataManager.js';
+import Tooltip from './Tooltip.jsx';
 
 const SimulateTab = () => {
   const [partyCharacters, setPartyCharacters] = useState([]);
@@ -195,15 +196,21 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                   </div>
                   <div className="stat">
                     <span className="stat-label">Total HP:</span>
-                    <span className="stat-value">{totalPartyHitPoints}</span>
+                    <Tooltip content="Sum of unmarked aspect bubbles across all party characters">
+                      <span className="stat-value">{totalPartyHitPoints}</span>
+                    </Tooltip>
                   </div>
                   <div className="stat">
                     <span className="stat-label">Total ATK:</span>
-                    <span className="stat-value">{totalPartyAttackScore}</span>
+                    <Tooltip content="Sum of attack scores (highest skill from BREAK, HUNT, FLOURISH)">
+                      <span className="stat-value">{totalPartyAttackScore}</span>
+                    </Tooltip>
                   </div>
                   <div className="stat">
                     <span className="stat-label">Total DEF:</span>
-                    <span className="stat-value">{totalPartyDefenseScore}</span>
+                    <Tooltip content="Sum of defense scores (highest skill from BRACE, VAULT, RATTLE)">
+                      <span className="stat-value">{totalPartyDefenseScore}</span>
+                    </Tooltip>
                   </div>
                 </div>
 
@@ -214,9 +221,15 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                       <div className="character-info">
                         <span className="character-name">{character.name}</span>
                         <div className="character-stats">
-                          <span className="character-hp">HP: {character.currentHP !== undefined ? character.currentHP : character.hitPoints}/{character.hitPoints}</span>
-                          <span className="character-attack">ATK: {character.attackScore} ({character.attackSkill})</span>
-                          <span className="character-defense">DEF: {character.defenseScore} ({character.defenseSkill})</span>
+                          <Tooltip content="Hit Points: Number of unmarked aspect bubbles">
+                            <span className="character-hp">HP: {character.currentHP !== undefined ? character.currentHP : character.hitPoints}/{character.hitPoints}</span>
+                          </Tooltip>
+                          <Tooltip content="Attack Score: Highest skill from BREAK, HUNT, FLOURISH">
+                            <span className="character-attack">ATK: {character.attackScore} ({character.attackSkill})</span>
+                          </Tooltip>
+                          <Tooltip content="Defense Score: Highest skill from BRACE, VAULT, RATTLE">
+                            <span className="character-defense">DEF: {character.defenseScore} ({character.defenseSkill})</span>
+                          </Tooltip>
                         </div>
                       </div>
                     </div>
@@ -246,7 +259,9 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                   </div>
                   <div className="stat">
                     <span className="stat-label">Total HP:</span>
-                    <span className="stat-value">{totalEncounterHP}</span>
+                    <Tooltip content="Sum of enemy track lengths (unmarked bubbles)">
+                      <span className="stat-value">{totalEncounterHP}</span>
+                    </Tooltip>
                   </div>
                 </div>
 
@@ -268,7 +283,9 @@ This model uses aspect track lengths as the basis for damage calculations, makin
                         <div className="enemy-info">
                           <span className="enemy-name">{enemy.uniqueName}</span>
                           <div className="enemy-stats">
-                            <span className="enemy-hp">HP: {currentHP}/{maxHP}</span>
+                            <Tooltip content="Hit Points: Number of unmarked track bubbles (⦾ = empty, ⦿ = marked/damaged)">
+                              <span className="enemy-hp">HP: {currentHP}/{maxHP}</span>
+                            </Tooltip>
                             <span className="enemy-track">Track: {trackDisplay}</span>
                           </div>
                         </div>

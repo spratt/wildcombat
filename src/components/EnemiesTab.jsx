@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Tooltip from './Tooltip';
 
 // Helper function to render trackLength as empty bubbles
 const renderTrackLength = (length) => {
@@ -296,12 +297,14 @@ const EnemiesTab = () => {
                 </div>
                 <div className="stat">
                   <span className="stat-label">Total HP:</span>
-                  <span className="stat-value">
-                    {encounter.reduce((total, encounterEnemy) => {
-                      const enemy = enemies.find(e => e.id === encounterEnemy.enemyId);
-                      return total + (enemy ? enemy.trackLength * encounterEnemy.count : 0);
-                    }, 0)}
-                  </span>
+                  <Tooltip content="Sum of enemy track lengths (unmarked bubbles)">
+                    <span className="stat-value">
+                      {encounter.reduce((total, encounterEnemy) => {
+                        const enemy = enemies.find(e => e.id === encounterEnemy.enemyId);
+                        return total + (enemy ? enemy.trackLength * encounterEnemy.count : 0);
+                      }, 0)}
+                    </span>
+                  </Tooltip>
                 </div>
               </div>
               

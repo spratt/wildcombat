@@ -5,6 +5,7 @@ import SaveCharacterButton from './SaveCharacterButton';
 import ExportCharacterButton from './ExportCharacterButton';
 import HealAllAspectsButton from './HealAllAspectsButton';
 import Character from './Character';
+import Tooltip from './Tooltip';
 
 // Helper function to calculate unchecked aspect tracks (hit points)
 const calculateHitPoints = (character) => {
@@ -378,15 +379,21 @@ const PartyTab = () => {
           </div>
           <div className="stat">
             <span className="stat-label">Total Hit Points:</span>
-            <span className="stat-value">{totalPartyHitPoints}</span>
+            <Tooltip content="Sum of unmarked aspect bubbles across all party characters">
+              <span className="stat-value">{totalPartyHitPoints}</span>
+            </Tooltip>
           </div>
           <div className="stat">
             <span className="stat-label">Total Attack Score:</span>
-            <span className="stat-value">{totalPartyAttackScore}</span>
+            <Tooltip content="Sum of attack scores (highest skill from BREAK, HUNT, FLOURISH)">
+              <span className="stat-value">{totalPartyAttackScore}</span>
+            </Tooltip>
           </div>
           <div className="stat">
             <span className="stat-label">Total Defense Score:</span>
-            <span className="stat-value">{totalPartyDefenseScore}</span>
+            <Tooltip content="Sum of defense scores (highest skill from BRACE, VAULT, RATTLE)">
+              <span className="stat-value">{totalPartyDefenseScore}</span>
+            </Tooltip>
           </div>
         </div>
       </div>
@@ -406,9 +413,15 @@ const PartyTab = () => {
                 <div className="character-info">
                   <span className="character-name">{character.name}</span>
                   <div className="character-stats">
-                    <span className="character-hp">HP: {character.hitPoints}</span>
-                    <span className="character-attack">ATK: {character.attackScore} ({character.attackSkill})</span>
-                    <span className="character-defense">DEF: {character.defenseScore} ({character.defenseSkill})</span>
+                    <Tooltip content="Hit Points: Number of unmarked aspect bubbles">
+                      <span className="character-hp">HP: {character.hitPoints}</span>
+                    </Tooltip>
+                    <Tooltip content="Attack Score: Highest skill from BREAK, HUNT, FLOURISH">
+                      <span className="character-attack">ATK: {character.attackScore} ({character.attackSkill})</span>
+                    </Tooltip>
+                    <Tooltip content="Defense Score: Highest skill from BRACE, VAULT, RATTLE">
+                      <span className="character-defense">DEF: {character.defenseScore} ({character.defenseSkill})</span>
+                    </Tooltip>
                   </div>
                 </div>
                 <button 
