@@ -48,9 +48,9 @@ check_file() {
 }
 
 # Find and check all source files
-find src -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) | sort | while read -r file; do
+while IFS= read -r file; do
     check_file "$file"
-done
+done < <(find src -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) | sort)
 
 echo ""
 
