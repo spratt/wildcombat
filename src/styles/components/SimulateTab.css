@@ -215,6 +215,7 @@
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
+  align-items: flex-start;
 }
 
 .option-group {
@@ -243,6 +244,38 @@
 }
 
 .damage-model-select:focus {
+  outline: 2px solid #61dafb;
+  outline-offset: 2px;
+}
+
+/* Damage Model Explanation */
+.damage-model-explanation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 300px;
+}
+
+.damage-model-explanation label {
+  font-weight: bold;
+  color: #d1d1d1;
+}
+
+.damage-model-details {
+  background: #2a2a2a;
+  color: #d1d1d1;
+  border: 1px solid #3a3a3a;
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-family: 'Courier New', monospace;
+  line-height: 1.4;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.damage-model-details:focus {
   outline: 2px solid #61dafb;
   outline-offset: 2px;
 }
@@ -366,6 +399,14 @@
   
   .simulate-layout .party-stats {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .simulation-options {
+    flex-direction: column;
+  }
+  
+  .damage-model-explanation {
+    min-width: 0;
   }
 }
 

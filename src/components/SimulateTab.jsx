@@ -21,7 +21,14 @@ const SimulateTab = () => {
   const [combatLog, setCombatLog] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [combatResult, setCombatResult] = useState(null);
-  const [damageModel, setDamageModel] = useState('0,1,2,counter');
+  const [damageModel, setDamageModel] = useState(() => {
+    try {
+      return localStorage.getItem('wildcombat-damage-model') || '0,1,2,counter';
+    } catch (error) {
+      console.warn('Failed to load damage model from localStorage:', error);
+      return '0,1,2,counter';
+    }
+  });
 
   useEffect(() => {
     loadParty();
@@ -60,6 +67,41 @@ const SimulateTab = () => {
 
   // Check if combat is over using utility function
   const { isOver: combatOver, aliveEnemies, aliveParty } = checkWinConditions(uniqueEnemies, partyCharacters);
+
+  // Save damage model to localStorage when it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('wildcombat-damage-model', damageModel);
+    } catch (error) {
+      console.warn('Failed to save damage model to localStorage:', error);
+    }
+  }, [damageModel]);
+
+  // Get damage model explanation
+  const getDamageModelExplanation = (model) => {
+    switch (model) {
+      case '0,1,2,counter':
+        return `Original damage model:
+• Roll 6: 0 damage
+• Roll 4-5: 1 damage  
+• Roll 1-3: 2 damage
+• Doubles: Counter-attack opportunity
+
+This model rewards high rolls by dealing less damage, representing skilled defensive maneuvers that minimize harm.`;
+      
+      case '1,2,aspect,counter':
+        return `Aspect-based damage model:
+• Roll 6: 1 damage
+• Roll 4-5: 2 damage
+• Roll 1-3: Damage = longest aspect track length
+• Doubles: Counter-attack opportunity
+
+This model scales damage based on character capabilities, where poor rolls can deal devastating damage equal to the defender's longest aspect track.`;
+      
+      default:
+        return 'Unknown damage model selected.';
+    }
+  };
 
 
   const handleSimulateOneRound = () => {
@@ -257,6 +299,16 @@ const SimulateTab = () => {
               <option value="0,1,2,counter">0,1,2,counter</option>
               <option value="1,2,aspect,counter">1,2,aspect,counter</option>
             </select>
+          </div>
+          <div className="damage-model-explanation">
+            <label htmlFor="damage-model-details">Details:</label>
+            <textarea
+              id="damage-model-details"
+              value={getDamageModelExplanation(damageModel)}
+              readOnly
+              className="damage-model-details"
+              rows="8"
+            />
           </div>
         </div>
       </div>
