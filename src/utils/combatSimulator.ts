@@ -467,7 +467,7 @@ export const simulateOneRound = (
       };
     } else {
       // Convert CombatCharacter to CombatCharacterInstance
-      const hp = combatCharacter.currentHP || combatCharacter.hp || 10;
+      const hp = combatCharacter.currentHP !== undefined ? combatCharacter.currentHP : combatCharacter.hp || 10;
       return {
         ...combatCharacter,
         incapacitated: false,
@@ -506,7 +506,7 @@ export const simulateOneRound = (
       };
     } else {
       // Convert CombatEnemy to CombatEnemyInstance
-      const hp = combatEnemy.currentHP || combatEnemy.hp || calculateEnemyTrackLength(combatEnemy);
+      const hp = combatEnemy.currentHP !== undefined ? combatEnemy.currentHP : combatEnemy.hp || calculateEnemyTrackLength(combatEnemy);
       return {
         ...combatEnemy,
         instanceId: `${enemy.name}_${index}`,
@@ -548,13 +548,13 @@ export const simulateOneRound = (
       return {
         ...char,
         hitPoints: char.hitPoints || char.hp || 10,
-        currentHP: char.currentHP || char.hp
+        currentHP: char.currentHP !== undefined ? char.currentHP : char.hp
       };
     } else {
       // Return as CombatCharacter
       return {
         ...char,
-        hp: char.currentHP || char.hp || 10,
+        hp: char.currentHP !== undefined ? char.currentHP : char.hp || 10,
         maxHp: char.maxHp || char.hitPoints || 10
       };
     }
@@ -566,13 +566,13 @@ export const simulateOneRound = (
       return {
         ...enemy,
         id: enemy.instanceId || enemy.id || `${enemy.name}_0`,
-        currentHP: enemy.currentHP || enemy.hp
+        currentHP: enemy.currentHP !== undefined ? enemy.currentHP : enemy.hp
       };
     } else {
       // Return as CombatEnemy
       return {
         ...enemy,
-        hp: enemy.currentHP || enemy.hp || calculateEnemyTrackLength(enemy),
+        hp: enemy.currentHP !== undefined ? enemy.currentHP : enemy.hp || calculateEnemyTrackLength(enemy),
         maxHp: enemy.maxHp || calculateEnemyTrackLength(enemy)
       };
     }

@@ -232,7 +232,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
         return {
           ...enemy,
           id: 'instanceId' in enemy ? enemy.instanceId || `${enemy.name}_0` : `${enemy.name}_0`,
-          currentHP: enemy.currentHP || (enemy as CombatEnemy).hp,
+          currentHP: enemy.currentHP !== undefined ? enemy.currentHP : (enemy as CombatEnemy).hp,
           hitPoints: 0,
           attackSkill: 'BREAK',
           attackScore: 1,
@@ -251,7 +251,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
         return {
           ...char,
           hitPoints: char.hitPoints || (char as CombatCharacter).hp || 10,
-          currentHP: char.currentHP || (char as CombatCharacter).hp,
+          currentHP: char.currentHP !== undefined ? char.currentHP : (char as CombatCharacter).hp,
           attackSkill: char.attackSkill || 'BREAK',
           attackScore: char.attackScore || 1,
           defenseSkill: char.defenseSkill || 'BRACE',
@@ -321,7 +321,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
     const finalEnemyInstances: EnemyInstance[] = sessionResult.finalEnemies.map(enemy => ({
       ...enemy,
       id: ('instanceId' in enemy ? enemy.instanceId : 'id' in enemy ? enemy.id : `${enemy.name}_0`) || `${enemy.name}_0`,
-      currentHP: enemy.currentHP || (enemy as CombatEnemy).hp,
+      currentHP: enemy.currentHP !== undefined ? enemy.currentHP : (enemy as CombatEnemy).hp,
       hitPoints: 0,
       attackSkill: 'BREAK',
       attackScore: 1,
@@ -332,7 +332,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
     const finalCharacterInstances: CharacterInstance[] = sessionResult.finalParty.map(char => ({
       ...char,
       hitPoints: char.hitPoints || (char as CombatCharacter).hp || 10,
-      currentHP: char.currentHP || (char as CombatCharacter).hp,
+      currentHP: char.currentHP !== undefined ? char.currentHP : (char as CombatCharacter).hp,
       attackSkill: char.attackSkill || 'BREAK',
       attackScore: char.attackScore || 1,
       defenseSkill: char.defenseSkill || 'BRACE',

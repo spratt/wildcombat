@@ -167,16 +167,16 @@ export const checkWinConditions = (
   party: CombatCharacter[]
 ): WinConditionResult => {
   const aliveEnemies = enemies.filter(enemy => {
-    // Check for hp first (during combat), then currentHP, then calculate from aspects
-    const hp = enemy.hp !== undefined ? enemy.hp :
-               enemy.currentHP !== undefined ? enemy.currentHP :
+    // Prioritize currentHP (combat state) over hp (initial/max), then calculate from aspects
+    const hp = enemy.currentHP !== undefined ? enemy.currentHP :
+               enemy.hp !== undefined ? enemy.hp :
                calculateEnemyTrackLength(enemy);
     return hp > 0;
   });
   const aliveParty = party.filter(char => {
-    // Check for hp first (during combat), then currentHP, then hitPoints (initial load)
-    const hp = char.hp !== undefined ? char.hp : 
-               char.currentHP !== undefined ? char.currentHP : 
+    // Prioritize currentHP (combat state) over hp, then fall back to hitPoints
+    const hp = char.currentHP !== undefined ? char.currentHP :
+               char.hp !== undefined ? char.hp :
                char.hitPoints || 0;
     return hp > 0;
   });

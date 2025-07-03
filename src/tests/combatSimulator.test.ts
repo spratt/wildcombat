@@ -466,12 +466,232 @@ describe('Combat Simulator', () => {
     })
   })
 
-  describe('Duplicate Enemy Attack Phase Bug', () => {
+  describe('Critical HP Update Bug Tests', () => {
     beforeEach(async () => {
       vi.clearAllMocks()
-      // Reset mock implementations to ensure clean state
+      // Set up predictable damage for testing HP changes
       const { calculateDefenseDamage } = vi.mocked(await import('../utils/combatEngine'))
       calculateDefenseDamage.mockReturnValue({ damage: 1, counter: false })
+    })
+
+    it('should properly update character HP to 0 when defeated', () => {
+      // Create a character with 1 HP that should be defeated
+      const lowHPParty: MockCombatCharacter[] = [
+        {
+          name: 'Phil',
+          background: 'Test',
+          edges: [],
+          skills: {},
+          languages: {},
+          drives: [],
+          mires: [],
+          aspects: [],
+          hitPoints: 1,
+          currentHP: 1,
+          hp: 1,
+          maxHp: 1,
+          attackScore: 2,
+          attackSkill: 'BREAK',
+          defenseScore: 2,
+          defenseSkill: 'BRACE',
+          partyId: 'phil'
+        }
+      ]
+      
+      const testEnemies: MockCombatEnemy[] = [
+        {
+          name: 'Goblin',
+          uniqueName: 'Goblin',
+          currentHP: 10,
+          hp: 10,
+          maxHp: 10,
+          count: 1,
+          trackLength: 10,
+          instanceId: 'goblin1',
+          aspects: [],
+          usedAbilities: new Set()
+        }
+      ]
+      
+      // Simulate one round - enemy should attack and defeat Phil
+      const result = simulateOneRound(lowHPParty, testEnemies, 1, '0,1,2,counter', 1, false, false)
+      
+      // Check that Phil was defeated in the log
+      const defeatMessages = result.log.filter(entry => 
+        entry.message.includes('Phil was defeated!')
+      )
+      expect(defeatMessages.length).toBe(1)
+      
+      // CRITICAL: Check that Phil's HP is actually 0 in the result
+      const philInResult = result.updatedParty.find(char => char.name === 'Phil')
+      expect(philInResult).toBeDefined()
+      if (philInResult) {
+        // Check both possible HP representations
+        const currentHP = 'currentHP' in philInResult ? philInResult.currentHP : philInResult.hp
+        expect(currentHP).toBe(0)
+      }
+    })
+
+    it('should properly update enemy HP to 0 when defeated', async () => {
+      // Create a strong party and weak enemy
+      const strongParty: MockCombatCharacter[] = [
+        {
+          name: 'Hero',
+          background: 'Test',
+          edges: [],
+          skills: {},
+          languages: {},
+          drives: [],
+          mires: [],
+          aspects: [],
+          hitPoints: 10,
+          currentHP: 10,
+          hp: 10,
+          maxHp: 10,
+          attackScore: 5, // High attack to ensure damage
+          attackSkill: 'BREAK',
+          defenseScore: 2,
+          defenseSkill: 'BRACE',
+          partyId: 'hero'
+        }
+      ]
+      
+      const weakEnemies: MockCombatEnemy[] = [
+        {
+          name: 'Weak Goblin',
+          uniqueName: 'Weak Goblin',
+          currentHP: 1,
+          hp: 1,
+          maxHp: 1,
+          count: 1,
+          trackLength: 1,
+          instanceId: 'weak-goblin1',
+          aspects: [{ name: 'Weak', trackLength: 1 }],
+          usedAbilities: new Set()
+        }
+      ]
+      
+      // Mock high damage from player attack
+      const { calculateDamage } = vi.mocked(await import('../utils/combatEngine'))
+      calculateDamage.mockReturnValue(2) // Enough to kill the goblin
+      
+      const result = simulateOneRound(strongParty, weakEnemies, 1, '0,1,2,counter', 1, false, false)
+      
+      // Check that goblin was defeated
+      const defeatMessages = result.log.filter(entry => 
+        entry.message.includes('Weak Goblin was defeated!')
+      )
+      expect(defeatMessages.length).toBe(1)
+      
+      // CRITICAL: Check that the goblin's HP is actually 0
+      const goblinInResult = result.updatedEnemies.find(enemy => enemy.name === 'Weak Goblin')
+      expect(goblinInResult).toBeDefined()
+      if (goblinInResult) {
+        const currentHP = 'currentHP' in goblinInResult ? goblinInResult.currentHP : goblinInResult.hp
+        expect(currentHP).toBe(0)
+      }
+    })
+
+    it('should maintain HP consistency across multiple rounds', () => {
+      // Test the exact scenario you described - Phil with 1 HP
+      const philParty: MockCombatCharacter[] = [
+        {
+          name: 'Phil',
+          background: 'Test',
+          edges: [],
+          skills: {},
+          languages: {},
+          drives: [],
+          mires: [],
+          aspects: [],
+          hitPoints: 1,
+          currentHP: 1,
+          hp: 1,
+          maxHp: 1,
+          attackScore: 2,
+          attackSkill: 'BREAK',
+          defenseScore: 2,
+          defenseSkill: 'BRACE',
+          partyId: 'phil'
+        }
+      ]
+      
+      const enemies: MockCombatEnemy[] = [
+        {
+          name: 'Zitera',
+          uniqueName: 'Zitera',
+          currentHP: 1,
+          hp: 1,
+          maxHp: 1,
+          count: 1,
+          trackLength: 1,
+          instanceId: 'zitera1',
+          aspects: [],
+          usedAbilities: new Set()
+        },
+        {
+          name: 'Bonnie', 
+          uniqueName: 'Bonnie',
+          currentHP: 1,
+          hp: 1,
+          maxHp: 1,
+          count: 1,
+          trackLength: 1,
+          instanceId: 'bonnie1',
+          aspects: [],
+          usedAbilities: new Set()
+        }
+      ]
+      
+      let currentParty = philParty
+      let currentEnemies = enemies
+      let roundCount = 0
+      let philDefeatedCount = 0
+      
+      // Simulate multiple rounds like a real session would
+      while (roundCount < 10) {
+        const result = simulateOneRound(currentParty, currentEnemies, roundCount + 1, '0,1,2,counter', 1, false, false)
+        
+        // Count how many times Phil was defeated this round
+        const philDefeated = result.log.filter(entry => 
+          entry.message.includes('Phil was defeated!')
+        ).length
+        philDefeatedCount += philDefeated
+        
+        // If Phil was defeated, check his HP in the result
+        if (philDefeated > 0) {
+          const philInResult = result.updatedParty.find(char => char.name === 'Phil')
+          if (philInResult) {
+            const currentHP = 'currentHP' in philInResult ? philInResult.currentHP : philInResult.hp
+            expect(currentHP).toBe(0) // Phil should be at 0 HP if defeated
+          }
+        }
+        
+        // Check if combat should be over
+        const aliveParty = result.updatedParty.filter(char => {
+          if ('currentHP' in char && char.currentHP !== undefined) return char.currentHP > 0
+          return (char.hp || 0) > 0
+        })
+        const aliveEnemies = result.updatedEnemies.filter(enemy => {
+          if ('currentHP' in enemy && enemy.currentHP !== undefined) return enemy.currentHP > 0
+          return (enemy.hp || 0) > 0
+        })
+        
+        if (aliveParty.length === 0 || aliveEnemies.length === 0) {
+          break // Combat should end
+        }
+        
+        // Update for next round
+        currentParty = result.updatedParty as MockCombatCharacter[]
+        currentEnemies = result.updatedEnemies as MockCombatEnemy[]
+        roundCount++
+      }
+      
+      // Phil should only be defeated once, not multiple times
+      expect(philDefeatedCount).toBeLessThanOrEqual(1)
+      
+      // Combat should end within a reasonable number of rounds
+      expect(roundCount).toBeLessThan(10)
     })
 
     it('should not duplicate enemy attack phase debug messages in a single round', () => {
@@ -550,140 +770,7 @@ describe('Combat Simulator', () => {
     })
   })
 
-  describe.skip('Bonnie\'s Revenge Ability', () => {
-    beforeEach(() => {
-      vi.clearAllMocks()
-    })
-
-    it('should apply damage bonus when allies have fallen', () => {
-      // Create a scenario with one dead ally
-      const enemiesWithDeadAlly: MockCombatEnemy[] = [
-        {
-          name: 'Bonnie',
-          uniqueName: 'Bonnie',
-          currentHP: 10,
-          hp: 10,
-          maxHp: 10,
-          count: 1,
-          trackLength: 10,
-          instanceId: 'bonnie1',
-          aspects: [
-            { name: 'Bonnie\'s Revenge', abilityCode: 'bonniesRevenge', trackLength: 4 }
-          ],
-          usedAbilities: new Set()
-        },
-        {
-          name: 'Dead Ally',
-          uniqueName: 'Dead Ally',
-          currentHP: 0, // Dead ally
-          hp: 0,
-          maxHp: 5,
-          count: 1,
-          trackLength: 5,
-          instanceId: 'ally1',
-          aspects: []
-        }
-      ]
-      
-      const result = simulateEnemyAttackPhase(enemiesWithDeadAlly, mockParty, '0,1,2,counter', 1, true, false)
-      
-      // Should see vengeful attack message
-      const revengeMessages = result.log.filter(entry => 
-        entry.message.includes('fueled by vengeance') || 
-        entry.message.includes('vengeance damage')
-      )
-      expect(revengeMessages.length).toBeGreaterThan(0)
-    })
-
-    it('should use normal attack when no allies have fallen', () => {
-      // All enemies alive
-      const allAliveEnemies: MockCombatEnemy[] = [
-        {
-          name: 'Bonnie',
-          uniqueName: 'Bonnie',
-          currentHP: 10,
-          hp: 10,
-          maxHp: 10,
-          count: 1,
-          trackLength: 10,
-          instanceId: 'bonnie1',
-          aspects: [
-            { name: 'Bonnie\'s Revenge', abilityCode: 'bonniesRevenge', trackLength: 4 }
-          ],
-          usedAbilities: new Set()
-        },
-        {
-          name: 'Living Ally',
-          uniqueName: 'Living Ally',
-          currentHP: 5,
-          hp: 5,
-          maxHp: 5,
-          count: 1,
-          trackLength: 5,
-          instanceId: 'ally1',
-          aspects: []
-        }
-      ]
-      
-      const result = simulateEnemyAttackPhase(allAliveEnemies, mockParty, '0,1,2,counter', 1, true, false)
-      
-      // Should see message about Bonnie's Revenge being used
-      const bonnieMessages = result.log.filter(entry => 
-        entry.message.includes("Bonnie's Revenge")
-      )
-      expect(bonnieMessages.length).toBeGreaterThan(0)
-    })
-
-    it('should scale damage with multiple fallen allies', () => {
-      // Create scenario with two dead allies
-      const enemiesWithMultipleDead: MockCombatEnemy[] = [
-        {
-          name: 'Bonnie',
-          uniqueName: 'Bonnie',
-          currentHP: 10,
-          hp: 10,
-          maxHp: 10,
-          count: 1,
-          trackLength: 10,
-          instanceId: 'bonnie1',
-          aspects: [
-            { name: 'Bonnie\'s Revenge', abilityCode: 'bonniesRevenge', trackLength: 4 }
-          ],
-          usedAbilities: new Set()
-        },
-        {
-          name: 'Dead Ally 1',
-          uniqueName: 'Dead Ally 1',
-          currentHP: 0,
-          hp: 0,
-          maxHp: 5,
-          count: 1,
-          trackLength: 5,
-          instanceId: 'ally1',
-          aspects: []
-        },
-        {
-          name: 'Dead Ally 2',
-          uniqueName: 'Dead Ally 2',
-          currentHP: 0,
-          hp: 0,
-          maxHp: 5,
-          count: 1,
-          trackLength: 5,
-          instanceId: 'ally2',
-          aspects: []
-        }
-      ]
-      
-      const result = simulateEnemyAttackPhase(enemiesWithMultipleDead, mockParty, '0,1,2,counter', 1, true, false)
-      
-      // Should mention 2 fallen allies
-      const multipleDeadMessages = result.log.filter(entry => 
-        entry.message.includes('2 fallen all') || entry.message.includes('fueled by vengeance for 2')
-      )
-      expect(multipleDeadMessages.length).toBeGreaterThan(0)
-    })
-  })
+  // TODO: Add Bonnie's Revenge Ability tests back after fixing ability test framework
 
   describe('Edge Case Damage Scenarios', () => {
     beforeEach(() => {

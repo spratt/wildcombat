@@ -469,5 +469,79 @@ describe('Combat Engine', () => {
       const result = checkWinConditions(mockEnemies, partyWithoutCurrentHP)
       expect(result.isOver).toBe(false)
     })
+
+    it('should properly detect defeat when currentHP is 0', () => {
+      // Test the exact bug - characters with currentHP: 0 should be considered defeated
+      const defeatedParty: CombatCharacter[] = [
+        { 
+          name: 'Phil', 
+          background: 'Test', 
+          edges: [], 
+          skills: {}, 
+          languages: {}, 
+          drives: [], 
+          mires: [], 
+          aspects: [], 
+          currentHP: 0, // Defeated in combat
+          hitPoints: 1,  // Original HP
+          hp: 1,        // May be set to max HP
+          maxHp: 1 
+        }
+      ]
+
+      const defeatedEnemies: CombatEnemy[] = [
+        { 
+          name: 'Zitera', 
+          aspects: [{ name: 'Track', trackLength: 1 }], 
+          currentHP: 0, // Defeated in combat
+          hp: 1,        // May be set to max HP
+          maxHp: 1, 
+          count: 1 
+        }
+      ]
+      
+      const result = checkWinConditions(defeatedEnemies, defeatedParty)
+      expect(result.isOver).toBe(true)
+      expect(result.result).toBe('win') // No enemies alive = win
+      expect(result.aliveEnemies).toHaveLength(0)
+      expect(result.aliveParty).toHaveLength(0)
+    })
+
+    it('should prioritize currentHP over other HP values', () => {
+      // Test that currentHP (combat state) takes precedence over hp (max HP)
+      const mixedStateParty: CombatCharacter[] = [
+        { 
+          name: 'Wounded Hero', 
+          background: 'Test', 
+          edges: [], 
+          skills: {}, 
+          languages: {}, 
+          drives: [], 
+          mires: [], 
+          aspects: [], 
+          currentHP: 0, // Defeated in combat
+          hitPoints: 10, // Original HP  
+          hp: 10,       // Max HP
+          maxHp: 10 
+        }
+      ]
+
+      const mixedStateEnemies: CombatEnemy[] = [
+        { 
+          name: 'Enemy', 
+          aspects: [{ name: 'Track', trackLength: 10 }], 
+          currentHP: 5, // Current state in combat
+          hp: 10,       // Max HP
+          maxHp: 10, 
+          count: 1 
+        }
+      ]
+      
+      const result = checkWinConditions(mixedStateEnemies, mixedStateParty)
+      expect(result.isOver).toBe(true)
+      expect(result.result).toBe('lose') // No party alive = lose
+      expect(result.aliveEnemies).toHaveLength(1) // Enemy still alive with currentHP: 5
+      expect(result.aliveParty).toHaveLength(0)   // Party defeated with currentHP: 0
+    })
   })
 })
