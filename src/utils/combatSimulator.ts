@@ -494,7 +494,7 @@ export const simulateOneRound = (
     
     if (isEnemyInstance) {
       // Already an EnemyInstance, convert to CombatEnemyInstance
-      const hp = enemyInstance.currentHP || calculateEnemyTrackLength(enemyInstance);
+      const hp = enemyInstance.currentHP !== undefined ? enemyInstance.currentHP : calculateEnemyTrackLength(enemyInstance);
       return {
         ...enemyInstance,
         instanceId: enemyInstance.id || `${enemy.name}_${index}`,

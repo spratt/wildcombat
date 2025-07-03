@@ -127,7 +127,7 @@ const SimulateTab: React.FC = () => {
   // Convert to compatible types for checkWinConditions
   const combatEnemies = uniqueEnemies.map(enemy => ({
     ...enemy,
-    hp: enemy.currentHP || calculateEnemyTrackLength(enemy),
+    hp: enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy),
     maxHp: calculateEnemyTrackLength(enemy),
     count: 1
   }));
@@ -308,7 +308,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
     // Convert enemies to compatible types
     const sessionEnemies: CombatEnemy[] = uniqueEnemies.map(enemy => ({
       ...enemy,
-      hp: enemy.currentHP || calculateEnemyTrackLength(enemy),
+      hp: enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy),
       maxHp: calculateEnemyTrackLength(enemy),
       count: 1,
       instanceId: enemy.id,
@@ -385,7 +385,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
       
       const sessionEnemiesCombat: CombatEnemy[] = sessionEnemies.map(enemy => ({
         ...enemy,
-        hp: enemy.currentHP || calculateEnemyTrackLength(enemy),
+        hp: enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy),
         maxHp: calculateEnemyTrackLength(enemy),
         count: 1
       }));
