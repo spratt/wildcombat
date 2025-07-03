@@ -433,8 +433,8 @@ export const simulateOneRound = (
   }
 
   // Check if combat is already over  
-  const combatEnemies = enemies.map(e => ({ ...e, hp: ('hp' in e ? e.hp : e.currentHP) || 0, maxHp: 0, count: 1 }));
-  const combatParty = party.map(p => ({ ...p, hp: ('hp' in p ? p.hp : p.currentHP) || 0, maxHp: 0 }));
+  const combatEnemies = enemies.map(e => ({ ...e, hp: e.currentHP !== undefined ? e.currentHP : calculateEnemyTrackLength(e), maxHp: 0, count: 1 }));
+  const combatParty = party.map(p => ({ ...p, hp: p.currentHP !== undefined ? p.currentHP : (p.hitPoints || 10), maxHp: 0 }));
   const { isOver } = checkWinConditions(combatEnemies, combatParty);
   if (isOver) {
     return {
