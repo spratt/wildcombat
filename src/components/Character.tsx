@@ -35,34 +35,7 @@ const calculateHitPoints = (character: CharacterType | null): number => {
 // Standard lists for Wildsea
 const EDGES = ['GRACE', 'INSTINCT', 'IRON', 'SHARPS', 'TEETH', 'TIDES', 'VEILS'] as const;
 
-const SKILLS = [
-  'BRACE', 'BREAK', 'CONCOCT', 'COOK', 'DELVE', 'FLOURISH', 'HACK', 'HARVEST',
-  'HUNT', 'OUTWIT', 'RATTLE', 'SCAVENGE', 'SENSE', 'STUDY', 'SWAY', 'TEND',
-  'VAULT', 'WAVEWALK'
-] as const;
 
-const LANGUAGES = [
-  'LOW_SOUR', 'CHTHONIC', 'SAPREKK', 'GAUDIMM', 'KNOCK', 'BRASSTONGUE',
-  'RAKA_SPIT', 'LYRE_BITE', 'OLD_HAND', 'SIGNALLING', 'HIGHVIN'
-] as const;
-
-// Helper function to get all skills with defaults
-const _getAllSkills = (characterSkills: Record<string, number[]>): Record<string, number[]> => {
-  const skills: Record<string, number[]> = {};
-  SKILLS.forEach(skill => {
-    skills[skill] = characterSkills[skill] || [0, 0, 0];
-  });
-  return skills;
-};
-
-// Helper function to get all languages with defaults
-const _getAllLanguages = (characterLanguages: Record<string, number[]>): Record<string, number[]> => {
-  const languages: Record<string, number[]> = {};
-  LANGUAGES.forEach(language => {
-    languages[language] = characterLanguages[language] || [0, 0, 0];
-  });
-  return languages;
-};
 
 interface CharacterProps {
   characterData: string | CharacterType | null;
@@ -85,7 +58,7 @@ const Character: React.FC<CharacterProps> = ({ characterData }) => {
     }
 
     try {
-      const data = typeof characterData === 'string' ? JSON.parse(characterData) : characterData;
+      const data: unknown = typeof characterData === 'string' ? JSON.parse(characterData) : characterData;
       
       // Validate against schema
       const ajv = new Ajv({ allErrors: true });
@@ -96,7 +69,8 @@ const Character: React.FC<CharacterProps> = ({ characterData }) => {
         setValidationError(validate.errors as ValidationError[]);
         setCharacter(null);
       } else {
-        setCharacter(data);
+        // Since we've validated the data against the schema, it's safe to cast it as Character
+        setCharacter(data as unknown as CharacterType);
         setValidationError(null);
       }
     } catch (error) {

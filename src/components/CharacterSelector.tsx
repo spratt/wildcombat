@@ -27,7 +27,7 @@ const CharacterSelector: React.FC<CharacterSelectorProps> = ({ onCharacterSelect
         const characterFiles = config.characterJsons || [];
         
         const results = await Promise.all(
-      characterFiles.map(async (filename): Promise<CharacterFile | null> => {
+      characterFiles.map(async (filename: string): Promise<CharacterFile | null> => {
         try {
           const response = await fetch(`./characters/${filename}`);
           if (!response.ok) throw new Error(`Failed to load ${filename}`);

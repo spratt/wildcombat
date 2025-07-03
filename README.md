@@ -24,9 +24,11 @@ Try the live demo: [https://spratt.github.io/wildcombat/](https://spratt.github.
 - **Win/Loss Detection**: Automatic combat resolution
 
 ### Enemy Management
-- **Enemy Database**: Browse and select from available enemies
+- **Enemy Database**: Browse and select from available enemies including unique boss enemies
 - **Encounter Builder**: Create custom enemy encounters with counts
 - **Enemy Stats Display**: View enemy aspects, drives, and abilities
+- **Unique Enemies**: Special boss-type enemies with custom abilities and lore
+- **Dynamic Enemy Lists**: Enemy and character lists loaded from config.json
 
 ## 🚀 Getting Started
 
@@ -109,13 +111,25 @@ src/
 - **Incapacitate**: Special attack that can disable characters temporarily or permanently
 - **Once Per Session**: Each ability can only be used once per combat session
 - **Toggle Control**: Enable/disable ability usage via checkbox for different scenarios
+- **Unique Boss Abilities**: Special enemies have custom abilities like:
+  - **Violet Haze**: Area-of-effect poison damage
+  - **Bonnie's Revenge**: Damage boost when allies fall
+  - **Gangland Execution**: Instant reduction to 1 HP
+  - **Dual Wield Barrage**: Multi-target attack requiring advantage defense
+  - **High Noon Duel**: Single-target lockdown mechanic
+  - **Desert Mirage**: Defensive confusion effect
 
 ### Combat Flow
 1. **Incapacitation Clear**: All status effects cleared at round start
 2. **Player Attack Phase**: Each party member attacks lowest HP enemy
 3. **Enemy Attack Phase**: Each enemy attacks lowest HP player or uses special abilities
-4. **Defense Resolution**: Target rolls defense, takes damage, potential counter
+4. **Defense Resolution**: Target rolls defense (with advantage/cut modifiers), takes damage, potential counter
 5. **Win/Lose Conditions**: Combat ends when one side is eliminated
+
+### Dice System Enhancements
+- **Advantage**: Roll extra dice and keep the best results
+- **Cut**: Roll fewer dice (minimum 1) for disadvantage
+- **Function-Based Abilities**: Modular ability system for unique enemy attacks
 
 ## 📊 Character System
 
@@ -135,15 +149,20 @@ Characters are validated against JSON Schema and include:
 - `npm run build:pages` - Build for GitHub Pages
 - `npm run lint` - Run ESLint
 - `npm test` - Run unit tests
+- `npm run coverage` - Run tests with coverage report
 - `npm run validate:characters` - Validate character JSON files
+- `npm run validate:enemies` - Validate enemy JSON files
+- `npm run check:file-sizes` - Check for oversized files
+- `npm run typecheck` - TypeScript type checking
 
 ### Technologies Used
 
 - **Frontend**: React 19, Vite 7
-- **Testing**: Vitest with comprehensive unit tests (64 tests)
-- **Validation**: AJV with JSON Schema
+- **Testing**: Vitest with comprehensive unit tests (64 tests) and coverage reporting
+- **Validation**: AJV with JSON Schema for both characters and enemies
 - **State Management**: localStorage for persistence
 - **Styling**: Modular CSS with responsive design
+- **Build Tools**: ESLint, TypeScript, file size monitoring
 
 ### Testing
 
@@ -154,14 +173,27 @@ The project includes comprehensive unit tests covering all combat simulation log
 - **Data Manager**: Statistics and calculations
 - **Session Simulator**: Full session simulation with timeout protection
 
-## 🎮 Example Characters
+## 🎮 Example Content
 
+### Characters
 The project includes 4 example characters showcasing different Wildsea bloodlines and roles:
 
 - **Zara**: Ardent Dredger Sawbones (medical specialist)
 - **Thresh**: Ketra Rootless Navigator (weather prediction)
 - **Felix**: Tzelicrae Spit Corsair (acrobatic fighter)
 - **Nova**: Cacophony Shankling Spit-Lyre (sonic musician)
+
+### Enemies
+The project includes both regular and unique enemies:
+
+**Regular Enemies:**
+- **Shadowclaw Spider**: Agile predator with web attacks
+- **Thornback Beetle**: Heavily armored tank enemy
+- **Dire Squirrel**: Fast skirmisher with hit-and-run tactics
+
+**Unique Boss Enemies:**
+- **Zitera**: Legendary ektus gunslinger with dual revolvers and special duel mechanics
+- **Bonnie**: Anchored ektus gangster with Thompson submachine gun and revenge abilities
 
 ## 🤝 Contributing
 

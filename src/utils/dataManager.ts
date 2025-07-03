@@ -1,15 +1,11 @@
 // Data management utilities for party and encounter operations
 import type { 
   Character, 
-  Enemy, 
-  CombatCharacter, 
-  CombatEnemy,
-  PartyState,
-  EncounterState
+  Enemy
 } from '../types';
 
 // Extended types for internal use
-interface CharacterInstance extends Character {
+export interface CharacterInstance extends Character {
   partyId?: string;
   currentHP?: number;
   hitPoints: number;
@@ -17,18 +13,32 @@ interface CharacterInstance extends Character {
   attackScore: number;
   defenseSkill: string;
   defenseScore: number;
+  // Optional properties for compatibility with CombatCharacter
+  hp?: number;
+  maxHp?: number;
+  incapacitated?: boolean;
 }
 
-interface EnemyInstance extends Enemy {
+export interface EnemyInstance extends Enemy {
   id: string;
   uniqueName?: string;
   baseName?: string;
   enemyId?: string;
   instanceId?: string;
   currentHP?: number;
+  // Optional properties for compatibility with CombatEnemy
+  hp?: number;
+  maxHp?: number;
+  count?: number;
+  usedAbilities?: Set<string>;
+  hitPoints?: number;
+  attackSkill?: string;
+  attackScore?: number;
+  defenseSkill?: string;
+  defenseScore?: number;
 }
 
-interface EncounterEnemy {
+export interface EncounterEnemy {
   enemyId: string;
   count: number;
 }
@@ -50,7 +60,7 @@ interface ResetCombatResult {
 }
 
 // Helper function to calculate total enemy trackLength from aspects
-export const calculateEnemyTrackLength = (enemy: Enemy | EnemyInstance): number => {
+export const calculateEnemyTrackLength = (enemy: Enemy | EnemyInstance | null | undefined): number => {
   if (!enemy || !enemy.aspects) return 0;
   return enemy.aspects.reduce((total, aspect) => {
     return total + (aspect.trackLength || 0);
@@ -180,7 +190,7 @@ export const loadEnemiesData = async (): Promise<EnemyInstance[]> => {
     const enemyFiles = config.enemyJsons || [];
     
     const enemyData = await Promise.all(
-      enemyFiles.map(async (filename) => {
+      enemyFiles.map(async (filename: string) => {
         try {
           const response = await fetch(`./enemies/${filename}`);
           if (!response.ok) throw new Error(`Failed to load ${filename}`);

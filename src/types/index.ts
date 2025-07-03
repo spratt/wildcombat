@@ -78,14 +78,27 @@ export interface EnemyAspect {
 export interface CombatCharacter extends Character {
   hp: number;
   maxHp: number;
+  currentHP?: number;
+  hitPoints?: number;
   incapacitated?: boolean;
+  // Optional properties for compatibility with CharacterInstance
+  partyId?: string;
+  attackScore?: number;
+  attackSkill?: string;
+  defenseScore?: number;
+  defenseSkill?: string;
 }
 
 export interface CombatEnemy extends Enemy {
   hp: number;
   maxHp: number;
+  currentHP?: number;
   count: number;
   usedAbilities?: Set<string>;
+  // Optional properties for compatibility with EnemyInstance
+  id?: string;
+  instanceId?: string;
+  uniqueName?: string;
 }
 
 export interface DamageModel {

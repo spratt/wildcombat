@@ -9,7 +9,7 @@ import {
   renderTrackLength,
   resetCombatState
 } from '../utils/dataManager'
-import type { Enemy, Character, EnemyAspect, Aspect } from '../types'
+import type { Enemy, Character, EnemyAspect } from '../types'
 
 describe('Data Manager', () => {
   describe('calculateEnemyTrackLength', () => {
@@ -19,7 +19,7 @@ describe('Data Manager', () => {
     })
 
     it('should return 0 for enemy without aspects', () => {
-      const enemy: Partial<Enemy> = { name: 'Test Enemy' }
+      const enemy = { name: 'Test Enemy' } as Enemy
       expect(calculateEnemyTrackLength(enemy)).toBe(0)
     })
 
@@ -57,10 +57,8 @@ describe('Data Manager', () => {
   })
 
   describe('calculatePartyStats', () => {
-    interface MockCharacter extends Partial<Character> {
-      name: string
+    interface MockCharacter extends Character {
       hitPoints: number
-      aspects: Aspect[]
       attackScore: number
       attackSkill: string
       defenseScore: number
@@ -71,6 +69,12 @@ describe('Data Manager', () => {
     const mockParty: MockCharacter[] = [
       {
         name: 'Character 1',
+        background: 'Test',
+        edges: [],
+        skills: {},
+        languages: {},
+        drives: [],
+        mires: [],
         hitPoints: 10,
         aspects: [
           { type: 'trait', name: 'Skill 1', value: [0, 0, 0] },
@@ -83,6 +87,12 @@ describe('Data Manager', () => {
       },
       {
         name: 'Character 2',
+        background: 'Test',
+        edges: [],
+        skills: {},
+        languages: {},
+        drives: [],
+        mires: [],
         hitPoints: 8,
         aspects: [
           { type: 'trait', name: 'Skill 1', value: [0, 0] },
@@ -129,6 +139,7 @@ describe('Data Manager', () => {
 
   describe('calculateEncounterStats', () => {
     interface MockEnemy extends Partial<Enemy> {
+      id: string
       name: string
       aspects: EnemyAspect[]
       currentHP?: number
@@ -136,6 +147,7 @@ describe('Data Manager', () => {
 
     const mockEnemies: MockEnemy[] = [
       {
+        id: 'enemy-1',
         name: 'Enemy 1',
         aspects: [
           { name: 'Aspect 1', trackLength: 6 },
@@ -143,6 +155,7 @@ describe('Data Manager', () => {
         ]
       },
       {
+        id: 'enemy-2',
         name: 'Enemy 2',
         aspects: [
           { name: 'Aspect 1', trackLength: 4 },
@@ -171,9 +184,9 @@ describe('Data Manager', () => {
     })
 
     it('should handle enemies without aspects', () => {
-      const enemiesWithoutAspects: Array<Partial<Enemy>> = [
-        { name: 'Enemy 1', aspects: [] },
-        { name: 'Enemy 2', aspects: [] }
+      const enemiesWithoutAspects: MockEnemy[] = [
+        { id: 'enemy-1', name: 'Enemy 1', aspects: [] },
+        { id: 'enemy-2', name: 'Enemy 2', aspects: [] }
       ]
       const stats = calculateEncounterStats(enemiesWithoutAspects)
       expect(stats.totalHP).toBe(0)
@@ -367,8 +380,8 @@ describe('Data Manager', () => {
     })
 
     it('should handle undefined/null length', () => {
-      expect(renderTrackLength(null)).toBe('')
-      expect(renderTrackLength(undefined)).toBe('')
+      expect(renderTrackLength(null as unknown as number)).toBe('')
+      expect(renderTrackLength(undefined as unknown as number)).toBe('')
     })
   })
 
@@ -387,6 +400,12 @@ describe('Data Manager', () => {
     const mockParty = [
       {
         name: 'Hero',
+        background: 'Test',
+        edges: [],
+        skills: {},
+        languages: {},
+        drives: [],
+        mires: [],
         hitPoints: 10,
         currentHP: 5,
         attackScore: 3,

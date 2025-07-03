@@ -11,14 +11,14 @@ vi.mock('../utils/combatEngine', () => ({
   checkWinConditions: vi.fn()
 }))
 
-interface MockCombatCharacter extends Partial<CombatCharacter> {
+interface MockCombatCharacter extends CombatCharacter {
   name: string
   hitPoints: number
   currentHP: number
   partyId: string
 }
 
-interface MockCombatEnemy extends Partial<CombatEnemy> {
+interface MockCombatEnemy extends CombatEnemy {
   name: string
   uniqueName: string
   currentHP: number
@@ -30,14 +30,32 @@ describe('Session Simulator', () => {
   const mockParty: MockCombatCharacter[] = [
     {
       name: 'Hero 1',
+      background: 'Test',
+      edges: [],
+      skills: {},
+      languages: {},
+      drives: [],
+      mires: [],
+      aspects: [],
       hitPoints: 5,
       currentHP: 5,
+      hp: 5,
+      maxHp: 5,
       partyId: 'hero1'
     },
     {
       name: 'Hero 2', 
+      background: 'Test',
+      edges: [],
+      skills: {},
+      languages: {},
+      drives: [],
+      mires: [],
+      aspects: [],
       hitPoints: 3,
       currentHP: 3,
+      hp: 3,
+      maxHp: 3,
       partyId: 'hero2'
     }
   ]
@@ -45,8 +63,12 @@ describe('Session Simulator', () => {
   const mockEnemies: MockCombatEnemy[] = [
     {
       name: 'Goblin',
+      aspects: [{ name: 'Track', trackLength: 4 }],
       uniqueName: 'Goblin 1',
       currentHP: 4,
+      hp: 4,
+      maxHp: 4,
+      count: 1,
       trackLength: 4,
       instanceId: 'goblin1'
     }
@@ -60,7 +82,12 @@ describe('Session Simulator', () => {
     const { checkWinConditions } = await import('../utils/combatEngine')
     
     // Set up default behaviors
-    vi.mocked(checkWinConditions).mockReturnValue({ isOver: false, result: null })
+    vi.mocked(checkWinConditions).mockReturnValue({ 
+      isOver: false, 
+      result: null, 
+      aliveEnemies: mockEnemies, 
+      aliveParty: mockParty 
+    })
     vi.mocked(simulateOneRound).mockReturnValue({
       updatedParty: mockParty,
       updatedEnemies: mockEnemies,
@@ -102,8 +129,18 @@ describe('Session Simulator', () => {
       
       // Mock win condition after one round
       vi.mocked(checkWinConditions)
-        .mockReturnValueOnce({ isOver: false, result: null }) // Pre-round check
-        .mockReturnValueOnce({ isOver: true, result: 'win' })  // Post-round check
+        .mockReturnValueOnce({ 
+          isOver: false, 
+          result: null, 
+          aliveEnemies: mockEnemies, 
+          aliveParty: mockParty 
+        }) // Pre-round check
+        .mockReturnValueOnce({ 
+          isOver: true, 
+          result: 'win', 
+          aliveEnemies: [], 
+          aliveParty: mockParty 
+        })  // Post-round check
       
       vi.mocked(simulateOneRound).mockReturnValue({
         updatedParty: mockParty,

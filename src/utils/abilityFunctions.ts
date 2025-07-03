@@ -98,8 +98,7 @@ export const handleCounterAttack = (
 
 // Incapacitate ability
 const incapacitateAbility: AbilityFunction = (context) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { enemy, ability, target, updatedParty, updatedEnemies, damageModel, enemyAttacksPerRound, attackNum, log } = context;
+  const { enemy, ability, target, updatedParty, updatedEnemies, enemyAttacksPerRound, attackNum, log } = context;
   
   const defenseScore = target.defenseScore || 1;
   const defenseSkill = target.defenseSkill || 'BRACE';

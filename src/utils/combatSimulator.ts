@@ -18,22 +18,26 @@ import type {
   CombatCharacter, 
   CombatEnemy
 } from '../types';
+import type {
+  CharacterInstance,
+  EnemyInstance
+} from './dataManager';
 
 
 interface PlayerAttackPhaseResult {
-  updatedEnemies: CombatEnemy[];
+  updatedEnemies: CombatEnemyInstance[];
   log: CombatLogEntry[];
 }
 
 interface EnemyAttackPhaseResult {
-  updatedParty: CombatCharacter[];
-  updatedEnemies: CombatEnemy[];
+  updatedParty: CombatCharacterInstance[];
+  updatedEnemies: CombatEnemyInstance[];
   log: CombatLogEntry[];
 }
 
 interface SimulateRoundResult {
-  updatedParty: CombatCharacter[];
-  updatedEnemies: CombatEnemy[];
+  updatedParty: (CombatCharacter | CharacterInstance)[];
+  updatedEnemies: (CombatEnemy | EnemyInstance)[];
   log: CombatLogEntry[];
   combatResult: string | null;
   isOver: boolean;
@@ -122,11 +126,11 @@ export const simulateEnemyAttackPhase = (
   let updatedEnemies = [...enemies];
   
   // Filter alive enemies and party at start of phase
-  const aliveEnemies = enemies.filter(enemy => 
+  const aliveEnemies = updatedEnemies.filter(enemy => 
     (enemy.currentHP !== undefined ? enemy.currentHP : calculateEnemyTrackLength(enemy)) > 0
   );
-  let aliveParty = party.filter(char => 
-    (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0
+  let aliveParty = updatedParty.filter(char => 
+    (char.currentHP !== undefined ? char.currentHP : char.hitPoints || 0) > 0
   );
   
   if (debugMode) {
@@ -158,7 +162,7 @@ export const simulateEnemyAttackPhase = (
     for (let attackNum = 1; attackNum <= enemyAttacksPerRound; attackNum++) {
       // Update alive party for each attack (some might have died)
       aliveParty = updatedParty.filter(char => 
-        (char.currentHP !== undefined ? char.currentHP : char.hitPoints) > 0
+        (char.currentHP !== undefined ? char.currentHP : char.hitPoints || 0) > 0
       );
       
       if (aliveParty.length === 0) {
@@ -173,8 +177,8 @@ export const simulateEnemyAttackPhase = (
       
       // Target player with lowest HP
       const target = aliveParty.reduce((lowest, player) => {
-        const playerHP = player.currentHP !== undefined ? player.currentHP : player.hitPoints;
-        const lowestHP = lowest.currentHP !== undefined ? lowest.currentHP : lowest.hitPoints;
+        const playerHP = player.currentHP !== undefined ? player.currentHP : player.hitPoints || 0;
+        const lowestHP = lowest.currentHP !== undefined ? lowest.currentHP : lowest.hitPoints || 0;
         return playerHP < lowestHP ? player : lowest;
       });
     
@@ -200,6 +204,11 @@ export const simulateEnemyAttackPhase = (
         // Use random available ability
         const ability = availableAbilities[Math.floor(Math.random() * availableAbilities.length)];
         
+        if (!ability.abilityCode) {
+          // Skip abilities without abilityCode
+          continue;
+        }
+        
         if (debugMode) {
           log.push({
             message: `DEBUG: ${enemy.uniqueName} selected ability "${ability.name}" with abilityCode "${ability.abilityCode}"`,
@@ -223,7 +232,7 @@ export const simulateEnemyAttackPhase = (
           // Create context for ability function
           const context: AbilityContext = {
             enemy,
-            ability,
+            ability: { name: ability.name, abilityCode: ability.abilityCode! },
             target,
             updatedParty,
             updatedEnemies,
@@ -405,8 +414,8 @@ export const simulateEnemyAttackPhase = (
 };
 
 export const simulateOneRound = (
-  party: CombatCharacterInstance[], 
-  enemies: CombatEnemyInstance[], 
+  party: CharacterInstance[] | CombatCharacter[], 
+  enemies: EnemyInstance[] | CombatEnemy[], 
   currentRound: number, 
   damageModel: string = '0,1,2,counter', 
   enemyAttacksPerRound: number = 1, 
@@ -423,8 +432,10 @@ export const simulateOneRound = (
     };
   }
 
-  // Check if combat is already over
-  const { isOver } = checkWinConditions(enemies as CombatEnemy[], party as CombatCharacter[]);
+  // Check if combat is already over  
+  const combatEnemies = enemies.map(e => ({ ...e, hp: ('hp' in e ? e.hp : e.currentHP) || 0, maxHp: 0, count: 1 }));
+  const combatParty = party.map(p => ({ ...p, hp: ('hp' in p ? p.hp : p.currentHP) || 0, maxHp: 0 }));
+  const { isOver } = checkWinConditions(combatEnemies, combatParty);
   if (isOver) {
     return {
       updatedParty: party,
@@ -437,14 +448,79 @@ export const simulateOneRound = (
 
   const roundLog: CombatLogEntry[] = [{ message: `--- Round ${currentRound} ---`, type: 'neutral' }];
   
-  // Clear incapacitation status at start of round
-  let updatedParty = party.map(char => ({
-    ...char,
-    incapacitated: false
-  }));
+  // Clear incapacitation status at start of round - handle both CharacterInstance and CombatCharacter
+  let updatedParty: CombatCharacterInstance[] = party.map((char): CombatCharacterInstance => {
+    const characterInstance = char as CharacterInstance;
+    const combatCharacter = char as CombatCharacter;
+    
+    // Determine which type we're dealing with
+    const isCharacterInstance = 'attackSkill' in char && typeof characterInstance.attackSkill === 'string';
+    
+    if (isCharacterInstance) {
+      // Already a CharacterInstance, convert to CombatCharacterInstance
+      const hp = characterInstance.currentHP || characterInstance.hitPoints || 10;
+      return {
+        ...characterInstance,
+        incapacitated: false,
+        hp: hp,
+        maxHp: characterInstance.hitPoints || 10
+      };
+    } else {
+      // Convert CombatCharacter to CombatCharacterInstance
+      const hp = combatCharacter.currentHP || combatCharacter.hp || 10;
+      return {
+        ...combatCharacter,
+        incapacitated: false,
+        partyId: combatCharacter.name,
+        hitPoints: combatCharacter.hitPoints || combatCharacter.hp || 10,
+        currentHP: hp,
+        hp: hp,
+        maxHp: combatCharacter.maxHp || combatCharacter.hitPoints || 10,
+        attackScore: 2,
+        attackSkill: 'BREAK',
+        defenseScore: 2,
+        defenseSkill: 'BRACE'
+      };
+    }
+  });
+  
+  // Convert enemies to instances for combat functions
+  const enemyInstances: CombatEnemyInstance[] = enemies.map((enemy, index): CombatEnemyInstance => {
+    const enemyInstance = enemy as EnemyInstance;
+    const combatEnemy = enemy as CombatEnemy;
+    
+    // Determine which type we're dealing with
+    const isEnemyInstance = 'id' in enemy && typeof enemyInstance.id === 'string';
+    
+    if (isEnemyInstance) {
+      // Already an EnemyInstance, convert to CombatEnemyInstance
+      const hp = enemyInstance.currentHP || calculateEnemyTrackLength(enemyInstance);
+      return {
+        ...enemyInstance,
+        instanceId: enemyInstance.id || `${enemy.name}_${index}`,
+        uniqueName: enemyInstance.uniqueName || enemy.name,
+        currentHP: hp,
+        hp: hp,
+        maxHp: calculateEnemyTrackLength(enemyInstance),
+        count: 1
+      };
+    } else {
+      // Convert CombatEnemy to CombatEnemyInstance
+      const hp = combatEnemy.currentHP || combatEnemy.hp || calculateEnemyTrackLength(combatEnemy);
+      return {
+        ...combatEnemy,
+        instanceId: `${enemy.name}_${index}`,
+        uniqueName: combatEnemy.count > 1 ? `${enemy.name} ${index + 1}` : enemy.name,
+        currentHP: hp,
+        hp: hp,
+        maxHp: combatEnemy.maxHp || calculateEnemyTrackLength(combatEnemy),
+        count: combatEnemy.count || 1
+      };
+    }
+  });
   
   // Player attack phase
-  const playerPhase = simulatePlayerAttackPhase(updatedParty, enemies);
+  const playerPhase = simulatePlayerAttackPhase(updatedParty, enemyInstances);
   roundLog.push(...playerPhase.log);
   
   // Enemy attack phase
@@ -452,7 +528,7 @@ export const simulateOneRound = (
   roundLog.push(...enemyPhase.log);
   
   // Check win/lose conditions
-  const winCheck = checkWinConditions(enemyPhase.updatedEnemies as CombatEnemy[], enemyPhase.updatedParty as CombatCharacter[]);
+  const winCheck = checkWinConditions(enemyPhase.updatedEnemies, enemyPhase.updatedParty);
   let combatResult: string | null = null;
   
   if (winCheck.isOver) {
@@ -465,9 +541,46 @@ export const simulateOneRound = (
     }
   }
   
+  // Convert back to the expected types for the caller
+  const finalParty = enemyPhase.updatedParty.map((char): CharacterInstance | CombatCharacter => {
+    if ('attackSkill' in char && typeof char.attackSkill === 'string') {
+      // Return as CharacterInstance
+      return {
+        ...char,
+        hitPoints: char.hitPoints || char.hp || 10,
+        currentHP: char.currentHP || char.hp
+      };
+    } else {
+      // Return as CombatCharacter
+      return {
+        ...char,
+        hp: char.currentHP || char.hp || 10,
+        maxHp: char.maxHp || char.hitPoints || 10
+      };
+    }
+  });
+
+  const finalEnemies = enemyPhase.updatedEnemies.map((enemy): EnemyInstance | CombatEnemy => {
+    if ('id' in enemy && typeof enemy.id === 'string') {
+      // Return as EnemyInstance
+      return {
+        ...enemy,
+        id: enemy.instanceId || enemy.id || `${enemy.name}_0`,
+        currentHP: enemy.currentHP || enemy.hp
+      };
+    } else {
+      // Return as CombatEnemy
+      return {
+        ...enemy,
+        hp: enemy.currentHP || enemy.hp || calculateEnemyTrackLength(enemy),
+        maxHp: enemy.maxHp || calculateEnemyTrackLength(enemy)
+      };
+    }
+  });
+
   return {
-    updatedParty: enemyPhase.updatedParty,
-    updatedEnemies: enemyPhase.updatedEnemies,
+    updatedParty: finalParty,
+    updatedEnemies: finalEnemies,
     log: roundLog,
     combatResult,
     isOver: winCheck.isOver

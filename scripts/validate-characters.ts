@@ -30,7 +30,7 @@ files.forEach(file => {
   } catch (error) {
     hasErrors = true;
     console.error(`✗ ${file} - invalid`);
-    console.error(error.stdout.toString());
+    console.error((error as Error & {stdout?: {toString(): string}}).stdout?.toString() || 'Unknown error');
   }
 });
 

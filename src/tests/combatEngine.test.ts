@@ -6,7 +6,7 @@ import {
   calculateIncapacitateDefense,
   checkWinConditions 
 } from '../utils/combatEngine'
-import type { Character, CombatCharacter, CombatEnemy, DiceRoll } from '../types'
+import type { CombatCharacter, CombatEnemy, DiceRoll } from '../types'
 
 describe('Combat Engine', () => {
   describe('rollDice', () => {
@@ -174,12 +174,21 @@ describe('Combat Engine', () => {
   })
 
   describe('calculateDefenseDamage', () => {
-    const mockCharacter: Partial<Character> = {
+    const mockCharacter: CombatCharacter = {
+      name: 'Test Character',
+      background: 'Test Background',
+      edges: [],
+      skills: {},
+      languages: {},
+      drives: [],
+      mires: [],
       aspects: [
         { type: 'trait', name: 'Aspect 1', value: [0, 0, 0] }, // length 3
         { type: 'trait', name: 'Aspect 2', value: [0, 0, 0, 0, 0] }, // length 5
         { type: 'trait', name: 'Aspect 3', value: [0, 0] } // length 2
-      ]
+      ],
+      hp: 10,
+      maxHp: 10
     }
 
     describe('0,1,2,counter model', () => {
@@ -286,20 +295,74 @@ describe('Combat Engine', () => {
   })
 
   describe('checkWinConditions', () => {
-    const mockParty: Array<Partial<CombatCharacter>> = [
-      { currentHP: 5, hitPoints: 10 },
-      { currentHP: 3, hitPoints: 8 }
+    const mockParty: CombatCharacter[] = [
+      { 
+        name: 'Hero 1', 
+        background: 'Test', 
+        edges: [], 
+        skills: {}, 
+        languages: {}, 
+        drives: [], 
+        mires: [], 
+        aspects: [], 
+        currentHP: 5, 
+        hitPoints: 10, 
+        hp: 5, 
+        maxHp: 10 
+      },
+      { 
+        name: 'Hero 2', 
+        background: 'Test', 
+        edges: [], 
+        skills: {}, 
+        languages: {}, 
+        drives: [], 
+        mires: [], 
+        aspects: [], 
+        currentHP: 3, 
+        hitPoints: 8, 
+        hp: 3, 
+        maxHp: 8 
+      }
     ]
 
-    const mockEnemies: Array<Partial<CombatEnemy>> = [
-      { currentHP: 4, trackLength: 6 },
-      { currentHP: 0, trackLength: 5 }
+    const mockEnemies: CombatEnemy[] = [
+      { 
+        name: 'Enemy 1', 
+        aspects: [{ name: 'Track', trackLength: 6 }], 
+        currentHP: 4, 
+        hp: 4, 
+        maxHp: 6, 
+        count: 1 
+      },
+      { 
+        name: 'Enemy 2', 
+        aspects: [{ name: 'Track', trackLength: 5 }], 
+        currentHP: 0, 
+        hp: 0, 
+        maxHp: 5, 
+        count: 1 
+      }
     ]
 
     it('should return win when all enemies are defeated', () => {
-      const defeatedEnemies: Array<Partial<CombatEnemy>> = [
-        { currentHP: 0, trackLength: 6 },
-        { currentHP: 0, trackLength: 5 }
+      const defeatedEnemies: CombatEnemy[] = [
+        { 
+          name: 'Enemy 1', 
+          aspects: [{ name: 'Track', trackLength: 6 }], 
+          currentHP: 0, 
+          hp: 0, 
+          maxHp: 6, 
+          count: 1 
+        },
+        { 
+          name: 'Enemy 2', 
+          aspects: [{ name: 'Track', trackLength: 5 }], 
+          currentHP: 0, 
+          hp: 0, 
+          maxHp: 5, 
+          count: 1 
+        }
       ]
       
       const result = checkWinConditions(defeatedEnemies, mockParty)
@@ -308,9 +371,35 @@ describe('Combat Engine', () => {
     })
 
     it('should return lose when all party members are defeated', () => {
-      const defeatedParty: Array<Partial<CombatCharacter>> = [
-        { currentHP: 0, hitPoints: 10 },
-        { currentHP: 0, hitPoints: 8 }
+      const defeatedParty: CombatCharacter[] = [
+        { 
+          name: 'Hero 1', 
+          background: 'Test', 
+          edges: [], 
+          skills: {}, 
+          languages: {}, 
+          drives: [], 
+          mires: [], 
+          aspects: [], 
+          currentHP: 0, 
+          hitPoints: 10, 
+          hp: 0, 
+          maxHp: 10 
+        },
+        { 
+          name: 'Hero 2', 
+          background: 'Test', 
+          edges: [], 
+          skills: {}, 
+          languages: {}, 
+          drives: [], 
+          mires: [], 
+          aspects: [], 
+          currentHP: 0, 
+          hitPoints: 8, 
+          hp: 0, 
+          maxHp: 8 
+        }
       ]
       
       const result = checkWinConditions(mockEnemies, defeatedParty)
@@ -325,9 +414,22 @@ describe('Combat Engine', () => {
     })
 
     it('should handle enemies without currentHP (using hp/maxHp)', () => {
-      const enemiesWithoutCurrentHP: Array<Partial<CombatEnemy>> = [
-        { hp: 6, maxHp: 6 }, // alive
-        { currentHP: 0, hp: 0, maxHp: 5 } // dead
+      const enemiesWithoutCurrentHP: CombatEnemy[] = [
+        { 
+          name: 'Enemy 1', 
+          aspects: [{ name: 'Track', trackLength: 6 }], 
+          hp: 6, 
+          maxHp: 6, 
+          count: 1 
+        }, // alive
+        { 
+          name: 'Enemy 2', 
+          aspects: [{ name: 'Track', trackLength: 5 }], 
+          currentHP: 0, 
+          hp: 0, 
+          maxHp: 5, 
+          count: 1 
+        } // dead
       ]
       
       const result = checkWinConditions(enemiesWithoutCurrentHP, mockParty)
@@ -335,9 +437,33 @@ describe('Combat Engine', () => {
     })
 
     it('should handle party without currentHP (using hitPoints)', () => {
-      const partyWithoutCurrentHP: Array<Partial<CombatCharacter>> = [
-        { hitPoints: 10 }, // alive
-        { hitPoints: 8 } // alive
+      const partyWithoutCurrentHP: CombatCharacter[] = [
+        { 
+          name: 'Hero 1', 
+          background: 'Test', 
+          edges: [], 
+          skills: {}, 
+          languages: {}, 
+          drives: [], 
+          mires: [], 
+          aspects: [], 
+          hitPoints: 10, 
+          hp: 10, 
+          maxHp: 10 
+        }, // alive
+        { 
+          name: 'Hero 2', 
+          background: 'Test', 
+          edges: [], 
+          skills: {}, 
+          languages: {}, 
+          drives: [], 
+          mires: [], 
+          aspects: [], 
+          hitPoints: 8, 
+          hp: 8, 
+          maxHp: 8 
+        } // alive
       ]
       
       const result = checkWinConditions(mockEnemies, partyWithoutCurrentHP)

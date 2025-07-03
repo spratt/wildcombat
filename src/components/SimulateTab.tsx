@@ -13,11 +13,13 @@ import {
   calculateEnemyTrackLength
 } from '../utils/dataManager';
 import Tooltip from './Tooltip';
-import { Character, CombatCharacter, CombatEnemy, Enemy, CombatResult, SessionStatistics } from '../types';
+// Types imported for compatibility
+import type { EnemyInstance, EncounterEnemy, CharacterInstance } from '../utils/dataManager';
+import type { CombatCharacter, CombatEnemy } from '../types';
 
 interface LogEntry {
   message: string;
-  type?: 'neutral' | 'good' | 'bad';
+  type?: 'neutral' | 'good' | 'bad' | 'player' | 'enemy';
 }
 
 interface SessionStats {
@@ -30,10 +32,10 @@ interface SessionStats {
 }
 
 const SimulateTab: React.FC = () => {
-  const [partyCharacters, setPartyCharacters] = useState<CombatCharacter[]>([]);
-  const [encounter, setEncounter] = useState<{ enemyId: string; count: number }[]>([]);
-  const [enemies, setEnemies] = useState<Enemy[]>([]);
-  const [uniqueEnemies, setUniqueEnemies] = useState<CombatEnemy[]>([]);
+  const [partyCharacters, setPartyCharacters] = useState<CharacterInstance[]>([]);
+  const [encounter, setEncounter] = useState<EncounterEnemy[]>([]);
+  const [enemies, setEnemies] = useState<EnemyInstance[]>([]);
+  const [uniqueEnemies, setUniqueEnemies] = useState<EnemyInstance[]>([]);
   const [combatLog, setCombatLog] = useState<LogEntry[]>([]);
   const [currentRound, setCurrentRound] = useState<number>(1);
   const [combatResult, setCombatResult] = useState<string | null>(null);
@@ -122,7 +124,19 @@ const SimulateTab: React.FC = () => {
   const { totalHP: totalEncounterHP } = calculateEncounterStats(uniqueEnemies);
 
   // Check if combat is over using utility function
-  const { isOver: combatOver } = checkWinConditions(uniqueEnemies, partyCharacters);
+  // Convert to compatible types for checkWinConditions
+  const combatEnemies = uniqueEnemies.map(enemy => ({
+    ...enemy,
+    hp: enemy.currentHP || calculateEnemyTrackLength(enemy),
+    maxHp: calculateEnemyTrackLength(enemy),
+    count: 1
+  }));
+  const combatParty = partyCharacters.map(char => ({
+    ...char,
+    hp: char.currentHP || char.hitPoints || 10,
+    maxHp: char.hitPoints || 10
+  }));
+  const { isOver: combatOver } = checkWinConditions(combatEnemies, combatParty);
   
 
   // Save damage model to localStorage when it changes
@@ -208,9 +222,46 @@ This model uses aspect track lengths as the basis for damage calculations, makin
   const handleSimulateOneRound = () => {
     const result = simulateOneRound(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound, useAbilities, debugMode);
     
-    // Update state with results
-    setUniqueEnemies(result.updatedEnemies);
-    setPartyCharacters(result.updatedParty);
+    // Update state with results - convert types safely
+    const updatedEnemyInstances: EnemyInstance[] = result.updatedEnemies.map(enemy => {
+      if ('id' in enemy && enemy.id) {
+        // Already an EnemyInstance
+        return enemy as EnemyInstance;
+      } else {
+        // Convert CombatEnemy to EnemyInstance
+        return {
+          ...enemy,
+          id: 'instanceId' in enemy ? enemy.instanceId || `${enemy.name}_0` : `${enemy.name}_0`,
+          currentHP: enemy.currentHP || (enemy as CombatEnemy).hp,
+          hitPoints: 0,
+          attackSkill: 'BREAK',
+          attackScore: 1,
+          defenseSkill: 'BRACE', 
+          defenseScore: 1
+        } as EnemyInstance;
+      }
+    });
+    
+    const updatedCharacterInstances: CharacterInstance[] = result.updatedParty.map(char => {
+      if ('attackSkill' in char && char.attackSkill) {
+        // Already a CharacterInstance
+        return char as CharacterInstance;
+      } else {
+        // Convert CombatCharacter to CharacterInstance
+        return {
+          ...char,
+          hitPoints: char.hitPoints || (char as CombatCharacter).hp || 10,
+          currentHP: char.currentHP || (char as CombatCharacter).hp,
+          attackSkill: char.attackSkill || 'BREAK',
+          attackScore: char.attackScore || 1,
+          defenseSkill: char.defenseSkill || 'BRACE',
+          defenseScore: char.defenseScore || 1,
+          partyId: char.partyId || char.name
+        } as CharacterInstance;
+      }
+    });
+    setUniqueEnemies(updatedEnemyInstances);
+    setPartyCharacters(updatedCharacterInstances);
     setCombatLog(prev => [...prev, ...result.log]);
     
     if (result.combatResult) {
@@ -241,11 +292,56 @@ This model uses aspect track lengths as the basis for damage calculations, makin
   };
 
   const handleSimulateOneSession = () => {
-    const sessionResult = simulateFullSession(partyCharacters, uniqueEnemies, currentRound, damageModel, enemyAttacksPerRound, useAbilities, debugMode);
+    // Convert to compatible types for session simulation
+    const sessionParty: CombatCharacter[] = partyCharacters.map(char => ({
+      ...char,
+      hp: char.currentHP || char.hitPoints || 10,
+      maxHp: char.hitPoints || 10,
+      hitPoints: char.hitPoints,
+      attackScore: char.attackScore,
+      attackSkill: char.attackSkill,
+      defenseScore: char.defenseScore,
+      defenseSkill: char.defenseSkill,
+      partyId: char.partyId
+    }));
     
-    // Update state with final session results
-    setUniqueEnemies(sessionResult.finalEnemies);
-    setPartyCharacters(sessionResult.finalParty);
+    // Convert enemies to compatible types
+    const sessionEnemies: CombatEnemy[] = uniqueEnemies.map(enemy => ({
+      ...enemy,
+      hp: enemy.currentHP || calculateEnemyTrackLength(enemy),
+      maxHp: calculateEnemyTrackLength(enemy),
+      count: 1,
+      instanceId: enemy.id,
+      uniqueName: enemy.uniqueName || enemy.name
+    }));
+    
+    const sessionResult = simulateFullSession(sessionParty, sessionEnemies, currentRound, damageModel, enemyAttacksPerRound, useAbilities, debugMode);
+    
+    // Update state with final session results - convert back to instances
+    const finalEnemyInstances: EnemyInstance[] = sessionResult.finalEnemies.map(enemy => ({
+      ...enemy,
+      id: ('instanceId' in enemy ? enemy.instanceId : 'id' in enemy ? enemy.id : `${enemy.name}_0`) || `${enemy.name}_0`,
+      currentHP: enemy.currentHP || (enemy as CombatEnemy).hp,
+      hitPoints: 0,
+      attackSkill: 'BREAK',
+      attackScore: 1,
+      defenseSkill: 'BRACE',
+      defenseScore: 1
+    })) as EnemyInstance[];
+    
+    const finalCharacterInstances: CharacterInstance[] = sessionResult.finalParty.map(char => ({
+      ...char,
+      hitPoints: char.hitPoints || (char as CombatCharacter).hp || 10,
+      currentHP: char.currentHP || (char as CombatCharacter).hp,
+      attackSkill: char.attackSkill || 'BREAK',
+      attackScore: char.attackScore || 1,
+      defenseSkill: char.defenseSkill || 'BRACE',
+      defenseScore: char.defenseScore || 1,
+      partyId: char.partyId || char.name
+    })) as CharacterInstance[];
+    
+    setUniqueEnemies(finalEnemyInstances);
+    setPartyCharacters(finalCharacterInstances);
     setCurrentRound(sessionResult.finalRound);
     setCombatLog(prev => [...prev, ...sessionResult.sessionLog]);
     
@@ -255,7 +351,12 @@ This model uses aspect track lengths as the basis for damage calculations, makin
   };
 
   const handleSimulateManySessions = () => {
-    const initialParty = partyCharacters.map(char => ({ ...char, currentHP: char.hitPoints }));
+    const initialParty: CharacterInstance[] = partyCharacters.map(char => ({ 
+      ...char, 
+      currentHP: char.hitPoints,
+      hp: char.hitPoints,
+      maxHp: char.hitPoints
+    }));
     const initialEnemies = resetCombatState(uniqueEnemies, partyCharacters).resetEnemies;
     
     let totalSessions = 0;
@@ -275,8 +376,22 @@ This model uses aspect track lengths as the basis for damage calculations, makin
         usedAbilities: new Set<string>()
       }));
       
+      // Convert session party and enemies to compatible types  
+      const sessionPartyCombat: CombatCharacter[] = sessionParty.map(char => ({
+        ...char,
+        hp: char.currentHP || char.hitPoints || 10,
+        maxHp: char.hitPoints || 10
+      }));
+      
+      const sessionEnemiesCombat: CombatEnemy[] = sessionEnemies.map(enemy => ({
+        ...enemy,
+        hp: enemy.currentHP || calculateEnemyTrackLength(enemy),
+        maxHp: calculateEnemyTrackLength(enemy),
+        count: 1
+      }));
+      
       // Simulate one complete session
-      const sessionResult = simulateFullSession(sessionParty, sessionEnemies, 1, damageModel, enemyAttacksPerRound, useAbilities, false); // No debug for many sessions
+      const sessionResult = simulateFullSession(sessionPartyCombat, sessionEnemiesCombat, 1, damageModel, enemyAttacksPerRound, useAbilities, false); // No debug for many sessions
       
       totalSessions++;
       totalRounds += sessionResult.finalRound - 1; // finalRound is 1 more than rounds completed
@@ -286,7 +401,7 @@ This model uses aspect track lengths as the basis for damage calculations, makin
         wins++;
         // Calculate total remaining player HP on win
         const remainingPlayerHP = sessionResult.finalParty.reduce((total, char) => {
-          const currentHP = char.currentHP !== undefined ? char.currentHP : char.hitPoints;
+          const currentHP = char.currentHP !== undefined ? char.currentHP : (char.hitPoints || (char as CombatCharacter).hp || 0);
           return total + currentHP;
         }, 0);
         totalPlayerHPOnWin += remainingPlayerHP;

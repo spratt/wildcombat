@@ -22,8 +22,7 @@ vi.mock('../utils/dataManager', () => ({
   calculateEnemyTrackLength: vi.fn((enemy: { aspects?: { trackLength?: number }[]; trackLength?: number }) => enemy.aspects?.reduce((sum: number, aspect: { trackLength?: number }) => sum + (aspect.trackLength || 0), 0) || enemy.trackLength || 10)
 }))
 
-interface MockCombatCharacter extends Partial<CombatCharacter> {
-  name: string
+interface MockCombatCharacter extends CombatCharacter {
   hitPoints: number
   currentHP: number
   attackScore: number
@@ -34,17 +33,11 @@ interface MockCombatCharacter extends Partial<CombatCharacter> {
   incapacitated?: boolean
 }
 
-interface MockCombatEnemy extends Partial<CombatEnemy> {
-  name: string
+interface MockCombatEnemy extends CombatEnemy {
   uniqueName: string
   currentHP: number
   trackLength: number
   instanceId: string
-  aspects: Array<{
-    name: string
-    trackLength: number
-    abilityCode?: string
-  }>
   usedAbilities?: Set<string>
 }
 
@@ -52,8 +45,17 @@ describe('Combat Simulator', () => {
   const mockParty: MockCombatCharacter[] = [
     {
       name: 'Hero 1',
+      background: 'Test',
+      edges: [],
+      skills: {},
+      languages: {},
+      drives: [],
+      mires: [],
+      aspects: [],
       hitPoints: 10,
       currentHP: 10,
+      hp: 10,
+      maxHp: 10,
       attackScore: 2,
       attackSkill: 'BREAK',
       defenseScore: 2,
@@ -62,8 +64,17 @@ describe('Combat Simulator', () => {
     },
     {
       name: 'Hero 2',
+      background: 'Test',
+      edges: [],
+      skills: {},
+      languages: {},
+      drives: [],
+      mires: [],
+      aspects: [],
       hitPoints: 8,
       currentHP: 8,
+      hp: 8,
+      maxHp: 8,
       attackScore: 3,
       attackSkill: 'DELVE',
       defenseScore: 1,
@@ -77,6 +88,9 @@ describe('Combat Simulator', () => {
       name: 'Goblin',
       uniqueName: 'Goblin 1',
       currentHP: 6,
+      hp: 6,
+      maxHp: 6,
+      count: 1,
       trackLength: 6,
       instanceId: 'goblin1',
       aspects: [
@@ -88,10 +102,13 @@ describe('Combat Simulator', () => {
       name: 'Orc',
       uniqueName: 'Orc 1',
       currentHP: 8,
+      hp: 8,
+      maxHp: 8,
+      count: 1,
       trackLength: 8,
       instanceId: 'orc1',
       aspects: [
-        { name: 'Sword', trackLength: 4, abilityCode: 'test' },
+        { name: 'Sword', trackLength: 4, abilityCode: 'Incapacitate' },
         { name: 'Shield', trackLength: 4 }
       ]
     }
@@ -169,7 +186,7 @@ describe('Combat Simulator', () => {
           ...mockEnemies[1],
           currentHP: 8, // Make sure enemy is alive
           aspects: [
-            { name: 'Special Attack', abilityCode: 'incapacitate', trackLength: 4 }
+            { name: 'Special Attack', abilityCode: 'Incapacitate', trackLength: 4 }
           ]
         }
       ]
@@ -187,7 +204,7 @@ describe('Combat Simulator', () => {
         {
           ...mockEnemies[1],
           aspects: [
-            { name: 'Special Attack', abilityCode: 'incapacitate', trackLength: 4 }
+            { name: 'Special Attack', abilityCode: 'Incapacitate', trackLength: 4 }
           ]
         }
       ]
@@ -259,7 +276,7 @@ describe('Combat Simulator', () => {
           ...mockEnemies[1],
           currentHP: 8,
           aspects: [
-            { name: 'Special Attack', abilityCode: 'incapacitate', trackLength: 4 }
+            { name: 'Special Attack', abilityCode: 'Incapacitate', trackLength: 4 }
           ],
           usedAbilities: new Set() // Fresh abilities available
         }
@@ -353,7 +370,7 @@ describe('Combat Simulator', () => {
       const enemyWithUnknownAbility: MockCombatEnemy[] = [{
         ...mockEnemies[0],
         aspects: [
-          { name: 'Unknown Ability', abilityCode: 'unknown-code', trackLength: 3 }
+          { name: 'Unknown Ability', trackLength: 3 }
         ],
         usedAbilities: new Set()
       }]
@@ -382,7 +399,7 @@ describe('Combat Simulator', () => {
       const enemyWithUsedAbilities: MockCombatEnemy[] = [{
         ...mockEnemies[0],
         aspects: [
-          { name: 'Used Ability', abilityCode: 'incapacitate', trackLength: 3 }
+          { name: 'Used Ability', abilityCode: 'Incapacitate', trackLength: 3 }
         ],
         usedAbilities: new Set(['Used Ability']) // Already used
       }]
@@ -406,7 +423,7 @@ describe('Combat Simulator', () => {
       const enemyWithAbility: MockCombatEnemy[] = [{
         ...mockEnemies[0],
         aspects: [
-          { name: 'Incapacitate', abilityCode: 'incapacitate', trackLength: 3 }
+          { name: 'Incapacitate', abilityCode: 'Incapacitate', trackLength: 3 }
         ],
         usedAbilities: new Set()
       }]
@@ -450,16 +467,45 @@ describe('Combat Simulator', () => {
   })
 
   describe('Duplicate Enemy Attack Phase Bug', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       vi.clearAllMocks()
+      // Reset mock implementations to ensure clean state
+      const { calculateDefenseDamage } = vi.mocked(await import('../utils/combatEngine'))
+      calculateDefenseDamage.mockReturnValue({ damage: 1, counter: false })
     })
 
     it('should not duplicate enemy attack phase debug messages in a single round', () => {
+      // Create fresh test data to avoid interference from other tests
+      const testParty: MockCombatCharacter[] = [
+        {
+          name: 'Hero 1',
+          background: 'Test',
+          edges: [],
+          skills: {},
+          languages: {},
+          drives: [],
+          mires: [],
+          aspects: [],
+          hitPoints: 10,
+          currentHP: 10,
+          hp: 10,
+          maxHp: 10,
+          attackScore: 2,
+          attackSkill: 'BREAK',
+          defenseScore: 2,
+          defenseSkill: 'BRACE',
+          partyId: 'hero1'
+        }
+      ]
+      
       const testEnemies: MockCombatEnemy[] = [
         {
           name: 'Zitera',
           uniqueName: 'Zitera',
           currentHP: 10,
+          hp: 10,
+          maxHp: 10,
+          count: 1,
           trackLength: 10,
           instanceId: 'zitera1',
           aspects: [
@@ -471,6 +517,9 @@ describe('Combat Simulator', () => {
           name: 'Bonnie',
           uniqueName: 'Bonnie',
           currentHP: 8,
+          hp: 8,
+          maxHp: 8,
+          count: 1,
           trackLength: 8,
           instanceId: 'bonnie1',
           aspects: [
@@ -481,7 +530,7 @@ describe('Combat Simulator', () => {
       ]
       
       // Simulate one round with debug mode enabled
-      const result = simulateOneRound(mockParty, testEnemies, 1, '0,1,2,counter', 1, true, true)
+      const result = simulateOneRound(testParty, testEnemies, 1, '0,1,2,counter', 1, true, true)
       
       // Count how many times the "Starting enemy attack phase" debug message appears
       const startingAttackPhaseMessages = result.log.filter(entry => 
@@ -496,6 +545,7 @@ describe('Combat Simulator', () => {
       const ziteraPreparingMessages = result.log.filter(entry =>
         entry.message.includes('DEBUG: Zitera preparing to attack')
       )
+      
       expect(ziteraPreparingMessages.length).toBe(1)
     })
   })
@@ -512,6 +562,9 @@ describe('Combat Simulator', () => {
           name: 'Bonnie',
           uniqueName: 'Bonnie',
           currentHP: 10,
+          hp: 10,
+          maxHp: 10,
+          count: 1,
           trackLength: 10,
           instanceId: 'bonnie1',
           aspects: [
@@ -523,6 +576,9 @@ describe('Combat Simulator', () => {
           name: 'Dead Ally',
           uniqueName: 'Dead Ally',
           currentHP: 0, // Dead ally
+          hp: 0,
+          maxHp: 5,
+          count: 1,
           trackLength: 5,
           instanceId: 'ally1',
           aspects: []
@@ -546,6 +602,9 @@ describe('Combat Simulator', () => {
           name: 'Bonnie',
           uniqueName: 'Bonnie',
           currentHP: 10,
+          hp: 10,
+          maxHp: 10,
+          count: 1,
           trackLength: 10,
           instanceId: 'bonnie1',
           aspects: [
@@ -557,6 +616,9 @@ describe('Combat Simulator', () => {
           name: 'Living Ally',
           uniqueName: 'Living Ally',
           currentHP: 5,
+          hp: 5,
+          maxHp: 5,
+          count: 1,
           trackLength: 5,
           instanceId: 'ally1',
           aspects: []
@@ -579,6 +641,9 @@ describe('Combat Simulator', () => {
           name: 'Bonnie',
           uniqueName: 'Bonnie',
           currentHP: 10,
+          hp: 10,
+          maxHp: 10,
+          count: 1,
           trackLength: 10,
           instanceId: 'bonnie1',
           aspects: [
@@ -590,6 +655,9 @@ describe('Combat Simulator', () => {
           name: 'Dead Ally 1',
           uniqueName: 'Dead Ally 1',
           currentHP: 0,
+          hp: 0,
+          maxHp: 5,
+          count: 1,
           trackLength: 5,
           instanceId: 'ally1',
           aspects: []
@@ -598,6 +666,9 @@ describe('Combat Simulator', () => {
           name: 'Dead Ally 2',
           uniqueName: 'Dead Ally 2',
           currentHP: 0,
+          hp: 0,
+          maxHp: 5,
+          count: 1,
           trackLength: 5,
           instanceId: 'ally2',
           aspects: []
@@ -631,7 +702,7 @@ describe('Combat Simulator', () => {
       const enemyWithAbility: MockCombatEnemy[] = [{
         ...mockEnemies[0],
         aspects: [
-          { name: 'Deadly Strike', abilityCode: 'incapacitate', trackLength: 3 }
+          { name: 'Deadly Strike', abilityCode: 'Incapacitate', trackLength: 3 }
         ],
         usedAbilities: new Set()
       }]
@@ -655,7 +726,7 @@ describe('Combat Simulator', () => {
       const enemyWithAbility: MockCombatEnemy[] = [{
         ...mockEnemies[0],
         aspects: [
-          { name: 'Stun', abilityCode: 'incapacitate', trackLength: 3 }
+          { name: 'Stun', abilityCode: 'Incapacitate', trackLength: 3 }
         ],
         usedAbilities: new Set()
       }]
@@ -679,7 +750,7 @@ describe('Combat Simulator', () => {
       const enemyWithAbility: MockCombatEnemy[] = [{
         ...mockEnemies[0],
         aspects: [
-          { name: 'Painful Strike', abilityCode: 'incapacitate', trackLength: 3 }
+          { name: 'Painful Strike', abilityCode: 'Incapacitate', trackLength: 3 }
         ],
         usedAbilities: new Set()
       }]

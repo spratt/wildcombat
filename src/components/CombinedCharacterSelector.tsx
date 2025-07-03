@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Character } from '../types';
 
+interface SavedCharacter extends Character {
+  savedAt: string;
+}
+
 interface CharacterOption {
   id: string;
   name: string;
@@ -39,7 +43,7 @@ const CombinedCharacterSelector: React.FC<CombinedCharacterSelectorProps> = ({ o
       const characterFiles = config.characterJsons || [];
       
       const results = await Promise.all(
-      characterFiles.map(async (filename): Promise<CharacterOption | null> => {
+      characterFiles.map(async (filename: string): Promise<CharacterOption | null> => {
         try {
           const response = await fetch(`./characters/${filename}`);
           if (!response.ok) throw new Error(`Failed to load ${filename}`);
@@ -72,7 +76,7 @@ const CombinedCharacterSelector: React.FC<CombinedCharacterSelectorProps> = ({ o
       const saved = localStorage.getItem('wildcombat-saved-characters');
       if (saved) {
         const characters = JSON.parse(saved);
-        const formattedCharacters: CharacterOption[] = characters.map((char: Character) => ({
+        const formattedCharacters: CharacterOption[] = characters.map((char: SavedCharacter) => ({
           ...char,
           type: 'saved' as const,
           displayName: `${char.name} (saved ${new Date(char.savedAt).toLocaleDateString()})`

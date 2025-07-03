@@ -12,7 +12,7 @@ interface Tab {
   component: FC
 }
 
-function App(): JSX.Element {
+function App(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     // Load saved tab from localStorage, default to 'party' if not found
     try {

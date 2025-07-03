@@ -5,8 +5,7 @@ import type {
   DefenseResult, 
   CombatCharacter, 
   CombatEnemy,
-  Character,
-  Enemy
+  Character
 } from '../types';
 
 export const rollDice = (count: number, cut: number = 0, advantage: number = 0): DiceRoll => {

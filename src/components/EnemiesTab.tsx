@@ -40,7 +40,7 @@ const EnemiesTab: React.FC = () => {
       const enemyFiles = config.enemyJsons || [];
       
       const enemyData = await Promise.all(
-        enemyFiles.map(async (filename): Promise<EnemyFile | null> => {
+        enemyFiles.map(async (filename: string): Promise<EnemyFile | null> => {
           try {
             const response = await fetch(`./enemies/${filename}`);
             if (!response.ok) throw new Error(`Failed to load ${filename}`);

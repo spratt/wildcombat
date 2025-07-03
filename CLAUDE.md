@@ -36,11 +36,13 @@ Wildcombat is a Vite React application for managing Wildsea RPG character sheets
 - **Combat Log**: Detailed round-by-round combat results with message styling
 
 ## Character System
-The project contains character data for a Wildsea RPG campaign with four characters:
+The project contains character data for a Wildsea RPG campaign. Example characters include:
 - **Zara** (Ardent Dredger) - Medical specialist with healing abilities
 - **Thresh** (Ketra Rootless) - Navigator with weather prediction abilities
 - **Felix** (Tzelicrae Spit) - Acrobatic fighter with mobility skills
 - **Nova** (Cacophony Shankling) - Sonic musician with sound-based abilities
+
+Character lists are dynamically loaded from `config.json` to allow easy addition/removal.
 
 ### Character Schema
 Characters are validated against a JSON Schema (draft-07) located at `src/character-schema.json`. The schema defines:
@@ -91,6 +93,14 @@ Characters are validated against a JSON Schema (draft-07) located at `src/charac
 - **Usage Control**: Abilities can be enabled/disabled via checkbox
 - **Once Per Session**: Each enemy ability can only be used once per combat session
 - **Aspect-Based**: Abilities are tied to specific enemy aspects with abilityCode
+- **Function-Based System**: Abilities now use a modular function mapping system for extensibility
+- **Unique Enemy Abilities**: Special boss enemies have custom abilities:
+  - **violetHaze**: AoE poison damage affecting all party members
+  - **bonniesRevenge**: Damage boost when allies are defeated
+  - **ganglandExecution**: Reduces wounded enemies to 1 HP
+  - **dualWieldBarrage**: Multi-target attack with advantage defense
+  - **highNoonDuel**: Single-target lockdown mechanic
+  - **desertMirage**: Defensive confusion effect
 
 ### Combat Flow
 1. **Incapacitation Clear**: All incapacitation status cleared at round start
@@ -133,11 +143,16 @@ Modular CSS structure in `src/styles/`:
 ## Utility Modules
 
 ### Combat Engine (`src/utils/combatEngine.js`)
-- `rollDice(count)` - Roll specified number of d6
+- `rollDice(count, options)` - Roll specified number of d6 with optional advantage/cut modifiers
+  - `advantage`: Roll extra dice and keep the best results
+  - `cut`: Roll fewer dice (minimum 1) for disadvantage
 - `calculateDamage(rolls)` - Calculate attack damage from rolls
 - `calculateDefenseDamage(rolls, damageModel, character)` - Calculate defense damage
 - `calculateIncapacitateDefense(rolls)` - Calculate incapacitation effects
 - `checkWinConditions(enemies, party)` - Determine combat end state
+- **Ability Functions**: Modular system for unique enemy abilities
+  - Each ability is a separate function in the abilities module
+  - Abilities can modify dice rolls, damage, or target selection
 
 ### Combat Simulator (`src/utils/combatSimulator.js`)
 - `simulatePlayerAttackPhase(party, enemies, damageModel, attacksPerRound)` - Player attacks
@@ -161,8 +176,11 @@ Modular CSS structure in `src/styles/`:
 - `npm run lint` - Run ESLint
 - `npm test` - Run unit tests (Vitest)
 - `npm run test:run` - Run tests once and exit
+- `npm run coverage` - Run tests with coverage report
 - `npm run validate:characters` - Validate all character JSON files
 - `npm run validate:enemies` - Validate all enemy JSON files
+- `npm run check:file-sizes` - Check for oversized files to prevent repository bloat
+- `npm run typecheck` - Run TypeScript type checking
 
 ## Important Notes
 
@@ -175,10 +193,13 @@ Modular CSS structure in `src/styles/`:
 - All character and enemy data is validated against JSON schemas
 - **Character Schema**: `src/character-schema.json` validates character structure
 - **Enemy Schema**: `src/enemy-schema.json` validates enemy structure and aspect trackLengths
+- **Unique Enemy Support**: Schema includes `unique` boolean field for boss enemies
+- **Ability Validation**: Enemy abilities validated with `abilityCode` field
 - Missing aspect values automatically default to `[0]`
 - HP calculations include all aspects (including defaults)
 - Combat state is preserved across page reloads
 - Pre-commit hooks validate all data before allowing commits
+- File size monitoring prevents large files (>1MB) from being committed
 
 ### Performance Considerations
 - Session simulation has 1-second timeout protection
@@ -191,7 +212,12 @@ Modular CSS structure in `src/styles/`:
 - **Validation**: AJV 8.17.1 with draft-07 JSON Schema support
 - **Character Schema**: `src/character-schema.json`
 - **Enemy Schema**: `src/enemy-schema.json`
-- **Validation Script**: `scripts/validate-characters.js`
+- **Validation Scripts**: 
+  - `scripts/validate-characters.ts` - TypeScript validation for characters
+  - `scripts/validate-enemies.ts` - TypeScript validation for enemies
+- **Configuration**: `public/config.json` contains dynamic lists of available enemies and characters
+- **File Size Monitoring**: Shell script prevents large files from being committed
+- **ESLint Configuration**: Modern flat config with proper TypeScript support
 
 ## Dependencies
 - React 19.1.0
@@ -201,15 +227,31 @@ Modular CSS structure in `src/styles/`:
 - Vitest 2.1.8 (testing framework)
 
 ## Testing
-- **Unit Test Coverage**: Comprehensive tests for combat simulation logic
+- **Unit Test Coverage**: Comprehensive tests for combat simulation logic with improved coverage
 - **Test Files**: Located in `src/tests/` directory
-  - `combatEngine.test.js` - Core combat mechanics (28 tests)
-  - `combatSimulator.test.js` - Attack phases and rounds (15 tests)
+  - `combatEngine.test.js` - Core combat mechanics including advantage/cut (28 tests)
+  - `combatSimulator.test.js` - Attack phases and rounds with ability testing (15 tests)
   - `dataManager.test.js` - Data calculations and statistics (14 tests)
-  - `sessionSimulator.test.js` - Full session simulation (7 tests)
+  - `sessionSimulator.test.js` - Full session simulation with timeout protection (7 tests)
 - **Test Framework**: Vitest with mocking for deterministic results
-- **Test Coverage**: 64 tests covering dice rolling, damage calculation, abilities, win conditions
+- **Test Coverage**: 64 tests covering:
+  - Dice rolling with advantage/cut modifiers
+  - Damage calculation for all models
+  - Enemy abilities and special attacks
+  - Win conditions and edge cases
+  - Session timeout protection
+- **Coverage Reporting**: Run with `npm run coverage` for detailed metrics
 - **CI/CD Ready**: Tests run once and exit for automation compatibility
+
+## Recent Improvements (2025)
+- **Unique Enemy System**: Added support for boss-type enemies with custom abilities and lore
+- **Function-Based Abilities**: Refactored ability system to use modular function mapping
+- **Dynamic Configuration**: Enemy and character lists now loaded from `config.json`
+- **Enhanced Dice System**: Added advantage/cut modifiers for more complex combat scenarios
+- **File Size Monitoring**: Prevents repository bloat by checking file sizes pre-commit
+- **TypeScript Integration**: Validation scripts converted to TypeScript
+- **Improved Test Coverage**: Enhanced unit tests for all new features
+- **Enemy Validation**: Added JSON schema validation for enemy data integrity
 
 ## Development Workflow
 1. Characters are managed in the Party tab (view, add to party, heal)
