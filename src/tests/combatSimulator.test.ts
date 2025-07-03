@@ -45,7 +45,7 @@ interface MockCombatEnemy extends Partial<CombatEnemy> {
     trackLength: number
     abilityCode?: string
   }>
-  usedAbilities?: string[]
+  usedAbilities?: Set<string>
 }
 
 describe('Combat Simulator', () => {
@@ -446,6 +446,171 @@ describe('Combat Simulator', () => {
       // Should include debug message about no alive party members
       const debugMessages = result.log.filter(entry => entry.message.includes('no alive party'))
       expect(debugMessages.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('Duplicate Enemy Attack Phase Bug', () => {
+    beforeEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it('should not duplicate enemy attack phase debug messages in a single round', () => {
+      const testEnemies: MockCombatEnemy[] = [
+        {
+          name: 'Zitera',
+          uniqueName: 'Zitera',
+          currentHP: 10,
+          trackLength: 10,
+          instanceId: 'zitera1',
+          aspects: [
+            { name: 'Dual Wield Barrage', abilityCode: 'dualWieldBarrage', trackLength: 4 }
+          ],
+          usedAbilities: new Set()
+        },
+        {
+          name: 'Bonnie',
+          uniqueName: 'Bonnie',
+          currentHP: 8,
+          trackLength: 8,
+          instanceId: 'bonnie1',
+          aspects: [
+            { name: 'Violet Haze', abilityCode: 'violetHaze', trackLength: 3 }
+          ],
+          usedAbilities: new Set()
+        }
+      ]
+      
+      // Simulate one round with debug mode enabled
+      const result = simulateOneRound(mockParty, testEnemies, 1, '0,1,2,counter', 1, true, true)
+      
+      // Count how many times the "Starting enemy attack phase" debug message appears
+      const startingAttackPhaseMessages = result.log.filter(entry => 
+        entry.message.includes('DEBUG: Starting enemy attack phase')
+      )
+      
+      
+      // Should only appear once per round, even with multiple enemies
+      expect(startingAttackPhaseMessages.length).toBe(1)
+      
+      // Also check that we don't have duplicate enemy preparation messages for the same enemy
+      const ziteraPreparingMessages = result.log.filter(entry =>
+        entry.message.includes('DEBUG: Zitera preparing to attack')
+      )
+      expect(ziteraPreparingMessages.length).toBe(1)
+    })
+  })
+
+  describe.skip('Bonnie\'s Revenge Ability', () => {
+    beforeEach(() => {
+      vi.clearAllMocks()
+    })
+
+    it('should apply damage bonus when allies have fallen', () => {
+      // Create a scenario with one dead ally
+      const enemiesWithDeadAlly: MockCombatEnemy[] = [
+        {
+          name: 'Bonnie',
+          uniqueName: 'Bonnie',
+          currentHP: 10,
+          trackLength: 10,
+          instanceId: 'bonnie1',
+          aspects: [
+            { name: 'Bonnie\'s Revenge', abilityCode: 'bonniesRevenge', trackLength: 4 }
+          ],
+          usedAbilities: new Set()
+        },
+        {
+          name: 'Dead Ally',
+          uniqueName: 'Dead Ally',
+          currentHP: 0, // Dead ally
+          trackLength: 5,
+          instanceId: 'ally1',
+          aspects: []
+        }
+      ]
+      
+      const result = simulateEnemyAttackPhase(enemiesWithDeadAlly, mockParty, '0,1,2,counter', 1, true, false)
+      
+      // Should see vengeful attack message
+      const revengeMessages = result.log.filter(entry => 
+        entry.message.includes('fueled by vengeance') || 
+        entry.message.includes('vengeance damage')
+      )
+      expect(revengeMessages.length).toBeGreaterThan(0)
+    })
+
+    it('should use normal attack when no allies have fallen', () => {
+      // All enemies alive
+      const allAliveEnemies: MockCombatEnemy[] = [
+        {
+          name: 'Bonnie',
+          uniqueName: 'Bonnie',
+          currentHP: 10,
+          trackLength: 10,
+          instanceId: 'bonnie1',
+          aspects: [
+            { name: 'Bonnie\'s Revenge', abilityCode: 'bonniesRevenge', trackLength: 4 }
+          ],
+          usedAbilities: new Set()
+        },
+        {
+          name: 'Living Ally',
+          uniqueName: 'Living Ally',
+          currentHP: 5,
+          trackLength: 5,
+          instanceId: 'ally1',
+          aspects: []
+        }
+      ]
+      
+      const result = simulateEnemyAttackPhase(allAliveEnemies, mockParty, '0,1,2,counter', 1, true, false)
+      
+      // Should see message about Bonnie's Revenge being used
+      const bonnieMessages = result.log.filter(entry => 
+        entry.message.includes("Bonnie's Revenge")
+      )
+      expect(bonnieMessages.length).toBeGreaterThan(0)
+    })
+
+    it('should scale damage with multiple fallen allies', () => {
+      // Create scenario with two dead allies
+      const enemiesWithMultipleDead: MockCombatEnemy[] = [
+        {
+          name: 'Bonnie',
+          uniqueName: 'Bonnie',
+          currentHP: 10,
+          trackLength: 10,
+          instanceId: 'bonnie1',
+          aspects: [
+            { name: 'Bonnie\'s Revenge', abilityCode: 'bonniesRevenge', trackLength: 4 }
+          ],
+          usedAbilities: new Set()
+        },
+        {
+          name: 'Dead Ally 1',
+          uniqueName: 'Dead Ally 1',
+          currentHP: 0,
+          trackLength: 5,
+          instanceId: 'ally1',
+          aspects: []
+        },
+        {
+          name: 'Dead Ally 2',
+          uniqueName: 'Dead Ally 2',
+          currentHP: 0,
+          trackLength: 5,
+          instanceId: 'ally2',
+          aspects: []
+        }
+      ]
+      
+      const result = simulateEnemyAttackPhase(enemiesWithMultipleDead, mockParty, '0,1,2,counter', 1, true, false)
+      
+      // Should mention 2 fallen allies
+      const multipleDeadMessages = result.log.filter(entry => 
+        entry.message.includes('2 fallen all') || entry.message.includes('fueled by vengeance for 2')
+      )
+      expect(multipleDeadMessages.length).toBeGreaterThan(0)
     })
   })
 

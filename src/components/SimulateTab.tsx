@@ -269,7 +269,11 @@ This model uses aspect track lengths as the basis for damage calculations, makin
     for (let i = 0; i < sessionsToSimulate; i++) {
       // Reset for each session
       const sessionParty = initialParty.map(char => ({ ...char }));
-      const sessionEnemies = initialEnemies.map(enemy => ({ ...enemy }));
+      const sessionEnemies = initialEnemies.map(enemy => ({ 
+        ...enemy,
+        // Always create a fresh Set for usedAbilities to prevent cross-session contamination
+        usedAbilities: new Set<string>()
+      }));
       
       // Simulate one complete session
       const sessionResult = simulateFullSession(sessionParty, sessionEnemies, 1, damageModel, enemyAttacksPerRound, useAbilities, false); // No debug for many sessions

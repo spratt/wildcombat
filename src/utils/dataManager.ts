@@ -280,7 +280,9 @@ export const resetCombatState = (
 ): ResetCombatResult => {
   const resetEnemies = uniqueEnemies.map(enemy => ({
     ...enemy,
-    currentHP: calculateEnemyTrackLength(enemy)
+    currentHP: calculateEnemyTrackLength(enemy),
+    // Clear usedAbilities for fresh combat state
+    usedAbilities: new Set<string>()
   }));
   
   const resetParty = partyCharacters.map(character => ({
