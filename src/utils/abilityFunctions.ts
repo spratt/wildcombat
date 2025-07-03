@@ -66,7 +66,7 @@ export const handleCounterAttack = (
   const counterDamage = calculateDamage(counterRolls);
   
   log.push({
-    message: `${target.name} counter-attacks with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
+    message: `⚔️ ${target.name} counter-attacks with ${counterAttackSkill} and rolled ${counterRolls.join(', ')} (${counterAttackScore} dice)`,
     type: 'player'
   });
   
@@ -79,13 +79,13 @@ export const handleCounterAttack = (
       updatedEnemies[enemyIndex].currentHP = Math.max(0, currentEnemyHP - counterDamage);
       
       log.push({
-        message: `${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
+        message: `💥 ${target.name} does ${counterDamage} damage to ${enemy.uniqueName}`,
         type: 'player'
       });
       
       if (updatedEnemies[enemyIndex].currentHP <= 0) {
         log.push({
-          message: `${enemy.uniqueName} was defeated by the counter-attack!`,
+          message: `💀 ${enemy.uniqueName} was defeated by the counter-attack!`,
           type: 'neutral'
         });
         return { updatedEnemies, shouldContinue: false };
@@ -108,11 +108,11 @@ const incapacitateAbility: AbilityFunction = (context) => {
   // Log ability use and defense
   const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
   log.push({
-    message: `${enemy.uniqueName} uses ${ability.name}${attackLabel}`,
+    message: `😵‍💫 ${enemy.uniqueName} uses ${ability.name}${attackLabel}`,
     type: 'enemy'
   });
   log.push({
-    message: `${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
+    message: `🛡️ ${target.name} defends with ${defenseSkill} and rolled ${defenseRolls.join(', ')} (${defenseScore} dice)`,
     type: 'player'
   });
   
@@ -122,11 +122,11 @@ const incapacitateAbility: AbilityFunction = (context) => {
     if (charIndex !== -1) {
       updatedParty[charIndex].currentHP = 0;
       log.push({
-        message: `${target.name} is fully incapacitated and loses all HP!`,
+        message: `😵 ${target.name} is fully incapacitated and loses all HP!`,
         type: 'enemy'
       });
       log.push({
-        message: `${target.name} was defeated!`,
+        message: `💀 ${target.name} was defeated!`,
         type: 'neutral'
       });
     }
@@ -135,7 +135,7 @@ const incapacitateAbility: AbilityFunction = (context) => {
     if (charIndex !== -1) {
       updatedParty[charIndex].incapacitated = true;
       log.push({
-        message: `${target.name} is incapacitated and cannot attack next turn!`,
+        message: `😵‍💫 ${target.name} is incapacitated and cannot attack next turn!`,
         type: 'enemy'
       });
     }
@@ -148,7 +148,7 @@ const incapacitateAbility: AbilityFunction = (context) => {
       updatedParty[charIndex].currentHP = Math.max(0, currentHP - abilityResult.damage);
       
       log.push({
-        message: `${enemy.uniqueName} does ${abilityResult.damage} damage to ${target.name}`,
+        message: `💥 ${enemy.uniqueName} does ${abilityResult.damage} damage to ${target.name}`,
         type: 'enemy'
       });
       
@@ -182,7 +182,7 @@ const dualWieldBarrageAbility: AbilityFunction = (context) => {
   
   const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
   log.push({
-    message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - targeting ALL players!`,
+    message: `🌪️ ${enemy.uniqueName} uses ${ability.name}${attackLabel} - targeting ALL players!`,
     type: 'enemy'
   });
   
@@ -215,7 +215,7 @@ const dualWieldBarrageAbility: AbilityFunction = (context) => {
         updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
         
         log.push({
-          message: `${partyTarget.name} takes ${defenseResult.damage} damage from the barrage`,
+          message: `💥 ${partyTarget.name} takes ${defenseResult.damage} damage from the barrage`,
           type: 'enemy'
         });
         
@@ -254,7 +254,7 @@ const highNoonDuelAbility: AbilityFunction = (context) => {
   
   const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
   log.push({
-    message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - challenging ${target.name} to a duel!`,
+    message: `🤠 ${enemy.uniqueName} uses ${ability.name}${attackLabel} - challenging ${target.name} to a duel!`,
     type: 'enemy'
   });
   
@@ -277,7 +277,7 @@ const highNoonDuelAbility: AbilityFunction = (context) => {
       updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
       
       log.push({
-        message: `${target.name} takes ${defenseResult.damage} damage in the duel`,
+        message: `🔫 ${target.name} takes ${defenseResult.damage} damage in the duel`,
         type: 'enemy'
       });
       
@@ -316,7 +316,7 @@ const desertMirageAbility: AbilityFunction = (context) => {
   
   const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
   log.push({
-    message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - reality shimmers and distorts!`,
+    message: `🌵 ${enemy.uniqueName} uses ${ability.name}${attackLabel} - reality shimmers and distorts!`,
     type: 'enemy'
   });
   
@@ -344,7 +344,7 @@ const desertMirageAbility: AbilityFunction = (context) => {
       updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
       
       log.push({
-        message: `${target.name} takes ${defenseResult.damage} damage through the mirage`,
+        message: `💥 ${target.name} takes ${defenseResult.damage} damage through the mirage`,
         type: 'enemy'
       });
       
@@ -383,7 +383,7 @@ const violetHazeAbility: AbilityFunction = (context) => {
   
   const attackLabel = enemyAttacksPerRound > 1 ? ` (attack ${attackNum}/${enemyAttacksPerRound})` : '';
   log.push({
-    message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - releasing toxic wisteria pollen!`,
+    message: `🌸 ${enemy.uniqueName} uses ${ability.name}${attackLabel} - releasing toxic wisteria pollen!`,
     type: 'enemy'
   });
   
@@ -421,7 +421,7 @@ const violetHazeAbility: AbilityFunction = (context) => {
         updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
         
         log.push({
-          message: `${partyTarget.name} takes ${defenseResult.damage} poison damage from the violet haze`,
+          message: `🧪 ${partyTarget.name} takes ${defenseResult.damage} poison damage from the violet haze`,
           type: 'enemy'
         });
         
@@ -470,7 +470,7 @@ const bonniesRevengeAbility: AbilityFunction = (context) => {
   
   if (defeatedAllies > 0) {
     log.push({
-      message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - fueled by vengeance for ${defeatedAllies} fallen ally${defeatedAllies > 1 ? 's' : ''}!`,
+      message: `😡 ${enemy.uniqueName} uses ${ability.name}${attackLabel} - fueled by vengeance for ${defeatedAllies} fallen ally${defeatedAllies > 1 ? 's' : ''}!`,
       type: 'enemy'
     });
     
@@ -502,7 +502,7 @@ const bonniesRevengeAbility: AbilityFunction = (context) => {
         updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
         
         log.push({
-          message: `${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name} (including +${vengeanceBonus} vengeance damage)`,
+          message: `💀 ${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name} (including +${vengeanceBonus} vengeance damage)`,
           type: 'enemy'
         });
         
@@ -536,7 +536,7 @@ const bonniesRevengeAbility: AbilityFunction = (context) => {
   } else {
     // No defeated allies, normal attack
     log.push({
-      message: `${enemy.uniqueName} uses ${ability.name}${attackLabel} - but no allies have fallen yet`,
+      message: `😐 ${enemy.uniqueName} uses ${ability.name}${attackLabel} - but no allies have fallen yet`,
       type: 'enemy'
     });
     
@@ -559,7 +559,7 @@ const bonniesRevengeAbility: AbilityFunction = (context) => {
         updatedParty[charIndex].currentHP = Math.max(0, currentHP - defenseResult.damage);
         
         log.push({
-          message: `${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name}`,
+          message: `💥 ${enemy.uniqueName} does ${defenseResult.damage} damage to ${target.name}`,
           type: 'enemy'
         });
         
